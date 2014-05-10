@@ -1,7 +1,7 @@
 computational_fluid_dynamics
 ============================
 
-Assignments for Scientific Computing Lab in CFD (IN 2186) at TU Munich SS14
+Assignments for Scientific Computing Lab for CFD (IN 2186) at TU Munich SS14
 
 Assignments
 ============================
