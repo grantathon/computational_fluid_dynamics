@@ -35,15 +35,11 @@
  * @param tau        safety parameter for time step calculation
  * @param itermax    max. number of pressure iterations
  * @param eps        tolerance limit for pressure calculation
- * @param wl         left boundary condition
- * @param wr         right boundary condition
- * @param wt         top boundary condition
- * @param wb         bottom boundary condition
  * @param dt_value   time steps for output (after how many time steps one should
  *                   write into the output file)
  */
 int read_parameters( 
-  const char *szFileName,
+		const char *szFileName,
   double *Re,
   double *UI,
   double *VI,
@@ -63,11 +59,37 @@ int read_parameters(
   double *tau,
   int  *itermax,
   double *eps,
-  int *wl,
-  int *wr,
-  int *wt,
-  int *wb,
-  double *dt_value
+  double *dt_value,
+  int *wl,			/* domain boundary conditions */
+  int *wr,			/* for right, left, top and */
+  int *wt,			/* bottom surfaces. */
+  int *wb
+);
+
+void read_special_BC(const char * szFileName,
+					double *xlength,           /* length of the domain x-dir.*/
+                    double *ylength,           /* length of the domain y-dir.*/
+                    double *dx,                /* length of a cell x-dir. */
+                    double *dy,                /* length of a cell y-dir. */
+                    int  *imax,                /* number of cells x-direction*/
+                    int  *jmax,                /* number of cells y-direction*/
+                    int *wl,			/* domain boundary conditions */
+                    int *wr,			/* for right, left, top and */
+                    int *wt,			/* bottom surfaces. */
+                    int *wb,
+                	double *v_l,
+                	double *v_r,
+                	double *u_t,
+                	double *u_b,
+                	double *u_l_in,
+                	double *u_r_in,
+                	double *v_t_in,
+                	double *v_b_in,
+                	int *in_prof_l,
+                	int *in_prof_r,
+                	int *in_prof_t,
+                	int *in_prof_b,
+                	double *U_max
 );
 
 /**
