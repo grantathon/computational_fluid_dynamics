@@ -1,5 +1,6 @@
 #include "helper.h"
 #include "init.h"
+#include <string.h>
 
 int read_parameters(const char * szFileName,
 					double *Re,                /* reynolds number   */
@@ -158,6 +159,26 @@ void init_uvp(
 	/* Pressure */
 	*P = matrix(0, imax+1, 0, jmax+1);
 	init_matrix(*P, 0, imax+1, 0, jmax+1, PI);
+}
+
+void init_flag(char *problem, int imax, int jmax, int **Flag)
+{
+	/* initialize Flag as a matrix of integers */
+	Flag = imatrix(0, imax + 1, 0, jmax + 1);
+
+	/* start with problem b) */
+	if(strcmp(problem, "plane_shear_flow") == 0)
+	{
+		init_imatrix(Flag, 0, imax + 1, 0, jmax + 1, C_F);
+	}
+	else if (strcmp(problem, "Karman_vortex") == 0)
+	{
+
+	}
+	else if(strcmp(problem, "flow_over_a_step") == 0)
+	{
+		
+	}
 }
 
 
