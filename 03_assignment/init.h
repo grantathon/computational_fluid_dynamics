@@ -39,12 +39,6 @@
  *                   write into the output file)
  */
 
-/*
-* if a cell is fluid cell, then 1, else(i.e. obstacale cell) 0
-*/
-#define C_F 1
-#define C_B 0
-
 int read_parameters( 
 		const char *szFileName,
   double *Re,

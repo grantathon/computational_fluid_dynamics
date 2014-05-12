@@ -1,5 +1,6 @@
 #include "helper.h"
 #include "init.h"
+#include "ns_definitions.h"
 #include <string.h>
 
 int read_parameters(const char * szFileName,
