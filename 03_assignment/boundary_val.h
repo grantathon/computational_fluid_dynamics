@@ -12,7 +12,8 @@ void boundaryvalues(
 		int wl,
 		int wr,
 		int wt,
-		int wb
+		int wb,
+		int **Flag
 );
 
 /* Additional BCs implemented here.*/

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "boundary_val.h"
 #include "init.h"
 #include "ns_definitions.h"
@@ -152,45 +153,45 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 }
 
 
-void spec_boundary_val(char *problem, int imax, int jmax, double **U, double **V)
+void spec_boundary_val(const char *problem, int imax, int jmax, double **U, double **V)
 {
-	int i, j;	/* loop indices */
+	int j; /*, i;*/	/* loop indices */
 
 	/* Domain wall BC type */
-	int wl = 0;
+	/*int wl = 0;
 	int wr = 0;
 	int wt = 0;
-	int wb = 0;
+	int wb = 0;*/
 
 	/* geometry details	*/
-	double xlength 	= 0;
-	double ylength 	= 0;
-	double U_max 	= 0;
-	double dx 		= 0;
-	double dy 		= 0;
-	double x 		= 0;	/* actual x-coordinate on the grid of a cell */
+	/*double xlength 	= 0;
+	double x 		= 0;
+	double dx 		= 0;*/
 	double y 		= 0;
+	double U_max 	= 0;
+	double dy 		= 0;
+	double ylength 	= 0;
 
 	/*	MOving wall velocities for each face of the domain	*/
-	double u_wl_mov = 0.0;
+	/*double u_wl_mov = 0.0;
 	double u_wr_mov = 0.0;
 	double u_wt_mov = 0.0;
-	double u_wb_mov = 0.0;
+	double u_wb_mov = 0.0;*/
 
 	/* Velocities for the inlet BC; one for each face*/
-	double u_wl_in = 0.0;
+	/*double u_wl_in = 0.0;
 	double u_wr_in = 0.0;
 	double u_wt_in = 0.0;
-	double u_wb_in = 0.0;
+	double u_wb_in = 0.0;*/
 
 	/* For inlet velocity BC this tells the type of inlet profile */
-	int in_prof_wl = 0;
+	/*int in_prof_wl = 0;
 	int in_prof_wr = 0;
 	int in_prof_wt = 0;
-	int in_prof_wb = 0;
+	int in_prof_wb = 0;*/
 
 	/*read_special_BC(szFileName, &xlength, &ylength, &dx, &dy, &imax, &jmax, &wl, &wr, &wt, &wb, &u_wl_mov, &u_wr_mov, &u_wt_mov,
-			&u_wb_mov, &u_wl_in, &u_wr_in, &u_wt_in, &u_wb_in, &in_prof_wl, &in_prof_wr, &in_prof_wt, &in_prof_wb,  &U_max);
+			&u_wb_mov, &u_wl_in, &u_wr_in, &u_wt_in, &u_wb_in, &in_prof_wl, &in_prof_wr, &in_prof_wt, &in_prof_wb,  &U_max); */
 
 	/* Floor */
 	

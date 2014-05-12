@@ -160,7 +160,7 @@ void init_uvp(
 	init_matrix(*P, 0, imax+1, 0, jmax+1, PI);
 }
 
-void init_flag(char *problem, int imax, int jmax, int ***Flag)
+void init_flag(const char *problem, int imax, int jmax, int ***Flag)
 {
 	/* initialize Flag as a matrix of integers */
 	*Flag = imatrix(0, imax + 1, 0, jmax + 1);

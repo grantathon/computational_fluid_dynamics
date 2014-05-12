@@ -113,10 +113,10 @@ void init_uvp(
 *
 */
 void init_flag(
-  char *problem,
+  const char *problem,
   int imax,
   int jmax,
-  int **Flag);
+  int ***Flag);
 
 #endif
 
