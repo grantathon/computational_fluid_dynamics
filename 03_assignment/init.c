@@ -36,7 +36,6 @@ int read_parameters(const char * szFileName,
 	READ_INT   ( szFileName, *wt );
 	READ_INT   ( szFileName, *wb );
 
-
 	/* Read all parameters */
 	READ_DOUBLE( szFileName, *xlength );
 	READ_DOUBLE( szFileName, *ylength );
@@ -67,7 +66,6 @@ int read_parameters(const char * szFileName,
 
 	return 1;
 }
-
 
 void read_special_BC(const char * szFileName,
 					double *xlength,           /* length of the domain x-dir.*/

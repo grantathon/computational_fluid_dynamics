@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
 {
 	/* Input file with user parameters */
 	/*const char *szFileName = "cavity100.dat";*/
-	const char *Pain_In_The_Ass = argv[1];
+	const char *problem = argv[1];
+	char *problemDataFile = malloc(strlen(problem) + 5);
 	const char *szProblem = "CFD_Lab_03";
 	int readParamError = 0;
 
@@ -93,11 +94,20 @@ int main(int argc, char *argv[])
 	double **F 	= 0;
 	double **G 	= 0;
 
+	/* User must enter correct problem strings */
+	if(strcmp(problem, "Karman_vortex") && strcmp(problem, "plane_sheer_flow") && strcmp(problem, "flow_over_a_step"))
+	{
+		printf("Run program using command 'sim [problem]', "
+				"where problem is 'Karman_vortex', 'plane_sheer_flow', or 'flow_over_a_step'\n");
+		return 0;
+	}
+	strcpy(problemDataFile, problem);
+	strcat(problemDataFile, ".dat");
+
 	/* Read parameters from DAT file, store locally, and check for potential error */
-	readParamError = read_parameters(Pain_In_The_Ass, &Re, &UI, &VI, &PI, &GX, &GY,
+	readParamError = read_parameters(problemDataFile, &Re, &UI, &VI, &PI, &GX, &GY,
 			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
 			&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb);
-
 	if(readParamError != 1)
 	{
 		printf("ERROR: Input parameters potentially corrupt!");
@@ -111,12 +121,12 @@ int main(int argc, char *argv[])
 	G = matrix(0, imax+1, 0, jmax+1);
 
 	/* Begin the time iteration process */
-	while(t < t_end && n < (10*itermax))
+	while(t < t_end)
 	{
 		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
 		boundaryvalues(imax, jmax, U, V, wl, wr, wt, wb);
 
-		spec_boundary_val(Pain_In_The_Ass, imax, jmax, U, V);
+		spec_boundary_val(problem, imax, jmax, U, V);
 
 		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G);
 		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);
@@ -132,13 +142,13 @@ int main(int argc, char *argv[])
 
 		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P);
 
-		/* Visualize U, V, and P */
-		write_vtkFile(szProblem, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
-
 		n++;
 		t += dt;
 		printf("t=%f, dt=%f\n", t, dt);
 	}
+
+	/* Visualize U, V, and P */
+	write_vtkFile(szProblem, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
 
 	/* Print end value of U[imax/2][7*jmax/8]	*/
 	printf("\nEnd value of U[imax/2][7*jmax/8]= %f \n", U[imax/2][(7*jmax)/8]);
