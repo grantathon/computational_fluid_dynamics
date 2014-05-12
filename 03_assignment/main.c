@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
 	double **RS = 0;
 	double **F 	= 0;
 	double **G 	= 0;
+	int **Flag 	= 0;
 
 	/* User must enter correct problem strings */
 	if(strcmp(problem, "Karman_vortex") && strcmp(problem, "plane_sheer_flow") && strcmp(problem, "flow_over_a_step"))
@@ -119,6 +120,8 @@ int main(int argc, char *argv[])
 	RS = matrix(0, imax+1, 0, jmax+1);
 	F = matrix(0, imax+1, 0, jmax+1);
 	G = matrix(0, imax+1, 0, jmax+1);
+
+	/* init_flag(problem, imax, jmax, &Flag); */
 
 	/* Begin the time iteration process */
 	while(t < t_end)
@@ -160,6 +163,7 @@ int main(int argc, char *argv[])
 	free_matrix(RS, 0, imax+1, 0, jmax+1);
 	free_matrix(F, 0, imax+1, 0, jmax+1);
 	free_matrix(G, 0, imax+1, 0, jmax+1);
+	free_matrix(Flag, 0, imax+1, 0, jmax+1);
 
 	return -1;
 }
