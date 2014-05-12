@@ -161,15 +161,15 @@ void init_uvp(
 	init_matrix(*P, 0, imax+1, 0, jmax+1, PI);
 }
 
-void init_flag(char *problem, int imax, int jmax, int **Flag)
+void init_flag(char *problem, int imax, int jmax, int ***Flag)
 {
 	/* initialize Flag as a matrix of integers */
-	Flag = imatrix(0, imax + 1, 0, jmax + 1);
+	*Flag = imatrix(0, imax + 1, 0, jmax + 1);
 
 	/* start with problem b) */
 	if(strcmp(problem, "plane_shear_flow") == 0)
 	{
-		init_imatrix(Flag, 0, imax + 1, 0, jmax + 1, C_F);
+		init_imatrix(*Flag, 0, imax + 1, 0, jmax + 1, C_F);
 	}
 	else if (strcmp(problem, "Karman_vortex") == 0)
 	{
