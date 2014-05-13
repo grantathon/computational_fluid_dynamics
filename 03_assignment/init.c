@@ -162,24 +162,54 @@ void init_uvp(
 
 void init_flag(const char *problem, int imax, int jmax, int ***Flag)
 {
-	/* initialize Flag as a matrix of integers */
-	*Flag = imatrix(0, imax + 1, 0, jmax + 1);
+	int **obstacleFlag = 0;
+	char *problemPBMFile = 0;
+	int i, j;
 
-	/* TODO: Define any objects within our domain here */
+	/* initialize Flag as a matrix of integers */
+	*Flag = imatrix(0, imax+1, 0, jmax+1);
 
 	/* start with problem b) */
 	if(strcmp(problem, "plane_shear_flow") == 0)
 	{
-		init_imatrix(*Flag, 0, imax + 1, 0, jmax + 1, C_F);
+
 	}
 	else if (strcmp(problem, "Karman_vortex") == 0)
 	{
+		/* Read pbm file for potential obstacles and adjust Flag accordingly */
+		problemPBMFile = malloc(strlen(problem) + 5);
+		strcpy(problemPBMFile, problem);
+		strcat(problemPBMFile, ".pbm");
+		obstacleFlag = read_pgm(problemPBMFile);
 
+		for(i = 0; i < imax+2; i++)
+		{
+			for(j = 0; j < jmax+2; j++)
+			{
+				printf("%u ", obstacleFlag[i][j]);
+			}
+			printf("\n\n");
+		}
 	}
 	else if(strcmp(problem, "flow_over_a_step") == 0)
 	{
-		
+		/* Read pbm file for potential obstacles and adjust Flag accordingly */
+		problemPBMFile = malloc(strlen(problem) + 5);
+		strcpy(problemPBMFile, problem);
+		strcat(problemPBMFile, ".pbm");
+		obstacleFlag = read_pgm(problemPBMFile);
+
+		for(i = 0; i < imax+2; i++)
+		{
+			for(j = 0; j < jmax+2; j++)
+			{
+				printf("%u ", obstacleFlag[j][i]);
+			}
+			printf("\n\n");
+		}
 	}
+
+	free_imatrix(obstacleFlag, 0, imax+1, 0, jmax+1);
 }
 
 

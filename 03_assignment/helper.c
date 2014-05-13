@@ -461,7 +461,8 @@ int **read_pgm(const char *filename)
     sscanf(line,"%d\n",&levels);
 
     /* allocate memory for image */
-    pic = imatrix(0,xsize+2,0,ysize+2);
+    /*pic = imatrix(0,xsize+2,0,ysize+2);*/
+    pic = imatrix(0,xsize+1,0,ysize+1);
     printf("Image initialised...\n");
 
     /* read pixel row by row */
