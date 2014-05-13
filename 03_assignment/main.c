@@ -137,19 +137,19 @@ int main(int argc, char *argv[])
 
 		spec_boundary_val(problem, imax, jmax, U, V);
 
-		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G);
+		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, Flag);
 		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);
 
 		it = 0;
 		do
 		{
-			sor(omg, dx, dy, imax, jmax, P, RS, &res);
+			sor(omg, dx, dy, imax, jmax, P, RS, &res, Flag);
 			it++;
 		}
 		while( it < itermax && res > eps);
 		printf("n=%u, res=%f, it=%u ", n, res, it);
 
-		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P);
+		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, Flag);
 
 		/* Visualize U, V, and P */
 		/*write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);*/
