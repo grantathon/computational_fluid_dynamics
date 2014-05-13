@@ -160,56 +160,74 @@ void init_uvp(
 	init_matrix(*P, 0, imax+1, 0, jmax+1, PI);
 }
 
-void init_flag(const char *problem, int imax, int jmax, int ***Flag)
+void init_flag(const char *problem, int imax, int jmax, int ***flag)
 {
-	int **obstacleFlag = 0;
 	char *problemPBMFile = 0;
+	int **obstacleFlag = 0;
 	int i, j;
 
 	/* initialize Flag as a matrix of integers */
-	*Flag = imatrix(0, imax+1, 0, jmax+1);
+	*flag = imatrix(0, imax+1, 0, jmax+1);
 
-	/* start with problem b) */
-	if(strcmp(problem, "plane_shear_flow") == 0)
+	/* Set boundary flags */
+	/* TODO: Make sure in other implemented files that we don't
+	 * 		treat border cells the same as obstacle cells */
+	for(i = 0; i <= imax+1; i++)
 	{
-
+		(*flag)[i][0] 		= C_B;	/* Floor */
+		(*flag)[i][jmax+1] 	= C_B;	/* Ceiling */
 	}
-	else if (strcmp(problem, "Karman_vortex") == 0)
+	for(j = 0; j <= jmax+1; j++)
 	{
-		/* Read pbm file for potential obstacles and adjust Flag accordingly */
-		problemPBMFile = malloc(strlen(problem) + 5);
-		strcpy(problemPBMFile, problem);
-		strcat(problemPBMFile, ".pbm");
-		obstacleFlag = read_pgm(problemPBMFile);
-
-		for(i = 0; i < imax+2; i++)
-		{
-			for(j = 0; j < jmax+2; j++)
-			{
-				printf("%u ", obstacleFlag[i][j]);
-			}
-			printf("\n\n");
-		}
+		(*flag)[0][j] 		= C_B;	/* Left wall */
+		(*flag)[imax+1][j] 	= C_B;	/* Right wall */
 	}
-	else if(strcmp(problem, "flow_over_a_step") == 0)
-	{
-		/* Read pbm file for potential obstacles and adjust Flag accordingly */
-		problemPBMFile = malloc(strlen(problem) + 5);
-		strcpy(problemPBMFile, problem);
-		strcat(problemPBMFile, ".pbm");
-		obstacleFlag = read_pgm(problemPBMFile);
 
-		for(i = 0; i < imax+2; i++)
+	/* Retrieve full file name */
+	problemPBMFile = malloc(strlen(problem) + 5);
+	strcpy(problemPBMFile, problem);
+	strcat(problemPBMFile, ".pbm");
+
+	/* Input file containing fluid/obstacle data */
+	obstacleFlag = read_pgm(problemPBMFile);
+
+	/* Set inner flags */
+	for(i = 1; i <= imax; i++)
+	{
+		for(j = 1; j <= jmax; j++)
 		{
-			for(j = 0; j < jmax+2; j++)
+			/* Determine whether cell is a fluid or an obstacle */
+			if(obstacleFlag[i][j] == 1)
 			{
-				printf("%u ", obstacleFlag[j][i]);
+				(*flag)[i][j] = C_F;  /* Fluid */
 			}
-			printf("\n\n");
+			else
+			{
+				(*flag)[i][j] = C_B;  /* Obstacle/border */
+			}
+
+			/* Check for neighboring fluid cells and set corresponding flags */
+			if(obstacleFlag[i-1][j] == 1)  /* Left cell */
+			{
+				(*flag)[i][j] |= B_W;
+			}
+			if(obstacleFlag[i+1][j] == 1)  /* Right cell */
+			{
+				(*flag)[i][j] |= B_O;
+			}
+			if(obstacleFlag[i][j+1] == 1)  /* Top cell */
+			{
+				(*flag)[i][j] |= B_N;
+			}
+			if(obstacleFlag[i][j-1] == 1)  /* Bottom cell */
+			{
+				(*flag)[i][j] |= B_S;
+			}
 		}
 	}
 
 	free_imatrix(obstacleFlag, 0, imax+1, 0, jmax+1);
+	free(problemPBMFile);
 }
 
 
