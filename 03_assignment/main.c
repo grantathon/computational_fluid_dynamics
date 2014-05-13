@@ -46,7 +46,8 @@ int main(int argc, char *argv[])
 	/*const char *szFileName = "cavity100.dat";*/
 	const char *problem = argv[1];
 	char *problemDataFile = malloc(strlen(problem) + 5);
-	const char *szProblem = "CFD_Lab_03";
+	char *problemOutput = malloc(strlen(problem) + 7);
+
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -106,6 +107,10 @@ int main(int argc, char *argv[])
 	strcpy(problemDataFile, problem);
 	strcat(problemDataFile, ".dat");
 
+	/* Append name for output vtk file */
+	strcpy(problemOutput, problem);
+	strcat(problemOutput, "_Output");
+
 	/* Read parameters from DAT file, store locally, and check for potential error */
 	readParamError = read_parameters(problemDataFile, &Re, &UI, &VI, &PI, &GX, &GY,
 			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
@@ -146,13 +151,16 @@ int main(int argc, char *argv[])
 
 		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P);
 
+		/* Visualize U, V, and P */
+		/*write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);*/
+
 		n++;
 		t += dt;
 		printf("t=%f, dt=%f\n", t, dt);
 	}
 
 	/* Visualize U, V, and P */
-	write_vtkFile(szProblem, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
+	write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
 
 	/* Print end value of U[imax/2][7*jmax/8]	*/
 	printf("\nEnd value of U[imax/2][7*jmax/8]= %f \n", U[imax/2][(7*jmax)/8]);

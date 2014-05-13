@@ -69,67 +69,19 @@ int read_parameters(const char * szFileName,
 }
 
 void read_special_BC(const char * szFileName,
-					double *xlength,           /* length of the domain x-dir.*/
-                    double *ylength,           /* length of the domain y-dir.*/
-                    double *dx,                /* length of a cell x-dir. */
-                    double *dy,                /* length of a cell y-dir. */
-                    int  *imax,                /* number of cells x-direction*/
-                    int  *jmax,                /* number of cells y-direction*/
-                    int *wl,			/* domain boundary conditions */
-                    int *wr,			/* for right, left, top and */
-                    int *wt,			/* bottom surfaces. */
-                    int *wb,
-                	double *u_wl_mov,
-                	double *u_wr_mov,
-                	double *u_wt_mov,
-                	double *u_wb_mov,
-                	double *u_wl_in,
-                	double *u_wr_in,
-                	double *u_wt_in,
-                	double *u_wb_in,
-                	int *in_prof_wl,
-                	int *in_prof_wr,
-                	int *in_prof_wt,
-                	int *in_prof_wb,
-                	double *U_max
+		double *UI,	/* Read inlet velocity BC*/
+		double *VI,
+		double *delta_p
 )
 {
-	/* Read domain boundary conditions*/
-	READ_INT   ( szFileName, *wl );
-	READ_INT   ( szFileName, *wr );
-	READ_INT   ( szFileName, *wt );
-	READ_INT   ( szFileName, *wb );
+	READ_DOUBLE( szFileName, *UI );
+	READ_DOUBLE( szFileName, *VI );
 
-	/* Read all parameters */
-	READ_DOUBLE( szFileName, *xlength );
-	READ_DOUBLE( szFileName, *ylength );
+	if (strcmp(szFileName, "plane_shear_flow.dat") == 0)
+	{
+		READ_DOUBLE( szFileName, *delta_p );
+	}
 
-	/* Read moving wall BCs*/
-	READ_DOUBLE( szFileName, *u_wl_mov );
-	READ_DOUBLE( szFileName, *u_wr_mov );
-	READ_DOUBLE( szFileName, *u_wt_mov );
-	READ_DOUBLE( szFileName, *u_wb_mov );
-
-	/* Read string for inlet conditions */
-	/*READ_INT( szFileName, inlets);*/
-	READ_INT( szFileName, *in_prof_wl);
-	READ_INT( szFileName, *in_prof_wr);
-	READ_INT( szFileName, *in_prof_wt);
-	READ_INT( szFileName, *in_prof_wb);
-
-	/* Read inlet velocities */
-	READ_DOUBLE( szFileName, *u_wl_in );
-	READ_DOUBLE( szFileName, *u_wr_in );
-	READ_DOUBLE( szFileName, *u_wt_in );
-	READ_DOUBLE( szFileName, *u_wb_in );
-
-	READ_DOUBLE( szFileName, *U_max );
-
-	READ_DOUBLE( szFileName, *xlength );
-	READ_DOUBLE( szFileName, *ylength );
-
-	*dx = *xlength / (double)(*imax);
-	*dy = *ylength / (double)(*jmax);
 }
 
 /*
