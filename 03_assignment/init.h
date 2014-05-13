@@ -68,29 +68,9 @@ int read_parameters(
 );
 
 void read_special_BC(const char * szFileName,
-					double *xlength,           /* length of the domain x-dir.*/
-                    double *ylength,           /* length of the domain y-dir.*/
-                    double *dx,                /* length of a cell x-dir. */
-                    double *dy,                /* length of a cell y-dir. */
-                    int  *imax,                /* number of cells x-direction*/
-                    int  *jmax,                /* number of cells y-direction*/
-                    int *wl,			/* domain boundary conditions */
-                    int *wr,			/* for right, left, top and */
-                    int *wt,			/* bottom surfaces. */
-                    int *wb,
-                	double *v_l,
-                	double *v_r,
-                	double *u_t,
-                	double *u_b,
-                	double *u_l_in,
-                	double *u_r_in,
-                	double *v_t_in,
-                	double *v_b_in,
-                	int *in_prof_l,
-                	int *in_prof_r,
-                	int *in_prof_t,
-                	int *in_prof_b,
-                	double *U_max
+		double *UI,	/* Read inlet velocity BC*/
+		double *VI,
+		double *delta_p
 );
 
 /**

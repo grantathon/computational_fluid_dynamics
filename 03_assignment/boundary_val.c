@@ -3,14 +3,18 @@
 #include "boundary_val.h"
 #include "init.h"
 #include "ns_definitions.h"
+#include "helper.h"
 
 /*
-*
-* I extented the current version of the boundary conditions, where I have rewritten the spec_boundary_val
-* funtion and also, I extended the boundaryvalues function, in order to incorporate the boundary conditions
-* for boundary cells of the obstacle(with respect to their flag, e.g. if flag = B_N, then implement 1.4)
-*
-*/
+ *
+ * I extented the current version of the boundary conditions, where I have rewritten the spec_boundary_val
+ * funtion and also, I extended the boundaryvalues function, in order to incorporate the boundary conditions
+ * for boundary cells of the obstacle(with respect to their flag, e.g. if flag = B_N, then implement 1.4)
+ *
+ */
+/*
+ * 1 = no slip; 2 = free-slip; 3 = outlet
+ */
 
 
 void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr, int wt, int wb, int **Flag)
@@ -21,7 +25,7 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 	for(i = 1; i < imax+1; i++)
 	{
 		/* FLOOR BC*/
-		if (wb == 1 || wb == 4 || wb == 5)	/* no-slip BC for floor*/
+		if (wb == 1)	/* no-slip BC for floor*/
 		{
 			U[i][0] = -U[i][1];
 			V[i][0]	= 0;
@@ -31,14 +35,9 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 			V[i][0]	= 0;
 			U[i][0] = U[i][1];
 		}
-		else if (wb == 3) /*outflow BC for floor*/
-		{
-			U[i][0] = U[i][1];
-			V[i][0]	= V[i][1];
-		}
 
 		/* CEILING BC */
-		if (wt == 1 || wt == 4 || wt == 5)	/* no-slip BC for ceiling*/
+		if (wt == 1)	/* no-slip BC for ceiling*/
 		{
 			U[i][jmax+1] 	= -U[i][jmax];
 			V[i][jmax]		= 0;
@@ -49,18 +48,13 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 			U[i][jmax+1] 	= U[i][jmax];
 
 		}
-		else if (wt == 3) /* (wb == 3) outflow BC for ceiling*/
-		{
-			U[i][jmax+1] 	= U[i][jmax];
-			V[i][jmax] 		= V[i][jmax-1];
-		}
 	}
 
 	/* Iterate across both the walls*/
 	for(j = 1; j < jmax+1; j++)
 	{
 		/* LEFT wall BC*/
-		if (wl == 1 || wl == 4 || wl == 5)	/* no-slip BC for left wall*/
+		if (wl == 1)	/* no-slip BC for left wall*/
 		{
 			V[0][j]	= -V[1][j];
 			U[0][j]	= 0;
@@ -70,14 +64,14 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 			U[0][j]	= 0;
 			V[0][j]	= V[1][j];
 		}
-		else if (wl == 3) /* (wb == 3) outflow BC for left wall*/
+		else if (wl == 3)	/* outflow BC for left wall*/
 		{
 			U[0][j]	= U[1][j];
 			V[0][j]	= V[1][j];
 		}
 
 		/* RIGHT wall BC*/
-		if (wr == 1 || wr == 4 || wr == 5)	/* no-slip BC for right wall*/
+		if (wr == 1)	/* no-slip BC for right wall*/
 		{
 			V[imax+1][j] 	= -V[imax][j];
 			U[imax][j]		= 0;
@@ -87,7 +81,7 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 			U[imax][j]		= 0;
 			V[imax+1][j] 	= V[imax][j];
 		}
-		else if (wr == 3) /* (wb == 3) outflow BC for right wall*/
+		else if (wr == 3)	/* outflow BC for right wall*/
 		{
 			U[imax][j] 		= U[imax-1][j];
 			V[imax+1][j] 	= V[imax][j];
@@ -97,246 +91,126 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 	/*
 		loop through the Flag array and find each cells have the flag B_N, B_W, B_O, B_S
 		we must define the protocol for B_N, B_W, B_O, B_S
-	*/
+	 */
 
 
-		for(i = 1 ; i < imax + 1 ; i++)
+	for(i = 1 ; i < imax + 1 ; i++)
+	{
+		for(j = 1 ; j < imax + 1 ; j++)
 		{
-			for(j = 1 ; j < imax + 1 ; j++)
+			/* take the normal bounary cells */
+			/* always start with the East ;) */
+			if(Flag[i][j] == B_O)
 			{
-				/* take the normal bounary cells */
-				/* always start with the East ;) */
-				if(Flag[i][j] == B_O)
-				{
-					U[i][j] = 0;
-					V[i][j - 1] = - V[i][j - 1];
-					V[i][j]	= -V[i - 1][j];				
-				} 
-				else if(Flag[i][j] == B_N)
-				{
-					V[i][j] = 0;
-					U[i - 1][j] = - U[i - 1][j + 1];
-					U[i][j]	= -U[i][j + 1];			
-				}
-				else if(Flag[i][j] == B_W)
-				{
-					U[i - 1][j] = 0;
-					V[i][j - 1] = - V[i][j - 1];
-					V[i][j]	= -V[i - 1][j];			
-				}
-				else if(Flag[i][j] == B_S)
-				{
-					V[i][j-1] = 0;
-					U[i][j] = - U[i][j + 1];
-					U[i + 1][j]	= - U[i + 1][j + 1];				
-				}
+				U[i][j] = 0;
+				V[i][j - 1] = - V[i + 1][j - 1];
+				V[i][j]	= -V[i + 1][j];
+			}
+			else if(Flag[i][j] == B_N)
+			{
+				V[i][j] = 0;
+				U[i - 1][j] = - U[i - 1][j + 1];
+				U[i][j]	= -U[i][j + 1];
+			}
+			else if(Flag[i][j] == B_W)
+			{
+				U[i - 1][j] = 0;
+				V[i][j - 1] = - V[i - 1][j - 1];
+				V[i][j]	= -V[i - 1][j];
+			}
+			else if(Flag[i][j] == B_S)
+			{
+				V[i][j - 1] = 0;
+				U[i][j] = - U[i][j - 1];
+				U[i - 1][j]	= - U[i - 1][j - 1];
+			}
 
-				/* take the corner cells */ 
-				if(Flag[i][j] == B_NO)
-				{
-								
-				}
-				else if(Flag[i][j] == B_NW)
-				{
-								
-				}
-				else if(Flag[i][j] == B_SO)
-				{
-								
-				} 
-				else if(Flag[i][j] == B_SW)
-				{
-								
-				}	
+			/* take the corner cells */
+			if(Flag[i][j] == B_NO)
+			{
+				U[i][j] = 0;
+				V[i][j] = 0;
+				U[i - 1][j]	= -U[i - 1][j + 1];
+				V[i][j - 1]	= -V[i + 1][j - 1];
+			}
+			else if(Flag[i][j] == B_NW)
+			{
+				U[i - 1][j] = 0;
+				V[i][j] = 0;
+				U[i][j]	= -U[i][j + 1];
+				V[i][j - 1]	= -V[i - 1][j - 1];
+			}
+			else if(Flag[i][j] == B_SO)
+			{
+				U[i][j] = 0;
+				V[i][j - 1] = 0;
+				U[i - 1][j]	= -U[i - 1][j - 1];
+				V[i][j]	= -V[i + 1][j];
+			}
+			else if(Flag[i][j] == B_SW)
+			{
+				U[i - 1][j] = 0;
+				V[i][j - 1] = 0;
+				U[i][j]	= -U[i][j - 1];
+				V[i][j]	= -V[i - 1][j];
 			}
 		}
+	}
 }
 
 
 void spec_boundary_val(const char *problem, int imax, int jmax, double **U, double **V)
 {
-	int j; /*, i;*/	/* loop indices */
-
-	/* Domain wall BC type */
-	/*int wl = 0;
-	int wr = 0;
-	int wt = 0;
-	int wb = 0;*/
+	int j;
 
 	/* geometry details	*/
-	/*double xlength 	= 0;
-	double x 		= 0;
-	double dx 		= 0;*/
-	double y 		= 0;
-	double U_max 	= 0;
-	double dy 		= 0;
-	double ylength 	= 0;
+	double UI = 0;
+	double VI = 0;
+	double delta_p	= 0;
+	char *problemDataFile = malloc(strlen(problem) + 5);
 
-	/*	MOving wall velocities for each face of the domain	*/
-	/*double u_wl_mov = 0.0;
-	double u_wr_mov = 0.0;
-	double u_wt_mov = 0.0;
-	double u_wb_mov = 0.0;*/
-
-	/* Velocities for the inlet BC; one for each face*/
-	/*double u_wl_in = 0.0;
-	double u_wr_in = 0.0;
-	double u_wt_in = 0.0;
-	double u_wb_in = 0.0;*/
-
-	/* For inlet velocity BC this tells the type of inlet profile */
-	/*int in_prof_wl = 0;
-	int in_prof_wr = 0;
-	int in_prof_wt = 0;
-	int in_prof_wb = 0;*/
-
-	/*read_special_BC(szFileName, &xlength, &ylength, &dx, &dy, &imax, &jmax, &wl, &wr, &wt, &wb, &u_wl_mov, &u_wr_mov, &u_wt_mov,
-			&u_wb_mov, &u_wl_in, &u_wr_in, &u_wt_in, &u_wb_in, &in_prof_wl, &in_prof_wr, &in_prof_wt, &in_prof_wb,  &U_max); */
-
-	/* Floor */
-	
-	/* For moving wall */
-	/*
-	if (wb == 4)	
-	{
-		for(i = 1; i < imax+1; i++)
-		{
-			U[i][1] = 2 * u_wb_mov - U[i][0]; 
-		}
-	}
-	else if (wb == 5 && in_prof_wb == 0)
-	{
-		for(i = 1; i < imax+1; i++)
-		{
-			V[i][0] = u_wb_in;
-		}
-	}
-	else if (wb == 5 && in_prof_wb == 1)	
-	{
-		for(i = 1; i < imax+1; i++)
-		{
-			x = i * dx;
-			V[i][0] = (4 * U_max * x * (1 - (x/xlength))) / xlength;
-		}
-	}
-	*/
-
-	/* Ceiling BC */
-	/*
-	if (wt == 4)	
-	{
-		for(i = 1; i < imax+1; i++)
-		{
-			U[i][jmax+1] = 2 * u_wt_mov - U[i][jmax];
-		}
-	}
-	else if (wt == 5 && in_prof_wt == 0)	
-	{
-		for(i = 1; i < imax+1; i++)
-		{
-			V[i][jmax+1] = u_wt_in;
-		}
-	}
-	else if (wt == 5 && in_prof_wt == 1)	
-	{
-		for(i = 1; i < imax+1; i++)
-		{
-			x = i * dx;
-			V[i][jmax+1] = (4 * U_max * x * (1 - (x/xlength))) / xlength;
-		}
-	}
-	*/
-
-	/* Left wall*/
-	/*
-	if (wl == 4)	
-	{
-		for(j = 1; j < jmax+1; j++)
-		{
-			V[1][j]	= 2 * u_wl_mov - V[0][j];
-		}
-	}
-	else if (wl == 5 && in_prof_wl == 0)	
-	{
-		for(j = 1; j < jmax+1; j++)
-		{
-			U[0][j] = u_wl_in;
-		}
-	}
-	else if (wl == 5 && in_prof_wl == 1)	
-	{
-		for(j = 1; j < jmax+1; j++)
-		{
-			y = j * dy;
-			U[0][j] = (4 * U_max * y * (1 - (y/ylength))) / ylength;
-		}
-	}
-	*/
-
-	/* Right wall */
-	/*
-	if (wr == 4)	
-	{
-		for(j = 1; j < jmax+1; j++)
-		{
-			V[imax+1][j] = 2 * u_wr_mov - V[imax][j];
-		}
-	}
-	else if (wr == 5 && in_prof_wr == 0)	
-	{
-		for(j = 1; j < jmax+1; j++)
-		{
-			U[imax+1][j] = u_wr_in;
-		}
-	}
-	else if (wr == 5 && in_prof_wr == 1)	
-	{
-		for(j = 1; j < jmax+1; j++)
-		{
-			y = j * dy;
-			U[imax+1][j] = (4 * U_max * y * (1 - (y/ylength))) / ylength;
-		}
-	}*/
+	strcpy(problemDataFile, problem);
+	strcat(problemDataFile, ".dat");
 
 	if(strcmp(problem, "plane_shear_flow") == 0)
 	{
-		/*
-		ask Ayman for this; practically, it is a parabolic profile of the form 4Umax*y(1-y)
-		*/
+		read_special_BC(problemDataFile, &UI, &VI, &delta_p);
+
 		for(j = 1; j < jmax+1; j++)
 		{
-			y = j * dy;
-			U[0][j] = (4 * U_max * y * (1 - (y/ylength))) / ylength;
+			U[0][j] = UI;
+			V[0][j] = 2 * VI - V[1][j];
 		}
 	}
 	else if (strcmp(problem, "Karman_vortex") == 0)
 	{
 		/*
 		for the Karman vortex street, we consider u = 1 and v = 0 at the left wall
-		*/
+		 */
+		read_special_BC(problemDataFile, &UI, &VI, &delta_p);
 		for(j = 1; j < jmax+1; j++)
 		{
-			U[0][j] = 1.0;
-			V[0][j]	= 0.0;
+			U[0][j] = UI;
+			V[0][j] = 2 * VI - V[1][j];
 		}
 	}
 	else if(strcmp(problem, "flow_over_a_step") == 0)
 	{
-		/*
-		if I am not wrong, the upper half is u = 1, v = 0 and the lower half is u = 0 and 
-		v = 0, because of the step; they say that IT MIGHT BE DONE IN init_uvp, but...:-j
-		*/	
+		/*	Inlet velocity BC for upper half of inlet only; lower half cells not used by any other function etc and can be removed LATER.*/
+		read_special_BC(problemDataFile, &UI, &VI, &delta_p);
 		for(j = 1; j <= jmax/2; j++)
 		{
 			U[0][j] = 0.0;
-			V[0][j]	= 0.0;
+			V[0][j] = - V[1][j];
 		}
 
 		for(j = jmax/2 + 1; j < jmax + 1; j++)
 		{
-			U[0][j] = 1.0;
-			V[0][j]	= 0.0;
+			U[0][j] = UI;
+			V[0][j] = 2 * VI - V[1][j];
 		}
 
 	}
+
+	free(problemDataFile);
 }

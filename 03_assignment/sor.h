@@ -8,6 +8,8 @@
  * 
  * An \omega = 1 GS - implementation is given within sor.c.
  */
+
+ /* modified SOR; this time, we also take the Flag array as input */
 void sor(
   double omg,
   double dx,
@@ -16,7 +18,8 @@ void sor(
   int    jmax,
   double **P,
   double **RS,
-  double *res
+  double *res,
+  int **Flag
 );
 
 

@@ -28,6 +28,10 @@ double matrix_abs_max(double **A, int imax, int jmax);
  * @f$ i=1,\ldots,imax, \quad j=1,\ldots,jmax-1 @f$
  *
  */
+
+ /* extended calculate_fg : now we also consider the Flag array as an input and we set F, G and p 
+ for the boundary obstacle cells, as well.
+ */
 void calculate_fg(
   double Re,
   double GX,
@@ -41,7 +45,8 @@ void calculate_fg(
   double **U,
   double **V,
   double **F,
-  double **G
+  double **G,
+  int **Flag
 );
 
 
@@ -108,7 +113,8 @@ void calculate_uv(
   double **V,
   double **F,
   double **G,
-  double **P
+  double **P,
+  int **Flag
 );
 
 #endif

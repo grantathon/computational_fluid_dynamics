@@ -1,7 +1,7 @@
-#--------------------------------------------
+    #--------------------------------------------
 #            Define Boundary Conditions             
 #--------------------------------------------
-#   Domain Boundaries
+#       Domain Boundaries
 # 1 = no slip; 2 = free-slip; 3 = outlet
 # 4 = moving wall; 5 = inlet
 #--------------------------------------------
@@ -11,40 +11,9 @@ wt      1
 wb      1
 
 #--------------------------------------------
-#   Moving Wall BCs
+#       Pressure BCs
 #--------------------------------------------
-u_wl_mov  0.0
-u_wr_mov  0.0
-u_wt_mov  0.0
-u_wb_mov  0.0
-
-#--------------------------------------------
-#   Constant Inlet BCs
-#--------------------------------------------
-u_wl_in  2.0
-u_wr_in  0.0
-u_wt_in  0.0
-u_wb_in  0.0
-
-#--------------------------------------------
-#              Parabolic Inlet BCs
-#
-#       U = 4*U_max*y*(1 - (y/H)) / H
-#
-# parabloic profile: U_max occurs in the middle
-# (between 2 walls); H is the width/height of
-# the channel; y is the variable in {0,H};
-# H = xlength or ylength depending on which
-# edge is the inlet. xlength for top/bottom,
-# ylength for left/right.
-#
-# in_prof_? = {0,1}    0: const, 1: parabola
-#--------------------------------------------
-in_prof_wl       0
-in_prof_wr       0
-in_prof_wt       0
-in_prof_wb       0
-U_max            0.0
+delta_p     4.0
 
 #--------------------------------------------
 #            size of the domain             
@@ -93,10 +62,11 @@ GY      0
 #                pressure
 #--------------------------------------------
 PI          0
-delta_p     4.0
 
 #--------------------------------------------
-#       initialization velocity
+#       Velocity Initialisation
+# these values are also used for inlet
+# velocity BCs
 #--------------------------------------------
-UI      1.0
-VI      0.0
+UI  1.0
+VI  0.0
