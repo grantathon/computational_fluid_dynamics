@@ -144,6 +144,9 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 	obstacleFlag = read_pgm(problemPBMFile);
 
 	/* Set inner flags */
+
+	/* Modified by Gabriel; in order to determine the nature of the cells in the boundary of the
+	obstacle, we need more conditions i.e. we need to test 3 neighbors*/
 	for(i = 1; i <= imax; i++)
 	{
 		for(j = 1; j <= jmax; j++)
@@ -157,23 +160,49 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 			{
 				(*flag)[i][j] = C_B;  /* Obstacle/border */
 			}
+		}
+	}
 
+	for(i = 1; i <= imax; i++)
+	{
+		for(j = 1; j <= jmax; j++)
+		{
 			/* Check for neighboring fluid cells and set corresponding flags */
-			if(obstacleFlag[i-1][j] == 1)  /* Left cell */
-			{
-				(*flag)[i][j] |= B_W;
-			}
-			if(obstacleFlag[i+1][j] == 1)  /* Right cell */
-			{
-				(*flag)[i][j] |= B_O;
-			}
-			if(obstacleFlag[i][j+1] == 1)  /* Top cell */
+
+			/* First, we check cells with only one common egde with the fluid cells */
+			if(obstacleFlag[i][j] & C_B && obstacleFlag[i-1][j] & C_B && obstacleFlag[i+1][j] & C_B && obstacleFlag[i][j+1] & C_F)  /* Left cell */
 			{
 				(*flag)[i][j] |= B_N;
 			}
-			if(obstacleFlag[i][j-1] == 1)  /* Bottom cell */
+			if(obstacleFlag[i][j] & C_B && obstacleFlag[i][j + 1] & C_B && obstacleFlag[i][j - 1] & C_B && obstacleFlag[i + 1][j] & C_F)  /* Left cell */
+			{
+				(*flag)[i][j] |= B_O;
+			}
+			if(obstacleFlag[i][j] & C_B && obstacleFlag[i][j + 1] & C_B && obstacleFlag[i][j - 1] & C_B && obstacleFlag[i - 1][j] & C_F)  /* Left cell */
+			{
+				(*flag)[i][j] |= B_W;
+			}
+			if(obstacleFlag[i][j] & C_B && obstacleFlag[i-1][j] & C_B && obstacleFlag[i+1][j] & C_B && obstacleFlag[i][j-1] & C_F)  /* Left cell */
 			{
 				(*flag)[i][j] |= B_S;
+			}
+
+			/* Next, we check for corner cells, i.e. cells with two common edges with the fluid cells */
+			if(obstacleFlag[i][j] & C_B && obstacleFlag[i-1][j] & C_B && obstacleFlag[i][j-1] & C_B && obstacleFlag[i][j+1] & C_F && obstacleFlag[i+1][j] & C_F)  /* Left cell */
+			{
+				(*flag)[i][j] |= B_NO;
+			}
+			if(obstacleFlag[i][j] & C_B && obstacleFlag[i+1][j] & C_B && obstacleFlag[i][j-1] & C_B && obstacleFlag[i][j+1] & C_F && obstacleFlag[i-1][j] & C_F)  /* Left cell */
+			{
+				(*flag)[i][j] |= B_NW;
+			}
+			if(obstacleFlag[i][j] & C_B && obstacleFlag[i-1][j] & C_B && obstacleFlag[i][j+1] & C_B && obstacleFlag[i][j-1] & C_F && obstacleFlag[i+1][j] & C_F)  /* Left cell */
+			{
+				(*flag)[i][j] |= B_SO;
+			}
+			if(obstacleFlag[i][j] & C_B && obstacleFlag[i+1][j] & C_B && obstacleFlag[i][j+1] & C_B && obstacleFlag[i][j-1] & C_F && obstacleFlag[i-1][j] & C_F)  /* Left cell */
+			{
+				(*flag)[i][j] |= B_SW;
 			}
 		}
 	}

@@ -36,9 +36,9 @@ void sor(
   /* compute the residual */
   /* now, the computation is restricted only for the fluid cells */
   rloc = 0;
-  for(i = 1; i <= imax; i++) 
+  for(i = 0; i <= imax; i++) 
   {
-    for(j = 1; j <= jmax; j++) 
+    for(j = 0; j <= jmax; j++) 
     {
       if(Flag[i][j] & C_F)
       {
@@ -57,53 +57,55 @@ void sor(
 
 
   /* set boundary values */
-  for(i = 1; i <= imax; i++) {
+  for(i = 1; i <= imax; i++) 
+  {
     P[i][0] = P[i][1];
     P[i][jmax+1] = P[i][jmax];
   }
-  for(j = 1; j <= jmax; j++) {
+  for(j = 1; j <= jmax; j++) 
+  {
     P[0][j] = P[1][j];
     P[imax+1][j] = P[imax][j];
   }
 
   /* boundary conditions for the pressure at the boundary stripe*/
-  for(i = 0 ; i <= imax + 1 ; i++)
+  for(i = 1 ; i < imax + 1 ; i++)
   {
-      for(j = 0 ; j <= imax + 1 ; j++)
+      for(j = 1 ; j < jmax + 1 ; j++)
       {
 
-        if(Flag[i][j] == B_O)
+        if(Flag[i][j] & B_O)
         {
           P[i][j] = P[i + 1][j];
         } 
-        else if(Flag[i][j] == B_N)
+        else if(Flag[i][j] & B_N)
         {
           P[i][j] = P[i][j + 1];    
         }
-        else if(Flag[i][j] == B_W)
+        else if(Flag[i][j] & B_W)
         {
           P[i][j] = P[i - 1][j];    
         }
-        else if(Flag[i][j] == B_S)
+        else if(Flag[i][j] & B_S)
         {
           P[i][j] = P[i][j - 1];       
         }
 
         /* take the corner cells */ 
         /* just average the neighbors */
-        if(Flag[i][j] == B_NO)
+        if(Flag[i][j] & B_NO)
         {
           P[i][j] = (P[i][j + 1] + P[i + 1][j])/2;
         }
-        else if(Flag[i][j] == B_NW)
+        else if(Flag[i][j] & B_NW)
         {
           P[i][j] = (P[i][j + 1] + P[i - 1][j])/2;
         }
-        else if(Flag[i][j] == B_SO)
+        else if(Flag[i][j] & B_SO)
         {
           P[i][j] = (P[i][j - 1] + P[i + 1][j])/2;
         } 
-        else if(Flag[i][j] == B_SW)
+        else if(Flag[i][j] & B_SW)
         {
           P[i][j] = (P[i][j - 1] + P[i - 1][j])/2;    
         }
