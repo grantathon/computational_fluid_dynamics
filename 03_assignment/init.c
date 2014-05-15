@@ -179,45 +179,45 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 			/* Check for neighboring fluid cells and set corresponding flags */
 
 			/* First, we check cells with only one common egde with the fluid cells */
-			if(obstacleFlag[i][j] & C_B && obstacleFlag[i-1][j] & C_B
-					&& obstacleFlag[i+1][j] & C_B && obstacleFlag[i][j+1] & C_F)  /* Left cell */
+			if((obstacleFlag[i][j] & C_B) && (obstacleFlag[i-1][j] & C_B)
+					&& (obstacleFlag[i+1][j] & C_B) && (obstacleFlag[i][j+1] & C_F))  /* Left cell */
 			{
 				(*flag)[i][j] |= B_N;
 			}
-			if(obstacleFlag[i][j] & C_B && obstacleFlag[i][j + 1] & C_B
-					&& obstacleFlag[i][j - 1] & C_B && obstacleFlag[i + 1][j] & C_F)  /* Left cell */
+			if((obstacleFlag[i][j] & C_B) && (obstacleFlag[i][j + 1] & C_B)
+					&& (obstacleFlag[i][j - 1] & C_B) && (obstacleFlag[i + 1][j] & C_F))  /* Left cell */
 			{
 				(*flag)[i][j] |= B_O;
 			}
-			if(obstacleFlag[i][j] & C_B && obstacleFlag[i][j + 1] & C_B
-					&& obstacleFlag[i][j - 1] & C_B && obstacleFlag[i - 1][j] & C_F)  /* Left cell */
+			if((obstacleFlag[i][j] & C_B) && (obstacleFlag[i][j + 1] & C_B)
+					&& (obstacleFlag[i][j - 1] & C_B) && (obstacleFlag[i - 1][j] & C_F))  /* Left cell */
 			{
 				(*flag)[i][j] |= B_W;
 			}
-			if(obstacleFlag[i][j] & C_B && obstacleFlag[i-1][j] & C_B
-					&& obstacleFlag[i+1][j] & C_B && obstacleFlag[i][j-1] & C_F)  /* Left cell */
+			if((obstacleFlag[i][j] & C_B) && (obstacleFlag[i-1][j] & C_B)
+					&& (obstacleFlag[i+1][j] & C_B) && (obstacleFlag[i][j-1] & C_F))  /* Left cell */
 			{
 				(*flag)[i][j] |= B_S;
 			}
 
 			/* Next, we check for corner cells, i.e. cells with two common edges with the fluid cells */
-			if(obstacleFlag[i][j] & C_B && obstacleFlag[i-1][j] & C_B
-					&& obstacleFlag[i][j-1] & C_B && obstacleFlag[i][j+1] & C_F && obstacleFlag[i+1][j] & C_F)  /* Left cell */
+			if((obstacleFlag[i][j] & C_B) && (obstacleFlag[i-1][j] & C_B)
+					&& (obstacleFlag[i][j-1] & C_B) && (obstacleFlag[i][j+1] & C_F) && (obstacleFlag[i+1][j] & C_F))  /* Left cell */
 			{
 				(*flag)[i][j] |= B_NO;
 			}
-			if(obstacleFlag[i][j] & C_B && obstacleFlag[i+1][j] & C_B
-					&& obstacleFlag[i][j-1] & C_B && obstacleFlag[i][j+1] & C_F && obstacleFlag[i-1][j] & C_F)  /* Left cell */
+			if((obstacleFlag[i][j] & C_B) && (obstacleFlag[i+1][j] & C_B)
+					&& (obstacleFlag[i][j-1] & C_B) && (obstacleFlag[i][j+1] & C_F) && (obstacleFlag[i-1][j] & C_F))  /* Left cell */
 			{
 				(*flag)[i][j] |= B_NW;
 			}
-			if(obstacleFlag[i][j] & C_B && obstacleFlag[i-1][j] & C_B
-					&& obstacleFlag[i][j+1] & C_B && obstacleFlag[i][j-1] & C_F && obstacleFlag[i+1][j] & C_F)  /* Left cell */
+			if((obstacleFlag[i][j] & C_B) && (obstacleFlag[i-1][j] & C_B)
+					&& (obstacleFlag[i][j+1] & C_B) && (obstacleFlag[i][j-1] & C_F) && (obstacleFlag[i+1][j] & C_F))  /* Left cell */
 			{
 				(*flag)[i][j] |= B_SO;
 			}
-			if(obstacleFlag[i][j] & C_B && obstacleFlag[i+1][j] & C_B
-					&& obstacleFlag[i][j+1] & C_B && obstacleFlag[i][j-1] & C_F && obstacleFlag[i-1][j] & C_F)  /* Left cell */
+			if((obstacleFlag[i][j] & C_B) && (obstacleFlag[i+1][j] & C_B)
+					&& (obstacleFlag[i][j+1] & C_B) && (obstacleFlag[i][j-1] & C_F) && (obstacleFlag[i-1][j] & C_F))  /* Left cell */
 			{
 				(*flag)[i][j] |= B_SW;
 			}

@@ -69,11 +69,14 @@ int read_parameters(
   double *Pw
 );
 
+/*
 void read_special_BC(const char * szFileName,
-		double *UI,	/* Read inlet velocity BC*/
+		double *UI,
 		double *VI,
 		double *delta_p
 );
+*/
+
 
 /**
  * The arrays U,V and P are initialized to the constant values UI, VI and PI on

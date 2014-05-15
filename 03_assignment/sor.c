@@ -60,13 +60,13 @@ void sor(
 
   /* set boundary values */
   /* pressure BC based on left boundary pressure value and pressure gradient */
-  for(i = 1; i < imax + 1; i++) {
+  for(i = 0; i <= imax + 1; i++) {
     P[i][0] = P[i][1];
     P[i][jmax+1] = P[i][jmax];
   }
-  for(j = 1; j < jmax + 1; j++)
+  for(j = 0; j <= jmax + 1; j++)
   {
-	  if (Flag[0][j] == P_L)
+	  if (Flag[0][j] & P_L)
 	  {
 		  P[0][j] = (2 * Pw) - P[1][j];
 		  P[imax+1][j] = (2 * (Pw - delta_p)) - P[imax][j];
@@ -76,7 +76,6 @@ void sor(
 		  P[0][j] = P[1][j];
 		  P[imax+1][j] = P[imax][j];
 	  }
-
   }
 
   /* boundary conditions for the pressure at the boundary stripe*/

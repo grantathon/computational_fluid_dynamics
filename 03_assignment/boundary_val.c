@@ -159,38 +159,17 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 }
 
 
-void spec_boundary_val(const char *problem, int imax, int jmax, double **U, double **V)
+void spec_boundary_val(const char *problem, int imax, int jmax, double **U, double **V, double UI, double VI)
 {
 	int j;
 
-	/* geometry details	*/
-	double UI = 0;
-	double VI = 0;
-	double delta_p	= 0;
-	char *problemDataFile = malloc(strlen(problem) + 5);
+	/* For plane shear flow, no inlet BCs, only outflow.	*/
 
-	strcpy(problemDataFile, problem);
-	strcat(problemDataFile, ".dat");
-
-	/* For plane shear flow, no inlet BCs, only outflow.
-	if(strcmp(problem, "plane_shear_flow") == 0)
-	{
-		read_special_BC(problemDataFile, &UI, &VI, &delta_p);
-
-		for(j = 1; j < jmax+1; j++)
-		{
-			U[0][j] = UI;
-			V[0][j] = 2 * VI - V[1][j];
-		}
-	}
-	else
-	*/
 	if (strcmp(problem, "Karman_vortex") == 0)
 	{
 		/*
 		for the Karman vortex street, we consider u = 1 and v = 0 at the left wall
 		 */
-		read_special_BC(problemDataFile, &UI, &VI, &delta_p);
 		for(j = 1; j < jmax+1; j++)
 		{
 			U[0][j] = UI;
@@ -200,7 +179,6 @@ void spec_boundary_val(const char *problem, int imax, int jmax, double **U, doub
 	else if(strcmp(problem, "flow_over_a_step") == 0)
 	{
 		/*	Inlet velocity BC for upper half of inlet only; lower half cells not used by any other function etc and can be removed LATER.*/
-		read_special_BC(problemDataFile, &UI, &VI, &delta_p);
 		for(j = 1; j <= jmax/2; j++)
 		{
 			U[0][j] = 0.0;
@@ -214,6 +192,4 @@ void spec_boundary_val(const char *problem, int imax, int jmax, double **U, doub
 		}
 
 	}
-
-	free(problemDataFile);
 }

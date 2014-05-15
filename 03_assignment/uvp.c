@@ -48,7 +48,7 @@ void calculate_fg(
 	{
 		for(j = 1; j <= jmax; j++)
 		{
-			if((Flag[i][j] & C_F && Flag[i - 1][j] & C_F) || (Flag[i][j] & C_F && Flag[i + 1][j] & C_F) || (Flag[i][j] & C_F && Flag[i][j - 1] & C_F) || (Flag[i][j] & C_F && Flag[i][j + 1] & C_F))
+			if((Flag[i][j] == C_F && Flag[i - 1][j]) || (Flag[i][j] == C_F && Flag[i + 1][j]) || (Flag[i][j] == C_F && Flag[i][j - 1]) || (Flag[i][j] == C_F && Flag[i][j + 1]))
 			{
 				/* Setup 1st and 2nd order derivatives for U and V */
 				du_x_2 = (U[i-1][j] - 2*U[i][j] + U[i+1][j])/pow(dx, 2);
@@ -74,7 +74,7 @@ void calculate_fg(
 	{
 		for(j = 1; j <= jmax-1; j++)
 		{
-			if((Flag[i][j] & C_F && Flag[i - 1][j] & C_F) || (Flag[i][j] & C_F && Flag[i + 1][j] & C_F) || (Flag[i][j] & C_F && Flag[i][j - 1] & C_F) || (Flag[i][j] & C_F && Flag[i][j + 1] & C_F))
+			if((Flag[i][j] == C_F && Flag[i - 1][j]) || (Flag[i][j] == C_F && Flag[i + 1][j]) || (Flag[i][j] == C_F && Flag[i][j - 1]) || (Flag[i][j] == C_F && Flag[i][j + 1]))
 			{
 
 			/* Setup 1st and 2nd order derivatives for U and V */
@@ -108,45 +108,45 @@ void calculate_fg(
 	}
 
 	/* loop through the Flag array and check the nature of the boundary cells; then, update F, G, p */
-	for(i = 1 ; i < imax + 1 ; i++)
+	for(i = 0 ; i <= imax + 1 ; i++)
 		{
-			for(j = 1 ; j < jmax + 1 ; j++)
+			for(j = 0 ; j <= imax + 1 ; j++)
 			{
 				/* normal boundary cells */
-				if(Flag[i][j] & B_O)
+				if(Flag[i][j] == B_O)
 				{
 					F[i][j] = U[i][j];				
 				}
-				else if(Flag[i][j] & B_W)
+				else if(Flag[i][j] == B_W)
 				{
 					F[i - 1][j] = U[i - 1][j];			
 				}
-				else if(Flag[i][j] & B_N)
+				if(Flag[i][j] == B_N)
 				{
 					G[i][j] = V[i][j];					
 				}
-				else if(Flag[i][j] & B_S)
+				else if(Flag[i][j] == B_S)
 				{
 					G[i][j - 1] = V[i][j - 1];					
 				}
 				 
 				/* take the corner cells */ 
-				if(Flag[i][j] & B_NO)
+				if(Flag[i][j] == B_NO)
 				{
 					G[i][j] = V[i][j];
 					F[i][j] = U[i][j];
 				}
-				else if(Flag[i][j] & B_NW)
+				else if(Flag[i][j] == B_NW)
 				{
 					G[i][j] = V[i][j];
 					F[i - 1][j] = U[i - 1][j];	
 				}
-				else if(Flag[i][j] & B_SO)
+				else if(Flag[i][j] == B_SO)
 				{
 					G[i][j - 1] = V[i][j - 1];
 					F[i][j] = U[i][j];	
 				} 
-				else if(Flag[i][j] & B_SW)
+				else if(Flag[i][j] == B_SW)
 				{
 					G[i][j - 1] = V[i][j - 1];
 					F[i - 1][j] = U[i - 1][j];			
@@ -254,7 +254,7 @@ void calculate_uv(
 	{
 		for(j = 1; j <= jmax; j++)
 		{
-			if((Flag[i][j] & C_F && Flag[i - 1][j] & C_F) || (Flag[i][j] & C_F && Flag[i + 1][j] & C_F) || (Flag[i][j] & C_F && Flag[i][j - 1] & C_F) || (Flag[i][j] & C_F && Flag[i][j + 1] & C_F))
+			if((Flag[i][j] == C_F && Flag[i - 1][j]) || (Flag[i][j] == C_F && Flag[i + 1][j]) || (Flag[i][j] == C_F && Flag[i][j - 1]) || (Flag[i][j] == C_F && Flag[i][j + 1]))
 			{
 				U[i][j] = F[i][j] - (dt/dx) * (P[i+1][j] - P[i][j]);	
 			}	
@@ -267,7 +267,7 @@ void calculate_uv(
 	{
 		for(j = 1; j <= jmax-1; j++)
 		{
-			if((Flag[i][j] & C_F && Flag[i - 1][j] & C_F) || (Flag[i][j] & C_F && Flag[i + 1][j] & C_F) || (Flag[i][j] & C_F && Flag[i][j - 1] & C_F) || (Flag[i][j] & C_F && Flag[i][j + 1] & C_F))
+			if((Flag[i][j] == C_F && Flag[i - 1][j]) || (Flag[i][j] == C_F && Flag[i + 1][j]) || (Flag[i][j] == C_F && Flag[i][j - 1]) || (Flag[i][j] == C_F && Flag[i][j + 1]))
 			{
 				V[i][j] = G[i][j] - (dt/dy) * (P[i][j+1] - P[i][j]);
 			}	
