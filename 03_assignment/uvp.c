@@ -48,7 +48,8 @@ void calculate_fg(
 	{
 		for(j = 1; j <= jmax; j++)
 		{
-			if((Flag[i][j] == C_F && Flag[i - 1][j]) || (Flag[i][j] == C_F && Flag[i + 1][j]) || (Flag[i][j] == C_F && Flag[i][j - 1]) || (Flag[i][j] == C_F && Flag[i][j + 1]))
+			if((Flag[i][j] & C_F)
+					&& ((Flag[i][j] & B_N) || (Flag[i][j] & B_O) || (Flag[i][j] & B_S) || (Flag[i][j] & B_W)))
 			{
 				/* Setup 1st and 2nd order derivatives for U and V */
 				du_x_2 = (U[i-1][j] - 2*U[i][j] + U[i+1][j])/pow(dx, 2);
@@ -74,10 +75,10 @@ void calculate_fg(
 	{
 		for(j = 1; j <= jmax-1; j++)
 		{
-			if((Flag[i][j] == C_F && Flag[i - 1][j]) || (Flag[i][j] == C_F && Flag[i + 1][j]) || (Flag[i][j] == C_F && Flag[i][j - 1]) || (Flag[i][j] == C_F && Flag[i][j + 1]))
+			if((Flag[i][j] & C_F)
+					&& ((Flag[i][j] & B_N) || (Flag[i][j] & B_O) || (Flag[i][j] & B_S) || (Flag[i][j] & B_W)))
 			{
-
-			/* Setup 1st and 2nd order derivatives for U and V */
+				/* Setup 1st and 2nd order derivatives for U and V */
 				dv_x_2 = (V[i-1][j] - 2*V[i][j] + V[i+1][j])/pow(dx, 2);
 				dv_y_2 = (V[i][j-1] - 2*V[i][j] + V[i][j+1])/pow(dy, 2);
 
@@ -254,7 +255,8 @@ void calculate_uv(
 	{
 		for(j = 1; j <= jmax; j++)
 		{
-			if((Flag[i][j] == C_F && Flag[i - 1][j]) || (Flag[i][j] == C_F && Flag[i + 1][j]) || (Flag[i][j] == C_F && Flag[i][j - 1]) || (Flag[i][j] == C_F && Flag[i][j + 1]))
+			if((Flag[i][j] & C_F)
+					&& ((Flag[i][j] & B_N) || (Flag[i][j] & B_O) || (Flag[i][j] & B_S) || (Flag[i][j] & B_W)))
 			{
 				U[i][j] = F[i][j] - (dt/dx) * (P[i+1][j] - P[i][j]);	
 			}	
@@ -267,7 +269,8 @@ void calculate_uv(
 	{
 		for(j = 1; j <= jmax-1; j++)
 		{
-			if((Flag[i][j] == C_F && Flag[i - 1][j]) || (Flag[i][j] == C_F && Flag[i + 1][j]) || (Flag[i][j] == C_F && Flag[i][j - 1]) || (Flag[i][j] == C_F && Flag[i][j + 1]))
+			if((Flag[i][j] & C_F)
+					&& ((Flag[i][j] & B_N) || (Flag[i][j] & B_O) || (Flag[i][j] & B_S) || (Flag[i][j] & B_W)))
 			{
 				V[i][j] = G[i][j] - (dt/dy) * (P[i][j+1] - P[i][j]);
 			}	
