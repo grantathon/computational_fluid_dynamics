@@ -96,7 +96,7 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 
 	for(i = 1 ; i < imax + 1 ; i++)
 	{
-		for(j = 1 ; j < imax + 1 ; j++)
+		for(j = 1 ; j < imax + 1 ; j++)	/* TODO: Fix bug!	*/
 		{
 			/* take the normal bounary cells */
 			/* always start with the East ;) */

@@ -28,7 +28,8 @@ int read_parameters(const char * szFileName,
                     int *wl,			/* domain boundary conditions */
                     int *wr,			/* for right, left, top and */
                     int *wt,			/* bottom surfaces. */
-                    int *wb
+                    int *wb,
+                    double *delta_p
 )
 {
 	/* Read domain boundary conditions*/
@@ -61,6 +62,12 @@ int read_parameters(const char * szFileName,
 	READ_DOUBLE( szFileName, *GX );
 	READ_DOUBLE( szFileName, *GY );
 	READ_DOUBLE( szFileName, *PI );
+
+	/* Read pressure difference if plane shear flow	*/
+	if (strcmp(szFileName, "plane_shear_flow.dat") == 0)
+	{
+		READ_DOUBLE( szFileName, *delta_p );
+	}
 
 	*dx = *xlength / (double)(*imax);
 	*dy = *ylength / (double)(*jmax);
