@@ -172,6 +172,7 @@ void spec_boundary_val(const char *problem, int imax, int jmax, double **U, doub
 	strcpy(problemDataFile, problem);
 	strcat(problemDataFile, ".dat");
 
+	/* For plane shear flow, no inlet BCs, only outflow.
 	if(strcmp(problem, "plane_shear_flow") == 0)
 	{
 		read_special_BC(problemDataFile, &UI, &VI, &delta_p);
@@ -182,7 +183,9 @@ void spec_boundary_val(const char *problem, int imax, int jmax, double **U, doub
 			V[0][j] = 2 * VI - V[1][j];
 		}
 	}
-	else if (strcmp(problem, "Karman_vortex") == 0)
+	else
+	*/
+	if (strcmp(problem, "Karman_vortex") == 0)
 	{
 		/*
 		for the Karman vortex street, we consider u = 1 and v = 0 at the left wall

@@ -29,7 +29,8 @@ int read_parameters(const char * szFileName,
                     int *wr,			/* for right, left, top and */
                     int *wt,			/* bottom surfaces. */
                     int *wb,
-                    double *delta_p
+                    double *delta_p,
+                    double *Pw
 )
 {
 	/* Read domain boundary conditions*/
@@ -67,6 +68,7 @@ int read_parameters(const char * szFileName,
 	if (strcmp(szFileName, "plane_shear_flow.dat") == 0)
 	{
 		READ_DOUBLE( szFileName, *delta_p );
+		READ_DOUBLE( szFileName, *Pw );
 	}
 
 	*dx = *xlength / (double)(*imax);
@@ -184,6 +186,19 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 			}
 		}
 	}
+
+	/* Specify the left and right boundaries where pressure BC is defined	*/
+	/* We only specify pressure value on the left boundary	*/
+	if (strcmp(problem, "plane_shear_flow") == 0)
+	{
+		for(j = 1; j <= jmax; j++)
+		{
+			/*(*flag)[imax + 1][j] |= P_R;*/
+			(*flag)[0][j] = P_L;
+
+		}
+	}
+
 
 	free_imatrix(obstacleFlag, 0, imax+1, 0, jmax+1);
 	free(problemPBMFile);

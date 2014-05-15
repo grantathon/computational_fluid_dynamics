@@ -87,6 +87,8 @@ int main(int argc, char *argv[])
 	double UI = 0;
 	double VI = 0;
 	double PI = 0;
+	double delta_p	= 0;	/* for pressure BC */
+	double Pw = 0;			/* pressure value at right boundary */
 
 	/* Resulting system quantities */
 	double **U 	= 0;
@@ -114,7 +116,7 @@ int main(int argc, char *argv[])
 	/* Read parameters from DAT file, store locally, and check for potential error */
 	readParamError = read_parameters(problemDataFile, &Re, &UI, &VI, &PI, &GX, &GY,
 			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
-			&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb);
+			&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb, &delta_p, &Pw);
 	if(readParamError != 1)
 	{
 		printf("ERROR: Input parameters potentially corrupt!");
@@ -143,7 +145,7 @@ int main(int argc, char *argv[])
 		it = 0;
 		do
 		{
-			sor(omg, dx, dy, imax, jmax, P, RS, &res, Flag);
+			sor(omg, dx, dy, imax, jmax, P, RS, &res, Flag, Pw, delta_p);
 			it++;
 		}
 		while( it < itermax && res > eps);
@@ -163,7 +165,7 @@ int main(int argc, char *argv[])
 	write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
 
 	/* Print end value of U[imax/2][jmax/2], i.e., at center of the domain	*/
-	printf("\nEnd value of U[imax/2][jmax/2]= %f \n", U[imax/2][(jmax/2]);
+	printf("\nEnd value of U[imax/2][jmax/2]= %f \n", U[imax/2][jmax/2]);
 
 	/* Deallocate heap memory */
 	free_matrix(U, 0, imax+1, 0, jmax+1);

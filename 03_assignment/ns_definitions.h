@@ -4,6 +4,9 @@
 #define C_B 	0x00 /* 00000000b */
 #define C_F 	0x10 /* 00010000b */
 
+#define P_L		0x40 /* 01000000b */
+/*#define P_R		0x20*/ /* 00100000b */
+
 #define B_N 	0x01 /* 00000001b */
 #define B_S 	0x02 /* 00000010b */
 #define B_W 	0x04 /* 00000100b */

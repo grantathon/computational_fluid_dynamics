@@ -64,7 +64,9 @@ int read_parameters(
   int *wl,			/* domain boundary conditions */
   int *wr,			/* for right, left, top and */
   int *wt,			/* bottom surfaces. */
-  int *wb
+  int *wb,
+  double *delta_p,
+  double *Pw
 );
 
 void read_special_BC(const char * szFileName,

@@ -13,7 +13,9 @@ void sor(
   double **P,
   double **RS,
   double *res,
-  int **Flag
+  int **Flag,
+  double Pw,
+  double delta_p
 ) {
   int i,j;
   double rloc;
@@ -24,9 +26,9 @@ void sor(
   int fluid_cells_count = 0;
 
   /* SOR iteration */
-  for(i = 1; i <= imax; i++) 
+  for(i = 1; i < imax + 1; i++)
   {
-    for(j = 1; j<=jmax; j++) 
+    for(j = 1; j < jmax + 1; j++)
     {
       P[i][j] = (1.0-omg)*P[i][j]
               + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);  
@@ -36,9 +38,9 @@ void sor(
   /* compute the residual */
   /* now, the computation is restricted only for the fluid cells */
   rloc = 0;
-  for(i = 1; i <= imax; i++) 
+  for(i = 1; i < imax + 1; i++)
   {
-    for(j = 1; j <= jmax; j++) 
+    for(j = 1; j < jmax + 1; j++)
     {
       if(Flag[i][j] & C_F)
       {
@@ -57,13 +59,23 @@ void sor(
 
 
   /* set boundary values */
-  for(i = 1; i <= imax; i++) {
+  /* pressure BC based on left boundary pressure value and pressure gradient */
+  for(i = 1; i < imax + 1; i++) {
     P[i][0] = P[i][1];
     P[i][jmax+1] = P[i][jmax];
   }
-  for(j = 1; j <= jmax; j++) {
-    P[0][j] = P[1][j];
-    P[imax+1][j] = P[imax][j];
+  for(j = 1; j < jmax + 1; j++)
+  {
+	  if (Flag[0][j] == P_L)
+	  {
+		  P[0][j] = (2 * Pw) - P[1][j];
+		  P[imax+1][j] = (2 * (Pw - delta_p)) - P[imax][j];
+	  }
+	  else
+	  {
+		  P[0][j] = P[1][j];
+		  P[imax+1][j] = P[imax][j];
+	  }
   }
 
   /* boundary conditions for the pressure at the boundary stripe*/
