@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Visualize U, V, and P */
-	write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
+	/*write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);*/
 
 	/* Print end value of U[imax/2][jmax/2], i.e., at center of the domain	*/
 	printf("\nEnd value of U[imax/2][jmax/2]= %f \n", U[imax/2][jmax/2]);
