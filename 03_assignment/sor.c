@@ -2,8 +2,6 @@
 #include "ns_definitions.h"
 #include <math.h>
 
-/* SOR updated - now, the pressure is set separately for cells from the boundary of the obstacle */
-
 void sor(
   double omg,
   double dx,
@@ -50,13 +48,13 @@ void sor(
       }
     }
   }
+
   /* the residual is now normalized by the total number of fluid cells */
   rloc = rloc/(fluid_cells_count);
   rloc = sqrt(rloc);
 
   /* set residual */
   *res = rloc;
-
 
   /* set boundary values */
   /* pressure BC based on left boundary pressure value and pressure gradient */
@@ -100,10 +98,7 @@ void sor(
         {
           P[i][j] = P[i][j - 1];       
         }
-
-        /* take the corner cells */ 
-        /* just average the neighbors */
-        if(Flag[i][j] == B_NO)
+        else if(Flag[i][j] == B_NO)
         {
           P[i][j] = (P[i][j + 1] + P[i + 1][j])/2;
         }

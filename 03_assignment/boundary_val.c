@@ -5,18 +5,6 @@
 #include "ns_definitions.h"
 #include "helper.h"
 
-/*
- *
- * I extented the current version of the boundary conditions, where I have rewritten the spec_boundary_val
- * funtion and also, I extended the boundaryvalues function, in order to incorporate the boundary conditions
- * for boundary cells of the obstacle(with respect to their flag, e.g. if flag = B_N, then implement 1.4)
- *
- */
-/*
- * 1 = no slip; 2 = free-slip; 3 = outlet
- */
-
-
 void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr, int wt, int wb, int **Flag)
 {
 	int i, j;
@@ -90,16 +78,12 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 
 	/*
 		loop through the Flag array and find each cells have the flag B_N, B_W, B_O, B_S
-		we must define the protocol for B_N, B_W, B_O, B_S
 	 */
-
-
 	for(i = 1 ; i < imax + 1 ; i++)
 	{
 		for(j = 1 ; j < jmax + 1 ; j++)
 		{
-			/* take the normal bounary cells */
-			/* always start with the East ;) */
+			/* check the boundary cells */
 			if(Flag[i][j] == B_O)
 			{
 				U[i][j] = 0;
@@ -124,9 +108,7 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 				U[i][j] = - U[i][j - 1];
 				U[i - 1][j]	= - U[i - 1][j - 1];
 			}
-
-			/* take the corner cells */
-			if(Flag[i][j] == B_NO)
+			else if(Flag[i][j] == B_NO)
 			{
 				U[i][j] = 0;
 				V[i][j] = 0;
@@ -162,8 +144,6 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 void spec_boundary_val(const char *problem, int imax, int jmax, double **U, double **V, double UI, double VI)
 {
 	int j;
-
-	/* For plane shear flow, no inlet BCs, only outflow.	*/
 
 	if (strcmp(problem, "Karman_vortex") == 0)
 	{

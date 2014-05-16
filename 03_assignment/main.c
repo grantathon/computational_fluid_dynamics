@@ -43,11 +43,9 @@
 int main(int argc, char *argv[])
 {
 	/* Input file with user parameters */
-	/*const char *szFileName = "cavity100.dat";*/
 	const char *problem = argv[1];
 	char *problemDataFile = malloc(strlen(problem) + 5);
 	char *problemOutput = malloc(strlen(problem) + 7);
-
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -102,7 +100,7 @@ int main(int argc, char *argv[])
 	/* User must enter correct problem strings */
 	if(strcmp(problem, "Karman_vortex") && strcmp(problem, "plane_shear_flow") && strcmp(problem, "flow_over_a_step"))
 	{
-		printf("Run program using command 'sim [problem]', "
+		printf("Run program using command './sim [problem]', "
 				"where problem is 'Karman_vortex', 'plane_shear_flow', or 'flow_over_a_step'\n");
 		return 0;
 	}
@@ -129,9 +127,11 @@ int main(int argc, char *argv[])
 	F = matrix(0, imax+1, 0, jmax+1);
 	G = matrix(0, imax+1, 0, jmax+1);
 
+	/* Init flags indicating cell type and neighbours cell types */
 	init_flag(problem, imax, jmax, &Flag);
 
 	/* Begin the time iteration process */
+	printf("Begin the main computation...\n");
 	while(t < t_end)
 	{
 		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
@@ -149,23 +149,17 @@ int main(int argc, char *argv[])
 			it++;
 		}
 		while( it < (itermax) && res > eps);
-		printf("n=%u, res=%f, it=%u ", n, res, it);
+		/* printf("n=%u, res=%f, it=%u, ", n, res, it); */
 
 		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, Flag);
 
-		/* Visualize U, V, and P */
-		write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
-
 		n++;
 		t += dt;
-		printf("t=%f, dt=%f\n", t, dt);
+		/* printf("t=%f, dt=%f\n", t, dt); */
 	}
 
 	/* Visualize U, V, and P */
 	write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
-
-	/* Print end value of U[imax/2][jmax/2], i.e., at center of the domain	*/
-	printf("\nEnd value of U[imax/2][jmax/2]= %f \n", U[imax/2][jmax/2]);
 
 	/* Deallocate heap memory */
 	free_matrix(U, 0, imax+1, 0, jmax+1);

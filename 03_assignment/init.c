@@ -131,8 +131,6 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 	*flag = imatrix(0, imax+1, 0, jmax+1);
 
 	/* Set boundary flags */
-	/* TODO: Make sure in other implemented files that we don't
-	 * 		treat border cells the same as obstacle cells */
 	for(i = 0; i <= imax+1; i++)
 	{
 		(*flag)[i][0] 		= C_B;	/* Floor */
@@ -173,6 +171,7 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 	{
 		for(j = 1; j <= jmax; j++)
 		{
+			/* Set flags according to neighbouring fluids */
 			if(obstacleFlag[i-1][j] == 1)
 			{
 				(*flag)[i][j] |= B_W;
@@ -189,57 +188,6 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 			{
 				(*flag)[i][j] |= B_S;
 			}
-/*
-			if((obstacleFlag[i][j-1] == 0) && (obstacleFlag[i-1][j] == 0)
-					&& (obstacleFlag[i+1][j] == 0) && (obstacleFlag[i][j+1] == 1))
-			{
-				(*flag)[i][j] |= B_N;
-			}
-			if((obstacleFlag[i-1][j] == 0) && (obstacleFlag[i][j + 1] == 0)
-					&& (obstacleFlag[i][j - 1] == 0) && (obstacleFlag[i + 1][j] == 1))
-			{
-				(*flag)[i][j] |= B_O;
-			}
-			if((obstacleFlag[i+1][j] == 0) && (obstacleFlag[i][j + 1] == 0)
-					&& (obstacleFlag[i][j - 1] == 0) && (obstacleFlag[i - 1][j] == 1))
-=======
-			if(obstacleFlag[i+1][j] == 1)
-			{
-				(*flag)[i][j] |= B_O;
-			}
-			if(obstacleFlag[i][j+1] == 1)
->>>>>>> be80e068d113695a25c4628a8035b10498fad22c
-			{
-				(*flag)[i][j] |= B_N;
-			}
-<<<<<<< HEAD
-			if((obstacleFlag[i][j+1] == 0) && (obstacleFlag[i-1][j] == 0)
-					&& (obstacleFlag[i+1][j] == 0) && (obstacleFlag[i][j-1] == 1))
-			{
-				(*flag)[i][j] |= B_S;
-			}
-
-			if((obstacleFlag[i-1][j] == 0) && (obstacleFlag[i][j-1] == 0)
-					&& (obstacleFlag[i][j+1] == 1) && (obstacleFlag[i+1][j] == 1))
-			{
-				(*flag)[i][j] |= B_NO;
-			}
-			if((obstacleFlag[i+1][j] == 0) && (obstacleFlag[i][j-1] == 0)
-					&& (obstacleFlag[i][j+1] == 1) && (obstacleFlag[i-1][j] == 1))
-			{
-				(*flag)[i][j] |= B_NW;
-			}
-			if((obstacleFlag[i-1][j] == 0) && (obstacleFlag[i][j+1] == 0)
-					&& (obstacleFlag[i][j-1] == 1) && (obstacleFlag[i+1][j] == 1))
-			{
-				(*flag)[i][j] |= B_SO;
-			}
-			if((obstacleFlag[i+1][j] == 0) && (obstacleFlag[i][j+1] == 0)
-					&& (obstacleFlag[i][j-1] == 1) && (obstacleFlag[i-1][j] == 1))
-			{
-				(*flag)[i][j] |= B_SW;
-			}
-*/
 		}
 	}
 
@@ -249,12 +197,10 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 	{
 		for(j = 1; j <= jmax; j++)
 		{
-			/*(*flag)[imax + 1][j] |= P_R;*/
 			(*flag)[0][j] = P_L;
 
 		}
 	}
-
 
 	free_imatrix(obstacleFlag, 0, imax+1, 0, jmax+1);
 	free(problemPBMFile);
