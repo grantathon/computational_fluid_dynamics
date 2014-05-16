@@ -153,9 +153,6 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 	obstacleFlag = read_pgm(problemPBMFile);
 
 	/* Set inner flags */
-
-	/* Modified by Gabriel; in order to determine the nature of the cells in the boundary of the
-	obstacle, we need more conditions i.e. we need to test 3 neighbors*/
 	for(i = 1; i <= imax; i++)
 	{
 		for(j = 1; j <= jmax; j++)
@@ -205,9 +202,17 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 			}
 			if((obstacleFlag[i+1][j] == 0) && (obstacleFlag[i][j + 1] == 0)
 					&& (obstacleFlag[i][j - 1] == 0) && (obstacleFlag[i - 1][j] == 1))
+=======
+			if(obstacleFlag[i+1][j] == 1)
 			{
-				(*flag)[i][j] |= B_W;
+				(*flag)[i][j] |= B_O;
 			}
+			if(obstacleFlag[i][j+1] == 1)
+>>>>>>> be80e068d113695a25c4628a8035b10498fad22c
+			{
+				(*flag)[i][j] |= B_N;
+			}
+<<<<<<< HEAD
 			if((obstacleFlag[i][j+1] == 0) && (obstacleFlag[i-1][j] == 0)
 					&& (obstacleFlag[i+1][j] == 0) && (obstacleFlag[i][j-1] == 1))
 			{
