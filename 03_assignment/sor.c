@@ -84,38 +84,38 @@ void sor(
       for(j = 1 ; j < jmax + 1 ; j++)
       {
 
-        if(Flag[i][j] & B_O)
+        if(Flag[i][j] == B_O)
         {
           P[i][j] = P[i + 1][j];
         } 
-        else if(Flag[i][j] & B_N)
+        else if(Flag[i][j] == B_N)
         {
           P[i][j] = P[i][j + 1];    
         }
-        else if(Flag[i][j] & B_W)
+        else if(Flag[i][j] == B_W)
         {
           P[i][j] = P[i - 1][j];    
         }
-        else if(Flag[i][j] & B_S)
+        else if(Flag[i][j] == B_S)
         {
           P[i][j] = P[i][j - 1];       
         }
 
         /* take the corner cells */ 
         /* just average the neighbors */
-        if(Flag[i][j] & B_NO)
+        if(Flag[i][j] == B_NO)
         {
           P[i][j] = (P[i][j + 1] + P[i + 1][j])/2;
         }
-        else if(Flag[i][j] & B_NW)
+        else if(Flag[i][j] == B_NW)
         {
           P[i][j] = (P[i][j + 1] + P[i - 1][j])/2;
         }
-        else if(Flag[i][j] & B_SO)
+        else if(Flag[i][j] == B_SO)
         {
           P[i][j] = (P[i][j - 1] + P[i + 1][j])/2;
         } 
-        else if(Flag[i][j] & B_SW)
+        else if(Flag[i][j] == B_SW)
         {
           P[i][j] = (P[i][j - 1] + P[i - 1][j])/2;    
         }

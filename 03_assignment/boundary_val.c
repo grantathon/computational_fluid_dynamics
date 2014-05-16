@@ -100,25 +100,25 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 		{
 			/* take the normal bounary cells */
 			/* always start with the East ;) */
-			if(Flag[i][j] & B_O)
+			if(Flag[i][j] == B_O)
 			{
 				U[i][j] = 0;
 				V[i][j - 1] = - V[i + 1][j - 1];
 				V[i][j]	= -V[i + 1][j];
 			}
-			else if(Flag[i][j] & B_N)
+			else if(Flag[i][j] == B_N)
 			{
 				V[i][j] = 0;
 				U[i - 1][j] = - U[i - 1][j + 1];
 				U[i][j]	= -U[i][j + 1];
 			}
-			else if(Flag[i][j] & B_W)
+			else if(Flag[i][j] == B_W)
 			{
 				U[i - 1][j] = 0;
 				V[i][j - 1] = - V[i - 1][j - 1];
 				V[i][j]	= -V[i - 1][j];
 			}
-			else if(Flag[i][j] & B_S)
+			else if(Flag[i][j] == B_S)
 			{
 				V[i][j - 1] = 0;
 				U[i][j] = - U[i][j - 1];
@@ -126,28 +126,28 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 			}
 
 			/* take the corner cells */
-			if(Flag[i][j] & B_NO)
+			if(Flag[i][j] == B_NO)
 			{
 				U[i][j] = 0;
 				V[i][j] = 0;
 				U[i - 1][j]	= -U[i - 1][j + 1];
 				V[i][j - 1]	= -V[i + 1][j - 1];
 			}
-			else if(Flag[i][j] & B_NW)
+			else if(Flag[i][j] == B_NW)
 			{
 				U[i - 1][j] = 0;
 				V[i][j] = 0;
 				U[i][j]	= -U[i][j + 1];
 				V[i][j - 1]	= -V[i - 1][j - 1];
 			}
-			else if(Flag[i][j] & B_SO)
+			else if(Flag[i][j] == B_SO)
 			{
 				U[i][j] = 0;
 				V[i][j - 1] = 0;
 				U[i - 1][j]	= -U[i - 1][j - 1];
 				V[i][j]	= -V[i + 1][j];
 			}
-			else if(Flag[i][j] & B_SW)
+			else if(Flag[i][j] == B_SW)
 			{
 				U[i - 1][j] = 0;
 				V[i][j - 1] = 0;
