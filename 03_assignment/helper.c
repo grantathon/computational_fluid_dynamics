@@ -473,7 +473,7 @@ int **read_pgm(const char *filename)
 	        int byte;
             fscanf(input, "%d", &byte);
 
-	        if (byte==EOF)
+            if (byte==EOF)
 	        {
 		        fclose(input);
 		        ERROR("read failed");
