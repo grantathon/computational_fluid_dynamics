@@ -23,6 +23,11 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 			V[i][0]	= 0;
 			U[i][0] = U[i][1];
 		}
+		else if (wb == 3)	/* outflow BC for floor*/
+		{
+			V[i][0]	= V[i][1];
+			U[i][0] = U[i][1];
+		}
 
 		/* CEILING BC */
 		if (wt == 1)	/* no-slip BC for ceiling*/
@@ -34,6 +39,12 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 		{
 			V[i][jmax]		= 0;
 			U[i][jmax+1] 	= U[i][jmax];
+
+		}
+		else if (wt == 3) /* (wb == 3) outflow BC for ceiling*/
+		{
+			U[i][jmax+1] 	= U[i][jmax];
+			V[i][jmax] 		= V[i][jmax-1];
 
 		}
 	}

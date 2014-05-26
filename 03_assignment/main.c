@@ -148,8 +148,8 @@ int main(int argc, char *argv[])
 			sor(omg, dx, dy, imax, jmax, P, RS, &res, Flag, Pw, delta_p);
 			it++;
 		}
-		while( it < (itermax+1000) && res > eps);
-		printf("n=%u, res=%f, it=%u, \n", n, res, it); 
+		while( it < (itermax - 480) && res > eps);
+		printf("n=%u, res=%f, it=%u, t=%f, dt=%f\n", n, res, it, t, dt);
 
 		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, Flag);
         write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
