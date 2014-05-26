@@ -1,5 +1,5 @@
-CC = gcc
-CFLAGS = -Wall -pedantic -Werror
+CC = mpicc.mpich2 #gcc
+CFLAGS = -Wall -Werror #-pedantic
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 
 OBJ = 	helper.o\
@@ -8,7 +8,8 @@ OBJ = 	helper.o\
       	uvp.o\
       	main.o\
       	visual.o\
-      	sor.o
+      	sor.o \
+      	parallel.o
 
 
 all:  $(OBJ)
@@ -25,5 +26,7 @@ init.o        : helper.h init.h
 boundary_val.o: helper.h boundary_val.h 
 uvp.o         : helper.h uvp.h
 visual.o      : helper.h
+sor.o      	  : sor.h
+parallel.o    : parallel.h
 
-main.o        : helper.h init.h boundary_val.h uvp.h visual.h sor.h
+main.o        : helper.h init.h boundary_val.h uvp.h visual.h sor.h parallel.h

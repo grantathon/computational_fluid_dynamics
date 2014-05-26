@@ -44,6 +44,7 @@ void Programm_Stop(char *txt)
    MPI_Finalize();
    exit(1);
 }
+<<<<<<< HEAD
 
 void init parallel (int iproc,
                int jproc,
@@ -99,3 +100,5 @@ void uv comm(double **U,
 {
    /* TODO: */
 }
+=======
+>>>>>>> 64b95e05a02ca9fca31ea21764820f44911d775b

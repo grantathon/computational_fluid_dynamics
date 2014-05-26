@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #include "mpi.h"
+=======
+#include <mpi.h>
+>>>>>>> 64b95e05a02ca9fca31ea21764820f44911d775b
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -15,6 +19,7 @@ void Programm_Sync(char *txt);
 void Programm_Stop(char *txt);
 /* all processes will produce a text output, be synchronized and finished */
 
+<<<<<<< HEAD
 void init parallel (int iproc,
 					int jproc,
 					int imax,
@@ -62,3 +67,5 @@ void uv comm(double **U,
 			double *bufRecv,
 			MPI Status *status,
 			int chunk);
+=======
+>>>>>>> 64b95e05a02ca9fca31ea21764820f44911d775b

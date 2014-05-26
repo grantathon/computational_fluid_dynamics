@@ -6,6 +6,7 @@
 #include "sor.h"
 #include "parallel.h"
 #include <stdio.h>
+#include <mpi.h>
 
 /**
  * The main operation reads the configuration file, initializes the scenario and
@@ -87,6 +88,10 @@ int main(int argn, char** args)
 	double **RS = 0;
 	double **F = 0;
 	double **G = 0;
+
+	/* MPI variables */
+	int myrank = 0;
+	int nproc = 0;
 
 	/* Read parameters from DAT file, store locally, and check for potential error */
 	readParamError = read_parameters(szFileName, &Re, &UI, &VI, &PI, &GX, &GY,
