@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 
 		n++;
 		t += dt;
-		/* printf("t=%f, dt=%f\n", t, dt); */
+		printf("t=%f, dt=%f\n", t, dt);
 	}
 
 	/* Visualize U, V, and P */
