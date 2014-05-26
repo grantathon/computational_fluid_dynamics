@@ -4,6 +4,7 @@
 #include "uvp.h"
 #include "boundary_val.h"
 #include "sor.h"
+#include "parallel.h"
 #include <stdio.h>
 
 /**
@@ -43,7 +44,7 @@ int main(int argn, char** args)
 {
 	/* Input file with user parameters */
 	const char *szFileName = "cavity100.dat";
-	const char *szProblem = "SciCompCFD_Assignment_01";
+	const char *szProblem = "CFD_Lab_04";
 	int readParamError = 0;
 
 	/* Geometry data */
