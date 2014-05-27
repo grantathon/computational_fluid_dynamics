@@ -90,9 +90,9 @@ int main(int argn, char** args)
 	double **G = 0;
 
 	/* MPI variables */
-	int myrank = 0;
+/*	int myrank = 0;
 	int nproc = 0;
-
+*/
 	/* Read parameters from DAT file, store locally, and check for potential error */
 	readParamError = read_parameters(szFileName, &Re, &UI, &VI, &PI, &GX, &GY,
 			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,

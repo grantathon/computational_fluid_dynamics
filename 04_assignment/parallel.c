@@ -44,9 +44,8 @@ void Programm_Stop(char *txt)
    MPI_Finalize();
    exit(1);
 }
-<<<<<<< HEAD
 
-void init parallel (int iproc,
+void init_parallel(int iproc,
                int jproc,
                int imax,
                int jmax,
@@ -61,12 +60,12 @@ void init parallel (int iproc,
                int *rank_t,
                int *omg_i,
                int *omg_j,
-               int num proc)
+               int num_proc)
 {
    /* TODO: */
 }
 
-void pressure comm(double **P,
+void pressure_comm(double **P,
             int il,
             int ir,
             int jb,
@@ -77,13 +76,13 @@ void pressure comm(double **P,
             int rank_t,
             double *bufSend,
             double *bufRecv, 
-            MPI Status *status, 
+            MPI_Status *status, 
             int chunk)
 {
    /* TODO: */
 }
 
-void uv comm(double **U,
+void uv_comm(double **U,
          double **V,
          int il,
          int ir,
@@ -95,10 +94,8 @@ void uv comm(double **U,
          int rank_t,
          double *bufSend,
          double *bufRecv,
-         MPI Status *status,
+         MPI_Status *status,
          int chunk)
 {
    /* TODO: */
 }
-=======
->>>>>>> 64b95e05a02ca9fca31ea21764820f44911d775b

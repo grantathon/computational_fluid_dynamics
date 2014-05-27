@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-#include "mpi.h"
-=======
 #include <mpi.h>
->>>>>>> 64b95e05a02ca9fca31ea21764820f44911d775b
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -19,8 +15,7 @@ void Programm_Sync(char *txt);
 void Programm_Stop(char *txt);
 /* all processes will produce a text output, be synchronized and finished */
 
-<<<<<<< HEAD
-void init parallel (int iproc,
+void init_parallel(int iproc,
 					int jproc,
 					int imax,
 					int jmax,
@@ -35,10 +30,10 @@ void init parallel (int iproc,
 					int *rank_t,
 					int *omg_i,
 					int *omg_j,
-					int num proc);
+					int num_proc);
 
 
-void pressure comm(double **P,
+void pressure_comm(double **P,
 				int il,
 				int ir,
 				int jb,
@@ -49,11 +44,11 @@ void pressure comm(double **P,
 				int rank_t,
 				double *bufSend,
 				double *bufRecv, 
-				MPI Status *status, 
+				MPI_Status *status, 
 				int chunk);
 
 
-void uv comm(double **U,
+void uv_comm(double **U,
 			double **V,
 			int il,
 			int ir,
@@ -65,7 +60,6 @@ void uv comm(double **U,
 			int rank_t,
 			double *bufSend,
 			double *bufRecv,
-			MPI Status *status,
+			MPI_Status *status,
 			int chunk);
-=======
->>>>>>> 64b95e05a02ca9fca31ea21764820f44911d775b
+
