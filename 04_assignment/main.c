@@ -5,7 +5,9 @@
 #include "boundary_val.h"
 #include "sor.h"
 #include "parallel.h"
+#include "string.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <mpi.h>
 
 /**
@@ -90,19 +92,83 @@ int main(int argn, char** args)
 	double **G = 0;
 
 	/* MPI variables */
-/*	int myrank = 0;
-	int nproc = 0;
-*/
-	/* Read parameters from DAT file, store locally, and check for potential error */
-	readParamError = read_parameters(szFileName, &Re, &UI, &VI, &PI, &GX, &GY,
-			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
-			&itermax, &eps, &dt_value);
+	int iproc = 0;
+	int jproc = 0;
+	int myrank = 0;
+	int il = 0;
+	int ir = 0;
+	int jb = 0;
+	int jt = 0;
+	int rank_l = 0;
+	int rank_r = 0;
+	int rank_b = 0;
+	int rank_t = 0;
+	int omg_i = 0;
+	int omg_j = 0;
+	int num_proc = 0;
+//	const char *np_flag = "-np ";
 
-	if(readParamError != 1)
+//	char *np_command = malloc(strlen(np_flag) + 3);
+
+	/* Initialize MPI and begin parallel processes */
+	MPI_Init(&argn, &args);
+	MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
+	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+	/* Perform necessary initializations in the main process */
+	if(myrank == 0)
 	{
-		printf("ERROR: Input parameters potentially corrupt!");
-		return 0;
+		/* Read parameters from DAT file, store locally, and check for potential error */
+		readParamError = read_parameters(szFileName, &Re, &UI, &VI, &PI, &GX, &GY,
+				&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
+				&itermax, &eps, &dt_value, &iproc, &jproc);
+
+		if(readParamError != 1)
+		{
+			printf("ERROR: Input parameters potentially corrupt!");
+			MPI_Finalize();
+
+			return -1;
+		}
 	}
+
+//	sprintf(np_command, "-np %d", iproc*jproc);
+//	printf("np_command = %s\n", np_command);
+//	printf("args[0] = %s\n", args[0]);
+//	printf("args[1] = %s\n", args[1]);
+
+	/* Broadcast parameters to the remaining processes */
+	MPI_Bcast(&Re, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&UI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&VI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&PI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&GX, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&GY, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&t_end, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&xlength, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&ylength, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&dt, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&dx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&dy, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&imax, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&jmax, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&alpha, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&omg, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&tau, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&itermax, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&eps, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&dt_value, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&iproc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&jproc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	if(myrank == 0)
+	{
+		printf("All simulation parameters have been broadcasted!\n\n");
+	}
+
+	/* Initialize process dependent variables */
+	init_parallel(iproc, jproc, imax, jmax, &myrank, &il, &ir, &jb, &jt, &rank_l,
+            &rank_r, &rank_b, &rank_t, &omg_i, &omg_j, num_proc);
 
 	/* Initialize matrices for velocity, pressure, rhs, etc. */
 	init_uvp(UI, VI, PI, imax, jmax, &U, &V, &P);
@@ -149,5 +215,9 @@ int main(int argn, char** args)
 	free_matrix(F, 0, imax+1, 0, jmax+1);
 	free_matrix(G, 0, imax+1, 0, jmax+1);
 
-	return -1;
+	/* Finalize MPI */
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Finalize();
+
+	return 0;
 }

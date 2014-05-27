@@ -15,6 +15,7 @@ void Programm_Sync(char *txt);
 void Programm_Stop(char *txt);
 /* all processes will produce a text output, be synchronized and finished */
 
+/* Set process dependent variables */
 void init_parallel(int iproc,
 					int jproc,
 					int imax,

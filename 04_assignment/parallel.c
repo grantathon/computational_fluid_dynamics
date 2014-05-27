@@ -62,7 +62,11 @@ void init_parallel(int iproc,
                int *omg_j,
                int num_proc)
 {
-   /* TODO: */
+	/* Set domain coordinates */
+	*omg_i = ((*myrank) % iproc) + 1;
+	*omg_j = (((*myrank) - (*omg_i) + 1) / iproc) + 1;
+
+	printf("omg_i = %u, omg_j = %u\n", *omg_i, *omg_j);
 }
 
 void pressure_comm(double **P,
