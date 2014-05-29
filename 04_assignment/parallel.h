@@ -33,7 +33,7 @@ void init_parallel(int iproc,
 					int *omg_j,
 					int num_proc);
 
-
+/* Check for neighbouring processes and exchange pressure data where present */
 void pressure_comm(double **P,
 				int il,
 				int ir,

@@ -171,10 +171,10 @@ int main(int argn, char** args)
             &rank_r, &rank_b, &rank_t, &omg_i, &omg_j, num_proc);
 
 	/* Initialize matrices for velocity, pressure, rhs, etc. */
-	init_uvp(UI, VI, PI, imax, jmax, &U, &V, &P);
-	RS = matrix(0, imax+1, 0, jmax+1);
-	F = matrix(0, imax+1, 0, jmax+1);
-	G = matrix(0, imax+1, 0, jmax+1);
+	init_uvp(UI, VI, PI, ir, jt, &U, &V, &P);
+	RS = matrix(0, ir+1, 0, jt+1);
+	F = matrix(0, ir+1, 0, jt+1);
+	G = matrix(0, ir+1, 0, jt+1);
 
 	/* Begin the time iteration process */
 	while(t < t_end)
@@ -187,7 +187,7 @@ int main(int argn, char** args)
 		it = 0;
 		do
 		{
-			sor(omg, dx, dy, imax, jmax, P, RS, &res);
+			sor(omg, dx, dy, P, RS, &res, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
 			it++;
 		}
 		while( it < itermax && res > eps);
@@ -208,12 +208,12 @@ int main(int argn, char** args)
 	}
 
 	/* Deallocate heap memory */
-	free_matrix(U, 0, imax+1, 0, jmax+1);
-	free_matrix(V, 0, imax+1, 0, jmax+1);
-	free_matrix(P, 0, imax+1, 0, jmax+1);
-	free_matrix(RS, 0, imax+1, 0, jmax+1);
-	free_matrix(F, 0, imax+1, 0, jmax+1);
-	free_matrix(G, 0, imax+1, 0, jmax+1);
+	free_matrix(U, 0, ir+1, 0, jt+1);
+	free_matrix(V, 0, ir+1, 0, jt+1);
+	free_matrix(P, 0, ir+1, 0, jt+1);
+	free_matrix(RS, 0, ir+1, 0, jt+1);
+	free_matrix(F, 0, ir+1, 0, jt+1);
+	free_matrix(G, 0, ir+1, 0, jt+1);
 
 	/* Finalize MPI */
 	MPI_Barrier(MPI_COMM_WORLD);
