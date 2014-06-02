@@ -156,7 +156,7 @@ void pressure_comm(double **P,
             MPI_Status *status, 
             int chunk)
 {
-	printf("Entered pressure_comm() \n");
+	Program_Message("Entered pressure_comm()");
 	int i, j, size;
 
 	/* Send to the left, receive from the right */

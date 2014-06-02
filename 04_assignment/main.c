@@ -47,7 +47,7 @@ int main(int argn, char** args)
 {
 	/* Input file with user parameters */
 	const char *szFileName = "cavity100.dat";
-	const char *szProblem = "CFD_Lab_04";
+//	const char *szProblem = "CFD_Lab_04";
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -179,10 +179,10 @@ int main(int argn, char** args)
 	/* Begin the time iteration process */
 	while(t < t_end)
 	{
-		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);	/* FIX */
-		boundaryvalues(imax, jmax, U, V);	/* FIX */
-		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G);	/* FIX */
-		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);	/* FIX */
+		calculate_dt(Re, tau, &dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V);	/* FIX */
+		boundaryvalues((ir - il + 1), (jt - jb + 1), U, V);	/* FIX */
+		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V, F, G);	/* FIX */
+		calculate_rs(dt, dx, dy, (ir - il + 1), (jt - jb + 1), F, G, RS);	/* FIX */
 
 		it = 0;
 		do
@@ -198,7 +198,7 @@ int main(int argn, char** args)
 		/* Visualize U, V, and P depending on dt_value */
 		if(((t / dt_value) >= visual_n) || (t == dt))
 		{
-			write_vtkFile(szProblem, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P);	/* FIX */
+			//write_vtkFile(szProblem, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P);	/* FIX */
 			visual_n++;
 		}
 
