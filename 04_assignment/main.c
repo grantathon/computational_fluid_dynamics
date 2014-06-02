@@ -171,10 +171,10 @@ int main(int argn, char** args)
             &rank_r, &rank_b, &rank_t, &omg_i, &omg_j, num_proc);
 
 	/* Initialize matrices for velocity, pressure, rhs, etc. */
-	init_uvp(UI, VI, PI, (ir - il), (jt - jb), &U, &V, &P);
-	F = matrix(0, (ir - il + 1), 0, (jt - jb + 1));
-	G = matrix(0, (ir - il + 1), 0, (jt - jb + 1));
-	RS = matrix(0, (ir - il + 1), 0, (jt - jb + 1));
+	init_uvp(UI, VI, PI, (ir - il + 1), (jt - jb + 1), &U, &V, &P);
+	F = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
+	G = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
+	RS = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
 
 	/* Begin the time iteration process */
 	while(t < t_end)
@@ -193,7 +193,7 @@ int main(int argn, char** args)
 		while( it < itermax && res > eps);
 		printf("res=%f, it=%u ", res, it);
 
-		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);	/* FIX */
+		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P); //, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);	/* FIX */
 
 		/* Visualize U, V, and P depending on dt_value */
 		if(((t / dt_value) >= visual_n) || (t == dt))
@@ -208,12 +208,12 @@ int main(int argn, char** args)
 	}
 
 	/* Deallocate heap memory */
-	free_matrix(U, 0, (ir - il + 1), 0, (jt - jb + 1));
-	free_matrix(V, 0, (ir - il + 1), 0, (jt - jb + 1));
-	free_matrix(P, 0, (ir - il + 1), 0, (jt - jb + 1));
-	free_matrix(F, 0, (ir - il + 1), 0, (jt - jb + 1));
-	free_matrix(G, 0, (ir - il + 1), 0, (jt - jb + 1));
-	free_matrix(RS, 0, (ir - il + 1), 0, (jt - jb + 1));
+	free_matrix(U, 0, (ir - il + 2), 0, (jt - jb + 2));
+	free_matrix(V, 0, (ir - il + 2), 0, (jt - jb + 2));
+	free_matrix(P, 0, (ir - il + 2), 0, (jt - jb + 2));
+	free_matrix(F, 0, (ir - il + 2), 0, (jt - jb + 2));
+	free_matrix(G, 0, (ir - il + 2), 0, (jt - jb + 2));
+	free_matrix(RS, 0, (ir - il + 2), 0, (jt - jb + 2));
 
 	/* Finalize MPI */
 	MPI_Barrier(MPI_COMM_WORLD);
