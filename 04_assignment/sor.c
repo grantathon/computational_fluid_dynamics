@@ -21,7 +21,7 @@ void sor(
 )
 {
   int i,j;
-  double rloc;
+  double rloc = 0.0;
   double coeff = omg/(2.0*(1.0/(dx*dx)+1.0/(dy*dy)));
   double *bufSend = 0;
   double *bufRecv = 0;
@@ -40,7 +40,6 @@ void sor(
   pressure_comm(P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
 
   /* compute the residual */
-  rloc = 0;
   for(i = il; i <= ir; i++) {
     for(j = jb; j <= jt; j++) {
       rloc += ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j])*
@@ -48,9 +47,10 @@ void sor(
     }
   }
 
+  /* set residual */
   rloc = rloc/(ir*jt);
   rloc = sqrt(rloc);
-  *res = rloc;	/* set residual */
+  *res = rloc;
 
   /* set boundary values */
   /* TODO: Do we treat process boundaries the same as domain boundaries? */
