@@ -193,7 +193,7 @@ int main(int argn, char** args)
 		while( it < itermax && res > eps);
 		printf("res=%f, it=%u ", res, it);
 
-		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P); //, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);	/* FIX */
+		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);	/* FIX */
 
 		/* Visualize U, V, and P depending on dt_value */
 		if(((t / dt_value) >= visual_n) || (t == dt))
