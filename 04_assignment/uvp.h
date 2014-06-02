@@ -108,7 +108,15 @@ void calculate_uv(
   double **V,
   double **F,
   double **G,
-  double **P
+  double **P,
+  int il,
+  int ir,
+  int jb,
+  int jt,
+  int rank_l,
+  int rank_r,
+  int rank_b,
+  int rank_t
 );
 
 #endif

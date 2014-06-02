@@ -1,5 +1,7 @@
 #include "math.h"
 #include "uvp.h"
+#include <mpi.h>
+#include "parallel.h"
 
 double matrix_abs_max(double **A, int imax, int jmax)
 {
@@ -184,9 +186,21 @@ void calculate_uv(
   double **V,
   double **F,
   double **G,
-  double **P
+  double **P,
+  int il,
+  int ir,
+  int jb,
+  int jt,
+  int rank_l,
+  int rank_r,
+  int rank_b,
+  int rank_t
 )
 {
+	double *bufSend = 0;
+	double *bufRecv = 0;
+	MPI_Status status;
+	int chunk = 0;
 	int i, j;
 
 	/* Iterate only over the inner cells */
@@ -207,4 +221,7 @@ void calculate_uv(
 			V[i][j] = G[i][j] - (dt/dy) * (P[i][j+1] - P[i][j]);
 		}
 	}
+
+	/*	TODO: uv_comm(...)	*/
+	uv_comm(U, V, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
 }

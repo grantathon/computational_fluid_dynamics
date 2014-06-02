@@ -284,5 +284,33 @@ void uv_comm(double **U,
          MPI_Status *status,
          int chunk)
 {
-   /* TODO: */
+	/* TODO: */
+	int i, j, size;
+
+	/* Send to the left, receive from the right */
+	if(rank_l != MPI_PROC_NULL)
+	{
+		/* Allocate memory for buffers */
+		size = jt - jb + 1;
+		bufSend = malloc(size*sizeof(double));
+		bufRecv = malloc(size*sizeof(double));
+
+		/* Copy left values to send */
+		for(j = 1; j <= size; j++)
+		{
+			bufSend[j - 1] = P[1][j];
+		}
+
+		MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_l, 0, bufRecv, size, MPI_DOUBLE, (rank_l + 1), 0, MPI_COMM_WORLD, status);
+
+		/* Copy received right values */
+		for(j = 1; j <= size; j++)
+		{
+			P[size + 1][j] = bufRecv[j - 1];
+		}
+
+		free(bufSend);
+		free(bufRecv);
+	}
+
 }
