@@ -156,7 +156,7 @@ void pressure_comm(double **P,
             MPI_Status *status, 
             int chunk)
 {
-	Program_Message("Entered pressure_comm()");
+//	Program_Message("Entered pressure_comm()");
 	int i, j, size;
 
 	/* Send to the left, receive from the right */
@@ -164,7 +164,8 @@ void pressure_comm(double **P,
 	if(rank_l != MPI_PROC_NULL || rank_r != MPI_PROC_NULL)
 	{
 		size = jt - jb + 1;
-		printf("size = %d\n", size);
+		//printf("size = %d\n", size);
+
 
 		if(rank_l != MPI_PROC_NULL && rank_r != MPI_PROC_NULL)  /* Perform both left-right transfers */
 		{
@@ -179,26 +180,26 @@ void pressure_comm(double **P,
 			}
 
 			/* Send left values, receive right values */
-			printf("Before MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
+			//printf("Before MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
 			MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_l, 1, bufRecv, size, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD, status);
-			printf("After MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
+			//printf("After MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
 
 			/* Copy received right values */
 			for(j = 1; j <= size; j++)
 			{
-				P[size + 1][j] = bufRecv[j - 1];
+				P[size + 1][j] = bufRecv[j - 1];	
 			}
 
 			/* Copy right values to send */
 			for(j = 1; j <= size; j++)
 			{
-				bufSend[j - 1] = P[size][j];
+				bufSend[j - 1] = P[size][j];	/*	TODO: shouldn't this be (rl-il+1)??? */
 			}
 
 			/* Send right values, receive left values */
-			printf("Before MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
+			//printf("Before MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
 			MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_r, 1, bufRecv, size, MPI_DOUBLE, rank_l, 1, MPI_COMM_WORLD, status);
-			printf("After MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
+			//printf("After MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
 
 			/* Copy received left values */
 			for(j = 1; j <= size; j++)
@@ -215,9 +216,9 @@ void pressure_comm(double **P,
 			bufSend = malloc(size*sizeof(double));
 
 			/* Receive right values */
-			printf("Before MPI_Recv from rank_r=%u\n", rank_r);
+			//printf("Before MPI_Recv from rank_r=%u\n", rank_r);
 			MPI_Recv(bufSend, size, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD, status);
-			printf("After MPI_Recv from rank_r=%u\n", rank_r);
+			//printf("After MPI_Recv from rank_r=%u\n", rank_r);
 
 			/* Copy received right values */
 			for(j = 1; j <= size; j++)
@@ -232,9 +233,9 @@ void pressure_comm(double **P,
 			}
 
 			/* Send right values */
-			printf("Before MPI_Send to rank_r=%u\n", rank_r);
+			//printf("Before MPI_Send to rank_r=%u\n", rank_r);
 			MPI_Send(bufSend, size, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD);
-			printf("After MPI_Send to rank_r=%u\n", rank_r);
+			//printf("After MPI_Send to rank_r=%u\n", rank_r);
 
 			free(bufSend);
 		}
@@ -250,14 +251,14 @@ void pressure_comm(double **P,
 			}
 
 			/* Send left values */
-			printf("Before MPI_Send to rank_l=%u\n", rank_l);
+			//printf("Before MPI_Send to rank_l=%u\n", rank_l);
 			MPI_Send(bufSend, size, MPI_DOUBLE, rank_l, 1, MPI_COMM_WORLD);
-			printf("After MPI_Send to rank_l=%u\n", rank_l);
+			//printf("After MPI_Send to rank_l=%u\n", rank_l);
 
 			/* Receive left values */
-			printf("Before MPI_Recv from rank_l=%u\n", rank_l);
+			//printf("Before MPI_Recv from rank_l=%u\n", rank_l);
 			MPI_Recv(bufSend, size, MPI_DOUBLE, rank_l, 1, MPI_COMM_WORLD, status);
-			printf("After MPI_Recv from rank_l=%u\n", rank_l);
+			//printf("After MPI_Recv from rank_l=%u\n", rank_l);
 
 			/* Copy received left values */
 			for(j = 1; j <= size; j++)
@@ -267,15 +268,16 @@ void pressure_comm(double **P,
 
 			free(bufSend);
 		}
+		//Program_Message("left/right pressure_comm()");
 	}
-	MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes */
+	//MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes */
 
 	/* Send to the top, receive from the bottom */
 	/* Send to the bottom, receive from the top */
 	if(rank_t != MPI_PROC_NULL || rank_b != MPI_PROC_NULL)
 	{
 		size = ir - il + 1;
-		printf("size = %d\n", size);
+		//printf("size = %d\n", size);
 
 		if(rank_t != MPI_PROC_NULL && rank_b != MPI_PROC_NULL)  /* Perform both top-bottom transfers */
 		{
@@ -289,10 +291,10 @@ void pressure_comm(double **P,
 				bufSend[i - 1] = P[i][size];
 			}
 
-			/* Send top values, receive bottom values */
-			printf("Before MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
+			/* Send values to top, receive values from bottom*/
+			//printf("Before MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
 			MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_t, 1, bufRecv, size, MPI_DOUBLE, rank_b, 1, MPI_COMM_WORLD, status);
-			printf("After MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
+			//printf("After MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
 
 			/* Copy received bottom values */
 			for(i = 1; i <= size; i++)
@@ -307,9 +309,9 @@ void pressure_comm(double **P,
 			}
 
 			/* Send bottom values, receive top values */
-			printf("Before MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
+			//printf("Before MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
 			MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_b, 1, bufRecv, size, MPI_DOUBLE, rank_t, 1, MPI_COMM_WORLD, status);
-			printf("After MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
+			//printf("After MPI_Sendrecv for  rank_t=%u & rank_b=%u\n", rank_t, rank_b);
 
 			/* Copy received top values */
 			for(i = 1; i <= size; i++)
@@ -326,9 +328,9 @@ void pressure_comm(double **P,
 			bufSend = malloc(size*sizeof(double));
 
 			/* Receive bottom values */
-			printf("Before MPI_Recv from rank_b=%u\n", rank_b);
-			MPI_Recv(bufSend, size, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD, status);
-			printf("After MPI_Recv from rank_b=%u\n", rank_b);
+			//printf("Before MPI_Recv from rank_b=%u\n", rank_b);
+			MPI_Recv(bufSend, size, MPI_DOUBLE, rank_b, 1, MPI_COMM_WORLD, status);
+			//printf("After MPI_Recv from rank_b=%u\n", rank_b);
 
 			/* Copy received bottom values */
 			for(i = 1; i <= size; i++)
@@ -343,9 +345,10 @@ void pressure_comm(double **P,
 			}
 
 			/* Send bottom values */
-			printf("Before MPI_Send to rank_b=%u\n", rank_b);
+			//printf("Before MPI_Send to rank_b=%u\n", rank_b);
 			MPI_Send(bufSend, size, MPI_DOUBLE, rank_b, 1, MPI_COMM_WORLD);
-			printf("After MPI_Send to rank_b=%u\n", rank_b);
+			//printf("After MPI_Send to rank_b=%u\n", rank_b);
+
 
 			free(bufSend);
 		}
@@ -361,14 +364,14 @@ void pressure_comm(double **P,
 			}
 
 			/* Send top values */
-			printf("Before MPI_Send to rank_t=%u\n", rank_t);
+			//printf("Before MPI_Send to rank_t=%u\n", rank_t);
 			MPI_Send(bufSend, size, MPI_DOUBLE, rank_t, 1, MPI_COMM_WORLD);
-			printf("After MPI_Send to rank_t\n");
+			//printf("After MPI_Send to rank_t\n");
 
 			/* Receive top values */
-			printf("Before MPI_Recv from rank_t=%u\n", rank_t);
+			//printf("Before MPI_Recv from rank_t=%u\n", rank_t);
 			MPI_Recv(bufSend, size, MPI_DOUBLE, rank_t, 1, MPI_COMM_WORLD, status);
-			printf("After MPI_Recv from rank_t=%u\n", rank_t);
+			//printf("After MPI_Recv from rank_t=%u\n", rank_t);
 
 			/* Copy received top values */
 			for(i = 1; i <= size; i++)
@@ -378,8 +381,11 @@ void pressure_comm(double **P,
 
 			free(bufSend);
 		}
+		//Program_Message("top/bottom pressure_comm()");
 	}
+	//Program_Message("Entered pressure_comm()");
 	MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes to finish */
+	//Program_Message("Barrier Exit pressure_comm()");
 }
 
 void uv_comm(double **U,
@@ -398,19 +404,17 @@ void uv_comm(double **U,
          int chunk)
 	/* TODO: FIX	*/
 {
-
-
-
-	// /* TODO: */
-	// printf("Entered uv_comm() \n");
-	// int i, j, size;
+//	Program_Message("Entered pressure_comm()");
+	// int i, j, size, x_dim, y_dim;
+	// x_dim = (ir - il + 1);
+	// y_dim = (jt - jb + 1);
 
 	// /* Send to the left, receive from the right */
 	// /* Send to the right, receive from the left */
 	// if(rank_l != MPI_PROC_NULL || rank_r != MPI_PROC_NULL)
 	// {
-	// 	size = (2 * (jt - jb + 1)) + 1;
-	// 	printf("size = %d\n", size);
+	// 	size = (2 * y_dim) + 1;
+	// 	//printf("size = %d\n", size);
 
 	// 	if(rank_l != MPI_PROC_NULL && rank_r != MPI_PROC_NULL)  /* Perform both left-right transfers */
 	// 	{
@@ -419,41 +423,53 @@ void uv_comm(double **U,
 	// 		bufRecv = malloc(size*sizeof(double));
 
 	// 		/* Copy left values to send */
-	// 		for(j = 1; j <= (jt - jb + 1); j++)
+	// 		for(j = 1; j <= y_dim; j++)
 	// 		{
 	// 			bufSend[j - 1] = U[1][j];
 	// 		}
-	// 		for (j = (jt - jb + 1); j <= size; j++)
+	// 		for(j = y_dim+1; j <= size; j++)
 	// 		{
-	// 			bufSend[j - 1] = V[1][j];
+	// 			bufSend[j - 1] = V[1][j - y_dim - 1];
 	// 		}
 
 	// 		/* Send left values, receive right values */
-	// 		printf("Before MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
+	// 		//printf("Before MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
 	// 		MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_l, 1, bufRecv, size, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD, status);
-	// 		printf("After MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
+	// 		//printf("After MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
 
 	// 		/* Copy received right values */
-	// 		for(j = 1; j <= size; j++)
+	// 		for(j = 1; j <= y_dim; j++)
 	// 		{
-	// 			P[size + 1][j] = bufRecv[j - 1];
+	// 			U[x_dim + 1][j] = bufRecv[j - 1];
+	// 		}
+	// 		for(j = y_dim+1; j <= size; j++)
+	// 		{
+	// 			V[x_dim + 1][j - y_dim - 1] = bufRecv[j - 1];
 	// 		}
 
 	// 		/* Copy right values to send */
-	// 		for(j = 1; j <= size; j++)
+	// 		for(j = 1; j <= y_dim; j++)
 	// 		{
-	// 			bufSend[j - 1] = P[size][j];
+	// 			bufSend[j - 1] = U[x_dim + 1][j];
+	// 		}
+	// 		for(j = y_dim+1; j <= size; j++)
+	// 		{
+	// 			bufSend[j - 1] = V[x_dim + 1][j - y_dim - 1];
 	// 		}
 
 	// 		/* Send right values, receive left values */
-	// 		printf("Before MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
+	// 		//printf("Before MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
 	// 		MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_r, 1, bufRecv, size, MPI_DOUBLE, rank_l, 1, MPI_COMM_WORLD, status);
-	// 		printf("After MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
+	// 		//printf("After MPI_Sendrecv for rank_l=%u & rank_r=%u\n", rank_l, rank_r);
 
 	// 		/* Copy received left values */
-	// 		for(j = 1; j <= size; j++)
+	// 		for(j = 1; j <= y_dim; j++)
 	// 		{
-	// 			P[0][j] = bufRecv[j - 1];
+	// 			U[0][j] = bufRecv[j - 1];
+	// 		}
+	// 		for(j = y_dim+1; j <= size; j++)
+	// 		{
+	// 			V[0][j - y_dim - 1] = bufRecv[j - 1];
 	// 		}
 
 	// 		free(bufSend);
@@ -465,26 +481,34 @@ void uv_comm(double **U,
 	// 		bufSend = malloc(size*sizeof(double));
 
 	// 		/* Receive right values */
-	// 		printf("Before MPI_Recv from rank_r=%u\n", rank_r);
+	// 		//printf("Before MPI_Recv from rank_r=%u\n", rank_r);
 	// 		MPI_Recv(bufSend, size, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD, status);
-	// 		printf("After MPI_Recv from rank_r=%u\n", rank_r);
+	// 		//printf("After MPI_Recv from rank_r=%u\n", rank_r);
 
 	// 		/* Copy received right values */
-	// 		for(j = 1; j <= size; j++)
+	// 		for(j = 1; j <= y_dim; j++)
 	// 		{
-	// 			P[size + 1][j] = bufSend[j - 1];
+	// 			U[x_dim + 1][j] = bufSend[j - 1];
+	// 		}
+	// 		for(j = y_dim+1; j <= size; j++)
+	// 		{
+	// 			V[x_dim + 1][j - y_dim - 1] = bufSend[j - 1];
 	// 		}
 
 	// 		/* Copy right values to send */
-	// 		for(j = 1; j <= size; j++)
+	// 		for(j = 1; j <= y_dim; j++)
 	// 		{
-	// 			bufSend[j - 1] = P[size][j];
+	// 			bufSend[j - 1] = U[x_dim + 1][j];
+	// 		}
+	// 		for(j = y_dim+1; j <= size; j++)
+	// 		{
+	// 			bufSend[j - 1] = V[x_dim + 1][j - y_dim - 1];
 	// 		}
 
 	// 		/* Send right values */
-	// 		printf("Before MPI_Send to rank_r=%u\n", rank_r);
+	// 		//printf("Before MPI_Send to rank_r=%u\n", rank_r);
 	// 		MPI_Send(bufSend, size, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD);
-	// 		printf("After MPI_Send to rank_r=%u\n", rank_r);
+	// 		//printf("After MPI_Send to rank_r=%u\n", rank_r);
 
 	// 		free(bufSend);
 	// 	}
@@ -494,38 +518,47 @@ void uv_comm(double **U,
 	// 		bufSend = malloc(size*sizeof(double));
 
 	// 		/* Copy left values to send */
-	// 		for(j = 1; j <= size; j++)
+	// 		for(j = 1; j <= y_dim; j++)
 	// 		{
-	// 			bufSend[j - 1] = P[1][j];
+	// 			bufSend[j - 1] = U[1][j];
+	// 		}
+	// 		for(j = y_dim+1; j <= size; j++)
+	// 		{
+	// 			bufSend[j - 1] = V[1][j - y_dim - 1];
 	// 		}
 
 	// 		/* Send left values */
-	// 		printf("Before MPI_Send to rank_l=%u\n", rank_l);
+	// 		//printf("Before MPI_Send to rank_l=%u\n", rank_l);
 	// 		MPI_Send(bufSend, size, MPI_DOUBLE, rank_l, 1, MPI_COMM_WORLD);
-	// 		printf("After MPI_Send to rank_l=%u\n", rank_l);
+	// 		//printf("After MPI_Send to rank_l=%u\n", rank_l);
 
 	// 		/* Receive left values */
-	// 		printf("Before MPI_Recv from rank_l=%u\n", rank_l);
+	// 		//printf("Before MPI_Recv from rank_l=%u\n", rank_l);
 	// 		MPI_Recv(bufSend, size, MPI_DOUBLE, rank_l, 1, MPI_COMM_WORLD, status);
-	// 		printf("After MPI_Recv from rank_l=%u\n", rank_l);
+	// 		//printf("After MPI_Recv from rank_l=%u\n", rank_l);
 
 	// 		/* Copy received left values */
-	// 		for(j = 1; j <= size; j++)
+	// 		for(j = 1; j <= y_dim; j++)
 	// 		{
-	// 			P[0][j] = bufSend[j - 1];
+	// 			U[0][j] = bufSend[j - 1];
+	// 		}
+	// 		for(j = y_dim+1; j <= size; j++)
+	// 		{
+	// 			V[0][j - y_dim - 1] = bufSend[j - 1];
 	// 		}
 
 	// 		free(bufSend);
 	// 	}
+	// 	//Program_Message("left/right pressure_comm()");
 	// }
-	// MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes */
+	// //MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes */
 
 	// /* Send to the top, receive from the bottom */
 	// /* Send to the bottom, receive from the top */
 	// if(rank_t != MPI_PROC_NULL || rank_b != MPI_PROC_NULL)
 	// {
-	// 	size = ir - il + 1;
-	// 	printf("size = %d\n", size);
+	// 	size = (2 * x_dim) + 1;
+	// 	//printf("size = %d\n", size);
 
 	// 	if(rank_t != MPI_PROC_NULL && rank_b != MPI_PROC_NULL)  /* Perform both top-bottom transfers */
 	// 	{
@@ -534,37 +567,54 @@ void uv_comm(double **U,
 	// 		bufRecv = malloc(size*sizeof(double));
 
 	// 		/* Copy top values to send */
-	// 		for(i = 1; i <= size; i++)
+	// 		for(i = 1; i <= x_dim; i++)
 	// 		{
-	// 			bufSend[i - 1] = P[i][size];
+	// 			bufSend[i - 1] = V[i][y_dim + 1];
+	// 		}
+	// 		for(i = x_dim+1; i <= size; i++)
+	// 		{
+	// 			bufSend[i - 1] = U[i-x_dim-1][y_dim + 1];
 	// 		}
 
-	// 		/* Send top values, receive bottom values */
-	// 		printf("Before MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
+	// 		/* Send values to top, receive values from bottom*/
+	// 		//printf("Before MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
 	// 		MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_t, 1, bufRecv, size, MPI_DOUBLE, rank_b, 1, MPI_COMM_WORLD, status);
-	// 		printf("After MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
+	// 		//printf("After MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
 
 	// 		/* Copy received bottom values */
-	// 		for(i = 1; i <= size; i++)
+	// 		for(i = 1; i <= x_dim; i++)
 	// 		{
-	// 			P[i][0] = bufRecv[i - 1];
+	// 			V[i][0] = bufRecv[i - 1];
+	// 		}
+	// 		for(i = x_dim+1; i <= size; i++)
+	// 		{
+	// 			U[i-x_dim-1][0] = bufRecv[i - 1];
 	// 		}
 
+
 	// 		/* Copy bottom values to send */
-	// 		for(i = 1; i <= size; i++)
+	// 		for(i = 1; i <= x_dim; i++)
 	// 		{
-	// 			bufSend[i - 1] = P[i][1];
+	// 			bufSend[i - 1] = V[i][1];
+	// 		}
+	// 		for(i = x_dim+1; i <= size; i++)
+	// 		{
+	// 			bufSend[i - 1] = U[i-x_dim-1][1];
 	// 		}
 
 	// 		/* Send bottom values, receive top values */
-	// 		printf("Before MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
+	// 		//printf("Before MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
 	// 		MPI_Sendrecv(bufSend, size, MPI_DOUBLE, rank_b, 1, bufRecv, size, MPI_DOUBLE, rank_t, 1, MPI_COMM_WORLD, status);
-	// 		printf("After MPI_Sendrecv for rank_t=%u & rank_b=%u\n", rank_t, rank_b);
+	// 		//printf("After MPI_Sendrecv for  rank_t=%u & rank_b=%u\n", rank_t, rank_b);
 
 	// 		/* Copy received top values */
-	// 		for(i = 1; i <= size; i++)
+	// 		for(i = 1; i <= x_dim; i++)
 	// 		{
-	// 			P[i][size + 1] = bufRecv[i - 1];
+	// 			V[i][y_dim + 1] = bufRecv[i - 1];
+	// 		}
+	// 		for(i = x_dim+1; i <= size; i++)
+	// 		{
+	// 			U[i-x_dim-1][y_dim + 1] = bufRecv[i - 1];
 	// 		}
 
 	// 		free(bufSend);
@@ -576,26 +626,35 @@ void uv_comm(double **U,
 	// 		bufSend = malloc(size*sizeof(double));
 
 	// 		/* Receive bottom values */
-	// 		printf("Before MPI_Recv from rank_b=%u\n", rank_b);
-	// 		MPI_Recv(bufSend, size, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD, status);
-	// 		printf("After MPI_Recv from rank_b=%u\n", rank_b);
+	// 		//printf("Before MPI_Recv from rank_b=%u\n", rank_b);
+	// 		MPI_Recv(bufSend, size, MPI_DOUBLE, rank_b, 1, MPI_COMM_WORLD, status);
+	// 		//printf("After MPI_Recv from rank_b=%u\n", rank_b);
 
 	// 		/* Copy received bottom values */
-	// 		for(i = 1; i <= size; i++)
+	// 		for(i = 1; i <= x_dim; i++)
 	// 		{
-	// 			P[i][0] = bufSend[i - 1];
+	// 			V[i][0] = bufSend[i - 1];
+	// 		}
+	// 		for(i = x_dim+1; i <= size; i++)
+	// 		{
+	// 			U[i-x_dim-1][0] = bufSend[i - 1];
 	// 		}
 
 	// 		/* Copy bottom values to send */
-	// 		for(i = 1; i <= size; i++)
+	// 		for(i = 1; i <= x_dim; i++)
 	// 		{
-	// 			bufSend[i - 1] = P[i][1];
+	// 			bufSend[i - 1] = V[i][1];
+	// 		}
+	// 		for(i = x_dim+1; i <= size; i++)
+	// 		{
+	// 			bufSend[i - 1] = U[i-x_dim-1][1];
 	// 		}
 
 	// 		/* Send bottom values */
-	// 		printf("Before MPI_Send to rank_b=%u\n", rank_b);
+	// 		//printf("Before MPI_Send to rank_b=%u\n", rank_b);
 	// 		MPI_Send(bufSend, size, MPI_DOUBLE, rank_b, 1, MPI_COMM_WORLD);
-	// 		printf("After MPI_Send to rank_b=%u\n", rank_b);
+	// 		//printf("After MPI_Send to rank_b=%u\n", rank_b);
+
 
 	// 		free(bufSend);
 	// 	}
@@ -605,30 +664,40 @@ void uv_comm(double **U,
 	// 		bufSend = malloc(size*sizeof(double));
 
 	// 		/* Copy top values to send */
-	// 		for(i = 1; i <= size; i++)
+	// 		for(i = 1; i <= x_dim; i++)
 	// 		{
-	// 			bufSend[i - 1] = P[i][size];
+	// 			bufSend[i - 1] = V[i][y_dim + 1];
+	// 		}
+	// 		for(i = x_dim+1; i <= size; i++)
+	// 		{
+	// 			bufSend[i - 1] = U[i-x_dim-1][y_dim + 1];
 	// 		}
 
 	// 		/* Send top values */
-	// 		printf("Before MPI_Send to rank_t=%u\n", rank_t);
+	// 		//printf("Before MPI_Send to rank_t=%u\n", rank_t);
 	// 		MPI_Send(bufSend, size, MPI_DOUBLE, rank_t, 1, MPI_COMM_WORLD);
-	// 		printf("After MPI_Send to rank_t\n");
+	// 		//printf("After MPI_Send to rank_t\n");
 
 	// 		/* Receive top values */
-	// 		printf("Before MPI_Recv from rank_t=%u\n", rank_t);
+	// 		//printf("Before MPI_Recv from rank_t=%u\n", rank_t);
 	// 		MPI_Recv(bufSend, size, MPI_DOUBLE, rank_t, 1, MPI_COMM_WORLD, status);
-	// 		printf("After MPI_Recv from rank_t=%u\n", rank_t);
+	// 		//printf("After MPI_Recv from rank_t=%u\n", rank_t);
 
 	// 		/* Copy received top values */
-	// 		for(i = 1; i <= size; i++)
+	// 		for(i = 1; i <= x_dim; i++)
 	// 		{
-	// 			P[i][size + 1] = bufSend[i - 1];
+	// 			V[i][y_dim + 1] = bufSend[i - 1];
+	// 		}
+	// 		for(i = x_dim+1; i <= size; i++)
+	// 		{
+	// 			U[i-x_dim-1][y_dim + 1] = bufSend[i - 1];
 	// 		}
 
 	// 		free(bufSend);
 	// 	}
+	// 	//Program_Message("top/bottom pressure_comm()");
 	// }
+	// //Program_Message("Entered pressure_comm()");
 	// MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes to finish */
-
+	// //Program_Message("Barrier Exit pressure_comm()");
 }

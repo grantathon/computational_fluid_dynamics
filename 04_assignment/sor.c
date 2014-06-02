@@ -29,19 +29,21 @@ void sor(
   int chunk = 0;
 
   /* SOR iteration */
-  for(i = il; i <= ir; i++) {
-    for(j = jb; j <= jt; j++) {
+  for(i = 1; i <= (ir - il + 1); i++) {
+    for(j = 1; j <= (jt - jb + 1); j++) {
       P[i][j] = (1.0-omg)*P[i][j]
               + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);
     }
   }
 
   /* Communicate between processes regarding pressure boundaries */
+  //Program_Message("SOR: before p_comm");
   pressure_comm(P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
+  //Program_Message("SOR: after p_comm");
 
   /* compute the residual */
-  for(i = il; i <= ir; i++) {
-    for(j = jb; j <= jt; j++) {
+  for(i = 1; i <= (ir - il + 1); i++) {
+    for(j = 1; j <= (jt - jb + 1); j++) {
       rloc += ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j])*
               ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j]);
     }
@@ -54,12 +56,12 @@ void sor(
 
   /* set boundary values */
   /* TODO: Do we treat process boundaries the same as domain boundaries? */
-  for(i = il; i <= ir; i++) {
+  for(i = 1; i <= (ir - il + 1); i++) {
     P[i][0] = P[i][1];
-    P[i][jt+1] = P[i][jt];
+    P[i][(jt - jb + 2)] = P[i][(jt - jb + 1)];
   }
-  for(j = jb; j <= jt; j++) {
+  for(j = 1; j <= (jt - jb + 1); j++) {
     P[0][j] = P[1][j];
-    P[ir+1][j] = P[ir][j];
+    P[(ir - il + -2)][j] = P[(ir - il + 1)][j];
   }
 }

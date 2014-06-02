@@ -185,6 +185,7 @@ int main(int argn, char** args)
 		calculate_rs(dt, dx, dy, (ir - il + 1), (jt - jb + 1), F, G, RS);	/* FIX */
 
 		it = 0;
+		Program_Message("main: Before SOR iter");
 		do
 		{
 			sor(omg, dx, dy, P, RS, &res, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
