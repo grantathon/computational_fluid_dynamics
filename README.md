@@ -9,4 +9,4 @@ Assignments
 1. Navier-Stokes Equations
 2. Lattice Boltzmann Method
 3. Arbitrary Geometries with Navier-Stokes Equations
-4. Arbitrary Geometries with Navier-Stokes Equations using MPI
+4. Navier-Stokes Equations using MPI

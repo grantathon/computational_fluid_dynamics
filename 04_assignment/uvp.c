@@ -103,16 +103,7 @@ void calculate_fg(
 
 	/* Set boundary values for those processes that border the global domain boundaries */
 	/* Check left & right neighboring boundaries */
-	if(rank_l == MPI_PROC_NULL && rank_r == MPI_PROC_NULL)  /* Both neighbors are global domain boundaries */
-	{
-		/* Set left & right boundary conditions */
-		for(j = 1; j <= jmax; j++)
-		{
-			F[0][j] = U[0][j];
-			F[imax][j] = U[imax][j];
-		}
-	}
-	else if(rank_l == MPI_PROC_NULL && rank_r != MPI_PROC_NULL)  /* Right neighbor, left global boundary */
+	if(rank_l == MPI_PROC_NULL && rank_r != MPI_PROC_NULL)  /* Right neighbor, left global boundary */
 	{
 		/* Set left boundary conditions */
 		for(j = 1; j <= jmax; j++)
@@ -128,18 +119,18 @@ void calculate_fg(
 			F[imax][j] = U[imax][j];
 		}
 	}
-
-	/* Check top & bottom neighboring boundaries */
-	if(rank_t == MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* Both neighbors are processes */
+	else if(rank_l == MPI_PROC_NULL && rank_r == MPI_PROC_NULL)  /* Both neighbors are global domain boundaries */
 	{
-		/* Set top & bottom boundary conditions */
-		for(i = 1; i <= imax; i++)
+		/* Set left & right boundary conditions */
+		for(j = 1; j <= jmax; j++)
 		{
-			G[i][0] = V[i][0];
-			G[i][jmax] = V[i][jmax];
+			F[0][j] = U[0][j];
+			F[imax][j] = U[imax][j];
 		}
 	}
-	else if(rank_t == MPI_PROC_NULL && rank_b != MPI_PROC_NULL)  /* Bottom neighbor, top global boundary */
+
+	/* Check top & bottom neighboring boundaries */
+	if(rank_t == MPI_PROC_NULL && rank_b != MPI_PROC_NULL)  /* Bottom neighbor, top global boundary */
 	{
 		/* Set top boundary conditions */
 		for(i = 1; i <= imax; i++)
@@ -153,6 +144,15 @@ void calculate_fg(
 		for(i = 1; i <= imax; i++)
 		{
 			G[i][0] = V[i][0];
+		}
+	}
+	else if(rank_t == MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* Both neighbors are processes */
+	{
+		/* Set top & bottom boundary conditions */
+		for(i = 1; i <= imax; i++)
+		{
+			G[i][0] = V[i][0];
+			G[i][jmax] = V[i][jmax];
 		}
 	}
 }
