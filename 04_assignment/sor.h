@@ -22,7 +22,9 @@ void sor(
   int rank_l,
   int rank_r,
   int rank_b,
-  int rank_t
+  int rank_t,
+  int imax,
+  int jmax
 );
 
 
