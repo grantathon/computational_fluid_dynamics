@@ -46,8 +46,10 @@
 int main(int argn, char** args)
 {
 	/* Input file with user parameters */
-	const char *szFileName = "cavity100.dat";
-//	const char *szProblem = "CFD_Lab_04";
+	const char *szFileName = "cavity_lab4.dat";
+	char *szProblem = malloc(strlen(szFileName) + 5);
+
+
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -115,6 +117,12 @@ int main(int argn, char** args)
 	MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
+	int y_dim, x_dim;
+
+	/* create output file name for each rank*/
+	strcpy(szProblem, szFileName);
+	sprintf(szProblem, "%i", myrank);
+
 	/* Perform necessary initializations in the main process */
 	if(myrank == 0)
 	{
@@ -170,51 +178,54 @@ int main(int argn, char** args)
 	init_parallel(iproc, jproc, imax, jmax, &myrank, &il, &ir, &jb, &jt, &rank_l,
             &rank_r, &rank_b, &rank_t, &omg_i, &omg_j, num_proc);
 
+	y_dim = (jt - jb + 1);
+	x_dim = (ir - il + 1);
+
 	/* Initialize matrices for velocity, pressure, rhs, etc. */
-	init_uvp(UI, VI, PI, (ir - il + 1), (jt - jb + 1), &U, &V, &P);
-	F = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
-	G = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
-	RS = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
+	init_uvp(UI, VI, PI, (ir - il + 1), y_dim, &U, &V, &P);
+	F = matrix(0, x_dim+1, 0, y_dim+1);
+	G = matrix(0, x_dim+1, 0, y_dim+1);
+	RS = matrix(0, x_dim+1, 0, y_dim+1);
 
 	/* Begin the time iteration process */
 	while(t < t_end)
 	{
-		calculate_dt(Re, tau, &dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V);
-		boundaryvalues((ir - il + 1), (jt - jb + 1), U, V);
-		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V, F, G);
-		calculate_rs(dt, dx, dy, (ir - il + 1), (jt - jb + 1), F, G, RS);
+		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
+		boundaryvalues(x_dim, y_dim, U, V, rank_l, rank_r, rank_b, rank_t);
+		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, x_dim, y_dim, U, V, F, G);
+		calculate_rs(dt, dx, dy, x_dim, y_dim, F, G, RS);
 
 		it = 0;
-		Program_Message("main: Before SOR iter");
+		//Program_Message("main: Before SOR iter");
 		do
 		{
-			sor(omg, dx, dy, P, RS, &res, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
+			sor(omg, dx, dy, P, RS, &res, imax, jmax, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
 			it++;
 		}
 		while( it < itermax && res > eps);
-		printf("res=%f, it=%u ", res, it);
+		printf("res=%f, it=%u \n", res, it);	//Program_Message(sprintf("res=%f, it=%u \n", res, it));
 
-		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
+		calculate_uv(dt, dx, dy, x_dim, y_dim, U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
 
 		/* Visualize U, V, and P depending on dt_value */
-		if(((t / dt_value) >= visual_n) || (t == dt))
-		{
-			//write_vtkFile(szProblem, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
+		/*if(((t / dt_value) >= visual_n) || (t == dt))
+		{*/
+			write_vtkFile(szProblem, visual_n, xlength, ylength, x_dim, y_dim, dx, dy, U, V, P);
 			visual_n++;
-		}
+		/*}*/
 
 		n++;
 		t += dt;
-		printf("t=%f, dt=%f\n", t, dt);
+		//printf("t=%f, dt=%f\n", t, dt);
 	}
 
 	/* Deallocate heap memory */
-	free_matrix(U, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(V, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(P, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(F, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(G, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(RS, 0, (ir - il + 2), 0, (jt - jb + 2));
+	free_matrix(U, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(V, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(P, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(F, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(G, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(RS, 0, x_dim+1, 0, y_dim+1);
 
 	/* Finalize MPI */
 	MPI_Barrier(MPI_COMM_WORLD);

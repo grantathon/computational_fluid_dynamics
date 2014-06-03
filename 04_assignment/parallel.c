@@ -369,7 +369,7 @@ void uv_comm(double **U,
          MPI_Status *status,
          int chunk)
 {
-	Program_Message("Entered uv_comm()");
+	//Program_Message("Entered uv_comm()");
 	int i, j, size, x_dim, y_dim;
 	x_dim = ir - il + 1;
 	y_dim = jt - jb + 1;
@@ -501,7 +501,7 @@ void uv_comm(double **U,
 
 			free(bufSend);
 		}
-		Program_Message("left/right uv_comm()");
+		//Program_Message("left/right uv_comm()");
 	}
 
 	/* Send to the top, receive from the bottom */
@@ -634,7 +634,7 @@ void uv_comm(double **U,
 			free(bufSend);
 		}
 
-		Program_Message("top/bottom uv_comm()");
+		//Program_Message("top/bottom uv_comm()");
 	}
 
 	//Program_Message("Entered uv_comm()");
