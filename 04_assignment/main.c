@@ -46,8 +46,8 @@
 int main(int argn, char** args)
 {
 	/* Input file with user parameters */
-	const char *szFileName = "cavity100.dat";
-//	const char *szProblem = "CFD_Lab_04";
+	const char *szFileName = "cavity_lab4.dat";
+	char *szProblem = malloc(strlen(szFileName) + 5);
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -115,6 +115,11 @@ int main(int argn, char** args)
 	MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
+	int x_dim, y_dim;
+
+	strcpy(szProblem, szFileName);
+	sprintf(szProblem, "%i", myrank);
+
 	/* Perform necessary initializations in the main process */
 	if(myrank == 0)
 	{
@@ -170,19 +175,22 @@ int main(int argn, char** args)
 	init_parallel(iproc, jproc, imax, jmax, &myrank, &il, &ir, &jb, &jt, &rank_l,
             &rank_r, &rank_b, &rank_t, &omg_i, &omg_j, num_proc);
 
+	x_dim = ir - il + 1;
+	y_dim = jt - jb + 1;
+
 	/* Initialize matrices for velocity, pressure, rhs, etc. */
-	init_uvp(UI, VI, PI, (ir - il + 1), (jt - jb + 1), &U, &V, &P);
-	F = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
-	G = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
-	RS = matrix(0, (ir - il + 2), 0, (jt - jb + 2));
+	init_uvp(UI, VI, PI, x_dim, y_dim, &U, &V, &P);
+	F = matrix(0, x_dim+1, 0, y_dim+1);
+	G = matrix(0, x_dim+1, 0, y_dim+1);
+	RS = matrix(0, x_dim+1, 0, y_dim+1);
 
 	/* Begin the time iteration process */
 	while(t < t_end)
 	{
-		calculate_dt(Re, tau, &dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V);
-		boundaryvalues((ir - il + 1), (jt - jb + 1), U, V);
-		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V, F, G, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
-		calculate_rs(dt, dx, dy, (ir - il + 1), (jt - jb + 1), F, G, RS);
+		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
+		boundaryvalues(x_dim, y_dim, U, V, rank_l, rank_r, rank_b, rank_t);
+		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, x_dim, y_dim, U, V, F, G, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
+		calculate_rs(dt, dx, dy, x_dim, y_dim, F, G, RS);
 
 		it = 0;
 		do
@@ -192,27 +200,31 @@ int main(int argn, char** args)
 		}
 		while(it < itermax && res > eps);
 
-		calculate_uv(dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
+		calculate_uv(dt, dx, dy, x_dim, y_dim, U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
 
 		/* Visualize U, V, and P depending on dt_value */
 		if(((t / dt_value) >= visual_n) || (t == dt))
 		{
-			//write_vtkFile(szProblem, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
+			write_vtkFile(szProblem, visual_n, xlength, ylength, x_dim, y_dim, dx, dy, U, V, P);
 			visual_n++;
 		}
 
 		n++;
 		t += dt;
-		printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
+		// output only for master rank
+		if (myrank == 0)
+		{
+			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
+		}
 	}
 
 	/* Deallocate heap memory */
-	free_matrix(U, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(V, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(P, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(F, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(G, 0, (ir - il + 2), 0, (jt - jb + 2));
-	free_matrix(RS, 0, (ir - il + 2), 0, (jt - jb + 2));
+	free_matrix(U, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(V, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(P, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(F, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(G, 0, x_dim+1, 0, y_dim+1);
+	free_matrix(RS, 0, x_dim+1, 0, y_dim+1);
 
 	/* Finalize MPI */
 	Programm_Stop("End of simulation.");
