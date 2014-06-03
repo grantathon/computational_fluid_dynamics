@@ -179,10 +179,10 @@ int main(int argn, char** args)
 	/* Begin the time iteration process */
 	while(t < t_end)
 	{
-		calculate_dt(Re, tau, &dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V);	/* FIX */
-		boundaryvalues((ir - il + 1), (jt - jb + 1), U, V);	/* FIX */
-		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V, F, G);	/* FIX */
-		calculate_rs(dt, dx, dy, (ir - il + 1), (jt - jb + 1), F, G, RS);	/* FIX */
+		calculate_dt(Re, tau, &dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V);
+		boundaryvalues((ir - il + 1), (jt - jb + 1), U, V);
+		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, (ir - il + 1), (jt - jb + 1), U, V, F, G);
+		calculate_rs(dt, dx, dy, (ir - il + 1), (jt - jb + 1), F, G, RS);
 
 		it = 0;
 		Program_Message("main: Before SOR iter");
@@ -194,12 +194,12 @@ int main(int argn, char** args)
 		while( it < itermax && res > eps);
 		printf("res=%f, it=%u ", res, it);
 
-		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);	/* FIX */
+		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
 
 		/* Visualize U, V, and P depending on dt_value */
 		if(((t / dt_value) >= visual_n) || (t == dt))
 		{
-			//write_vtkFile(szProblem, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P);	/* FIX */
+			//write_vtkFile(szProblem, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
 			visual_n++;
 		}
 

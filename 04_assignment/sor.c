@@ -37,9 +37,7 @@ void sor(
   }
 
   /* Communicate between processes regarding pressure boundaries */
-  //Program_Message("SOR: before p_comm");
   pressure_comm(P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
-  //Program_Message("SOR: after p_comm");
 
   /* compute the residual */
   for(i = 1; i <= (ir - il + 1); i++) {
@@ -55,7 +53,6 @@ void sor(
   *res = rloc;
 
   /* set boundary values */
-  /* TODO: Do we treat process boundaries the same as domain boundaries? */
   for(i = 1; i <= (ir - il + 1); i++) {
     P[i][0] = P[i][1];
     P[i][(jt - jb + 2)] = P[i][(jt - jb + 1)];

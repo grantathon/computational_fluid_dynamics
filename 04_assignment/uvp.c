@@ -222,6 +222,6 @@ void calculate_uv(
 		}
 	}
 
-	/*	TODO: uv_comm(...)	*/
+	/* Communicate between processes regarding velocities */
 	uv_comm(U, V, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
 }
