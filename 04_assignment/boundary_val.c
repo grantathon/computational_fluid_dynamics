@@ -7,7 +7,7 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int rank_l,  in
 	int i, j;
 
 	/* For floor wall */
-	if (rank_b != MPI_PROC_NULL)
+	if (rank_b == MPI_PROC_NULL)
 	{
 		for(i = 1; i < imax+1; i++)
 		{
@@ -17,18 +17,18 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int rank_l,  in
 	}
 
 	/*	For ceiling */
-	if (rank_t != MPI_PROC_NULL)
+	if (rank_t == MPI_PROC_NULL)
 	{
 		/* Iterate across ceiling and floor */
 		for(i = 1; i < imax+1; i++)
 		{
-			U[i][jmax+1] 	= 2.0-U[i][jmax];
+			U[i][jmax+1] 	= 0.0-U[i][jmax];
 			V[i][jmax]		= 0;
 		}
 	}
 
 	/* for left wall */
-	if (rank_l != MPI_PROC_NULL)
+	if (rank_l == MPI_PROC_NULL)
 	{
 		/* Iterate across both side walls */
 		for(j = 1; j < jmax+1; j++)
@@ -39,7 +39,7 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int rank_l,  in
 	}
 
 	/* for right wall */
-	if (rank_r != MPI_PROC_NULL)
+	if (rank_r == MPI_PROC_NULL)
 	{
 		/* Iterate across both side walls */
 		for(j = 1; j < jmax+1; j++)
