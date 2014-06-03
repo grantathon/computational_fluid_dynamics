@@ -64,3 +64,17 @@ void uv_comm(double **U,
 			MPI_Status *status,
 			int chunk);
 
+void fg_comm(double **F,
+			double **G,
+			int il,
+			int ir,
+			int jb,
+			int jt,
+			int rank_l,
+			int rank_r,
+			int rank_b,
+			int rank_t,
+			double *bufSend,
+			double *bufRecv,
+			MPI_Status *status);
+
