@@ -201,11 +201,11 @@ int main(int argn, char** args)
 		calculate_uv(dt, dx, dy, x_dim, y_dim, U, V, F, G, P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
 
 		/* Visualize U, V, and P depending on dt_value */
-		/*if(((t / dt_value) >= visual_n) || (t == dt))
-		{*/
+		if(((t / dt_value) >= visual_n) || (t == dt))
+		{
 			write_vtkFile(szProblem, visual_n, xlength, ylength, x_dim, y_dim, dx, dy, U, V, P);
 			visual_n++;
-		/*}*/
+		}
 
 		n++;
 		t += dt;

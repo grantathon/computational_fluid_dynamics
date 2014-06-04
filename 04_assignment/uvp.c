@@ -48,14 +48,37 @@ void calculate_fg(
   int rank_t
 )
 {
-	int i, j;
+	int i, j, imax_var, jmax_var;
 	double du_x_2, du_y_2, dv_x_2, dv_y_2, duv_x, duv_y, du2_x, dv2_y;
 	double *bufSend = 0;
 	double *bufRecv = 0;
 	MPI_Status status;
 
+	/* Determine when to apply the extra F & G values (depending on global boundaries) */
+	if(rank_t == MPI_PROC_NULL && rank_r == MPI_PROC_NULL)
+	{
+		imax_var = imax - 1;
+		jmax_var = jmax - 1;
+	}
+	else if(rank_t != MPI_PROC_NULL && rank_r == MPI_PROC_NULL)
+	{
+		imax_var = imax - 1;
+		jmax_var = jmax;	
+	}
+	else if(rank_t == MPI_PROC_NULL && rank_r != MPI_PROC_NULL)
+	{
+		imax_var = imax;
+		jmax_var = jmax - 1;
+	}
+	else
+	{
+		imax_var = imax;
+		jmax_var = jmax;
+	}
+
 	/* Iterate only over the inner cells of F */
-	for(i = 1; i <= imax-1; i++)
+	//for(i = 1; i <= imax-1; i++)
+	for(i = 1; i <= imax_var; i++)
 	{
 		for(j = 1; j <= jmax; j++)
 		{
@@ -79,7 +102,8 @@ void calculate_fg(
 	/* Iterate only over the inner cells of G */
 	for(i = 1; i <= imax; i++)
 	{
-		for(j = 1; j <= jmax-1; j++)
+		//for(j = 1; j <= jmax-1; j++)
+		for(j = 1; j <= jmax_var; j++)
 		{
 			/* Setup 1st and 2nd order derivatives for U and V */
 			dv_x_2 = (V[i-1][j] - 2*V[i][j] + V[i+1][j])/pow(dx, 2);

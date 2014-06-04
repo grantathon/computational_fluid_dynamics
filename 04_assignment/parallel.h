@@ -74,7 +74,7 @@ void fg_comm(double **F,
 			int rank_r,
 			int rank_b,
 			int rank_t,
-			double *bufSend,
-			double *bufRecv,
+			double *bufLeft,
+			double *bufBottom,
 			MPI_Status *status);
 
