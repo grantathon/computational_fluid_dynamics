@@ -29,7 +29,7 @@ void sor(
 	double *bufRecv = 0;
 	MPI_Status status;
 	int chunk = 0;
-	int x_dim = il - ir + 1;
+	int x_dim = ir - il + 1;
 	int y_dim = jt - jb + 1;
 
 	/* Set left & right global domain boundaries according to Neumann boundary conditions */
@@ -99,4 +99,5 @@ void sor(
 	/* Sum the squares of all local residuals then square root that sum for global residual */
 	MPI_Allreduce(&rloc, res, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	*res = sqrt((*res)/(imax*jmax));
+
 }
