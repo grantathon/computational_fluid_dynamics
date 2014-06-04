@@ -29,6 +29,53 @@ void sor(
 	double *bufRecv = 0;
 	MPI_Status status;
 	int chunk = 0;
+	int x_dim = il - ir + 1;
+	int y_dim = jt - jb + 1;
+
+	/* Set left & right global domain boundaries according to Neumann boundary conditions */
+	if(rank_l == MPI_PROC_NULL && rank_r != MPI_PROC_NULL)  /* Only receive/send data from/to right */
+	{
+		for(j = 1; j <= y_dim; j++) {
+			P[0][j] = P[1][j];
+		}
+	}
+	else if(rank_l != MPI_PROC_NULL && rank_r == MPI_PROC_NULL)  /* Only send/receive data to/from left */
+	{
+		for(j = 1; j <= y_dim; j++) {
+			P[x_dim+1][j] = P[x_dim][j];
+		}
+	}
+	else if(rank_l == MPI_PROC_NULL && rank_r == MPI_PROC_NULL)  /* No bordering processes */
+	{
+		for(j = 1; j <= y_dim; j++) {
+			P[0][j] = P[1][j];
+			P[x_dim+1][j] = P[x_dim][j];
+		}
+	}
+
+	/* Set top & bottom global domain boundaries according to Neumann boundary conditions */
+	if(rank_t == MPI_PROC_NULL && rank_b != MPI_PROC_NULL)  /* Only receive/send data from/to bottom */
+	{
+		/* Implement Neumann conditions on global domain boundaries */
+		for(i = 1; i <= x_dim; i++) {
+			P[i][y_dim+1] = P[i][y_dim];
+		}
+	}
+	else if(rank_t != MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* Only send/receive data to/from top */
+	{
+		/* Implement Neumann conditions on global domain boundaries */
+		for(i = 1; i <= x_dim; i++) {
+			P[i][0] = P[i][1];
+		}
+	}
+	else if(rank_t == MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* No bordering processes */
+	{
+		/* Implement Neumann conditions on global domain boundaries */
+		for(i = 1; i <= x_dim; i++) {
+			P[i][0] = P[i][1];
+			P[i][y_dim+1] = P[i][y_dim];
+		}
+	}
 
 	/* SOR iteration */
 	for(i = 1; i <= (ir - il + 1); i++) {
@@ -52,14 +99,4 @@ void sor(
 	/* Sum the squares of all local residuals then square root that sum for global residual */
 	MPI_Allreduce(&rloc, res, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	*res = sqrt((*res)/(imax*jmax));
-
-	/* set boundary values */
-	for(i = 1; i <= (ir - il + 1); i++) {
-		P[i][0] = P[i][1];
-		P[i][jt - jb + 2] = P[i][jt - jb + 1];
-	}
-	for(j = 1; j <= (jt - jb + 1); j++) {
-		P[0][j] = P[1][j];
-		P[ir - il + 2][j] = P[ir - il + 1][j];
-	}
 }

@@ -130,9 +130,7 @@ int main(int argn, char** args)
 
 		if(readParamError != 1)
 		{
-			printf("ERROR: Input parameters potentially corrupt!");
-			MPI_Finalize();
-
+			Programm_Stop("Input parameters potentially corrupt!");
 			return -1;
 		}
 	}
@@ -211,6 +209,7 @@ int main(int argn, char** args)
 
 		n++;
 		t += dt;
+
 		// output only for master rank
 		if (myrank == 0)
 		{
