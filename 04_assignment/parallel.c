@@ -411,7 +411,7 @@ void uv_comm(double **U,
 			/* Copy right values to send */
 			for(j = 1; j <= y_dim; j++)
 			{
-				bufSend[j - 1] = U[x_dim][j];
+				bufSend[j - 1] = U[x_dim-1][j];
 			}
 			for(j = (y_dim + 1); j <= size; j++)
 			{
@@ -445,7 +445,7 @@ void uv_comm(double **U,
 			/* Copy received right values */
 			for(j = 1; j <= y_dim; j++)
 			{
-				U[x_dim + 1][j] = bufSend[j - 1];
+				U[x_dim][j] = bufSend[j - 1];
 			}
 			for(j = (y_dim + 1); j <= size; j++)
 			{
@@ -455,7 +455,7 @@ void uv_comm(double **U,
 			/* Copy right values to send */
 			for(j = 1; j <= y_dim; j++)
 			{
-				bufSend[j - 1] = U[x_dim][j];
+				bufSend[j - 1] = U[x_dim-1][j];
 			}
 			for(j = (y_dim + 1); j <= size; j++)
 			{
@@ -517,7 +517,7 @@ void uv_comm(double **U,
 			/* Copy top values to send */
 			for(i = 1; i <= x_dim; i++)
 			{
-				bufSend[i - 1] = V[i][y_dim];
+				bufSend[i - 1] = V[i][y_dim-1];
 			}
 			for(i = (x_dim + 1); i <= size; i++)
 			{
@@ -553,7 +553,7 @@ void uv_comm(double **U,
 			/* Copy received top values */
 			for(i = 1; i <= x_dim; i++)
 			{
-				V[i][y_dim + 1] = bufRecv[i - 1];
+				V[i][y_dim] = bufRecv[i - 1];
 			}
 			for(i = (x_dim + 1); i <= size; i++)
 			{
@@ -604,7 +604,7 @@ void uv_comm(double **U,
 			/* Copy top values to send */
 			for(i = 1; i <= x_dim; i++)
 			{
-				bufSend[i - 1] = V[i][y_dim];
+				bufSend[i - 1] = V[i][y_dim-1];
 			}
 			for(i = (x_dim + 1); i <= size; i++)
 			{
@@ -620,7 +620,7 @@ void uv_comm(double **U,
 			/* Copy received top values */
 			for(i = 1; i <= x_dim; i++)
 			{
-				V[i][y_dim + 1] = bufSend[i - 1];
+				V[i][y_dim] = bufSend[i - 1];
 			}
 			for(i = (x_dim + 1); i <= size; i++)
 			{
