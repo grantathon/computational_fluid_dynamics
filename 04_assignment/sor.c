@@ -56,21 +56,18 @@ void sor(
 	/* Set top & bottom global domain boundaries according to Neumann boundary conditions */
 	if(rank_t == MPI_PROC_NULL && rank_b != MPI_PROC_NULL)  /* Only receive/send data from/to bottom */
 	{
-		/* Implement Neumann conditions on global domain boundaries */
 		for(i = 1; i <= x_dim; i++) {
 			P[i][y_dim+1] = P[i][y_dim];
 		}
 	}
 	else if(rank_t != MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* Only send/receive data to/from top */
 	{
-		/* Implement Neumann conditions on global domain boundaries */
 		for(i = 1; i <= x_dim; i++) {
 			P[i][0] = P[i][1];
 		}
 	}
 	else if(rank_t == MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* No bordering processes */
 	{
-		/* Implement Neumann conditions on global domain boundaries */
 		for(i = 1; i <= x_dim; i++) {
 			P[i][0] = P[i][1];
 			P[i][y_dim+1] = P[i][y_dim];
@@ -88,7 +85,7 @@ void sor(
 	/* Communicate between processes regarding pressure boundaries */
 	pressure_comm(P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
 
-	/* compute the residual */
+	/* Compute the residual */
 	for(i = 1; i <= x_dim; i++) {
 		for(j = 1; j <= y_dim; j++) {
 			rloc += ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j])*

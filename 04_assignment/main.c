@@ -45,9 +45,11 @@
  */
 int main(int argn, char** args)
 {
-	/* Input file with user parameters */
-	const char *szFileName = "cavity_lab4.dat";
-	char *szProblem = malloc(strlen(szFileName) + 5);
+	/* Input file variable */
+	const char *problem = args[1];
+	char *problemDataFile = malloc(strlen(problem) + 4);
+	char *problemOutput = malloc(strlen(problem) + 10);
+	char buffer[4] = {0};
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -65,7 +67,6 @@ int main(int argn, char** args)
 	double tau = 0;
 	double dt_value = 0;
 	double visual_n = 1.0;
-	int n = 0;
 
 	/* Pressure iteration data */
 	int itermax = 0;
@@ -106,25 +107,29 @@ int main(int argn, char** args)
 	int omg_i = 0;
 	int omg_j = 0;
 	int num_proc = 0;
-//	const char *np_flag = "-np ";
-
-//	char *np_command = malloc(strlen(np_flag) + 3);
+	int comm_size = 0;
+	int x_dim, y_dim;
 
 	/* Initialize MPI and begin parallel processes */
 	MPI_Init(&argn, &args);
 	MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-	int x_dim, y_dim;
+	/* Append name for output vtk file */
+	strcpy(problemOutput, problem);
+	strcat(problemOutput, "_output.");
+	sprintf(buffer, "%i", myrank);
+	strcat(problemOutput, buffer);
 
-	strcpy(szProblem, szFileName);
-	sprintf(szProblem, "%i", myrank);
+	/* Setup input file var for reading */
+	strcpy(problemDataFile, problem);
+	strcat(problemDataFile, ".dat");
 
 	/* Perform necessary initializations in the main process */
 	if(myrank == 0)
 	{
 		/* Read parameters from DAT file, store locally, and check for potential error */
-		readParamError = read_parameters(szFileName, &Re, &UI, &VI, &PI, &GX, &GY,
+		readParamError = read_parameters(problemDataFile, &Re, &UI, &VI, &PI, &GX, &GY,
 				&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
 				&itermax, &eps, &dt_value, &iproc, &jproc);
 
@@ -133,12 +138,14 @@ int main(int argn, char** args)
 			Programm_Stop("Input parameters potentially corrupt!");
 			return -1;
 		}
-	}
 
-//	sprintf(np_command, "-np %d", iproc*jproc);
-//	printf("np_command = %s\n", np_command);
-//	printf("args[0] = %s\n", args[0]);
-//	printf("args[1] = %s\n", args[1]);
+		MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+		if(comm_size != (iproc*jproc))
+		{
+			printf("The number of processes entered via 'mpirun -np %u' does not equal the size specified by the input file (iproc * jproc = %u)\n", comm_size, iproc*jproc);
+			return -1;
+		}
+	}
 
 	/* Broadcast parameters to the remaining processes */
 	MPI_Bcast(&Re, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -202,12 +209,9 @@ int main(int argn, char** args)
 		/* Visualize U, V, and P depending on dt_value */
 		if(((t / dt_value) >= visual_n) || (t == dt))
 		{
-			output_uvp(U, V, P, il, ir, jb, jt, omg_i, omg_j, szProblem, visual_n);
+			output_uvp(U, V, P, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
 			visual_n++;
 		}
-
-		n++;
-		t += dt;
 
 		// output only for master rank
 		if (myrank == 0)
@@ -216,6 +220,7 @@ int main(int argn, char** args)
 		}
 
 		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
+		t += dt;
 	}
 
 	/* Deallocate heap memory */

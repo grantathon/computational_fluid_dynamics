@@ -156,7 +156,6 @@ void pressure_comm(double **P,
             MPI_Status *status, 
             int chunk)
 {
-//	Program_Message("Entered pressure_comm()");
 	int i, j, x_dim, y_dim;
 	x_dim = ir - il + 1;
 	y_dim = jt - jb + 1;
@@ -351,7 +350,7 @@ void pressure_comm(double **P,
 		}
 	}
 
-//	MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes to finish */
+	MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes to finish */
 }
 
 void uv_comm(double **U,
@@ -631,122 +630,5 @@ void uv_comm(double **U,
 		}
 	}
 
-//	MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes to finish */
-}
-
-void fg_comm(double **F,
-         double **G,
-         int il,
-         int ir,
-         int jb,
-         int jt,
-         int rank_l,
-         int rank_r,
-         int rank_b,
-         int rank_t,
-         double *bufLeft,
-         double *bufBottom,
-         MPI_Status *status)
-{
-	int i, j, size_x, size_y, x_dim, y_dim;
-	x_dim = ir - il + 1;
-	y_dim = jt - jb + 1;
-
-	/* Determine when to apply the extra F & G values (depending on global boundaries) */
-	/* Send values to right neighbor */
-	if(rank_r != MPI_PROC_NULL)
-	{
-		size_y = 2*y_dim;
-
-		/* Need buffer for data transfer */
-		bufLeft = malloc(size_y*sizeof(double));
-
-		/* Copy right values to send */
-		for(j = 1; j <= y_dim; j++)
-		{
-			bufLeft[j - 1] = F[x_dim][j];
-		}
-		for(j = (y_dim + 1); j <= size_y; j++)
-		{
-			bufLeft[j - 1] = G[x_dim][j - y_dim];
-		}
-
-		/* Send right values */
-		MPI_Send(bufLeft, size_y, MPI_DOUBLE, rank_r, 1, MPI_COMM_WORLD);
-
-		free(bufLeft);
-	}
-
-	/* Receive values from left neighbor */
-	if(rank_l != MPI_PROC_NULL)
-	{
-		size_y = 2*y_dim;
-
-		/* Need buffer for data transfer */
-		bufLeft = malloc(size_y*sizeof(double));
-
-		/* Receive left values */
-		MPI_Recv(bufLeft, size_y, MPI_DOUBLE, rank_l, 1, MPI_COMM_WORLD, status);
-
-		/* Copy received left values */
-		for(j = 1; j <= y_dim; j++)
-		{
-			F[0][j] = bufLeft[j - 1];
-		}
-		for(j = (y_dim + 1); j <= size_y; j++)
-		{
-			G[0][j - y_dim] = bufLeft[j - 1];
-		}
-
-		free(bufLeft);
-	}
-
-
-	/* Send values to top neighbor */
-	if(rank_t != MPI_PROC_NULL)
-	{
-		size_x = 2*x_dim;
-
-		/* Need buffer for data transfer */
-		bufBottom = malloc(size_x*sizeof(double));
-
-		/* Copy top values to send */
-		for(i = 1; i <= x_dim; i++)
-		{
-			bufBottom[i - 1] = F[i][y_dim];
-		}
-		for(i = (x_dim + 1); i <= size_x; i++)
-		{
-			bufBottom[i - 1] = G[i - x_dim][y_dim];
-		}
-
-		/* Send top values */
-		MPI_Send(bufBottom, size_x, MPI_DOUBLE, rank_t, 1, MPI_COMM_WORLD);
-
-		free(bufBottom);
-	}
-
-	/* Receive values from bottom neighbor */
-	if(rank_b != MPI_PROC_NULL)
-	{
-		size_x = 2*x_dim;
-
-		/* Need buffer for data transfer */
-		bufBottom = malloc(size_x*sizeof(double));
-
-		/* Receive bottom values */
-		MPI_Recv(bufBottom, size_x, MPI_DOUBLE, rank_b, 1, MPI_COMM_WORLD, status);
-
-		/* Copy received bottom values */
-		for(j = 1; j <= x_dim; j++)
-		{
-			F[j][0] = bufBottom[j - 1];
-		}
-		for(j = (x_dim + 1); j <= size_x; j++)
-		{
-			G[j - x_dim][0] = bufBottom[j - 1];
-		}
-
-		free(bufBottom);
-	}
+	MPI_Barrier(MPI_COMM_WORLD);  /* Wait for all processes to finish */
 }

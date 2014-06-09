@@ -1,7 +1,7 @@
 #include "math.h"
 #include "uvp.h"
-#include <mpi.h>
 #include "parallel.h"
+#include <mpi.h>
 
 double matrix_abs_max(double **A, int imax, int jmax)
 {
@@ -48,37 +48,11 @@ void calculate_fg(
   int rank_t
 )
 {
-	int i, j, imax_var, jmax_var;
+	int i, j;
 	double du_x_2, du_y_2, dv_x_2, dv_y_2, duv_x, duv_y, du2_x, dv2_y;
-	double *bufSend = 0;
-	double *bufRecv = 0;
-	MPI_Status status;
-
-	/* Determine when to apply the extra F & G values (depending on global boundaries) */
-	if(rank_t == MPI_PROC_NULL && rank_r == MPI_PROC_NULL)
-	{
-		imax_var = imax - 1;
-		jmax_var = jmax - 1;
-	}
-	else if(rank_t != MPI_PROC_NULL && rank_r == MPI_PROC_NULL)
-	{
-		imax_var = imax - 1;
-		jmax_var = jmax;	
-	}
-	else if(rank_t == MPI_PROC_NULL && rank_r != MPI_PROC_NULL)
-	{
-		imax_var = imax;
-		jmax_var = jmax - 1;
-	}
-	else
-	{
-		imax_var = imax;
-		jmax_var = jmax;
-	}
 
 	/* Iterate only over the inner cells of F */
-	//for(i = 1; i <= imax-1; i++)
-	for(i = 1; i <= imax_var; i++)
+	for(i = 1; i <= imax-1; i++)
 	{
 		for(j = 1; j <= jmax; j++)
 		{
@@ -102,8 +76,7 @@ void calculate_fg(
 	/* Iterate only over the inner cells of G */
 	for(i = 1; i <= imax; i++)
 	{
-		//for(j = 1; j <= jmax-1; j++)
-		for(j = 1; j <= jmax_var; j++)
+		for(j = 1; j <= jmax-1; j++)
 		{
 			/* Setup 1st and 2nd order derivatives for U and V */
 			dv_x_2 = (V[i-1][j] - 2*V[i][j] + V[i+1][j])/pow(dx, 2);
@@ -122,62 +95,17 @@ void calculate_fg(
 		}
 	}
 
-	/* Communicate between processes regarding F & G values */
-	fg_comm(F, G, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status);
-
-	/* Set boundary values for those processes that border the global domain boundaries */
-	/* Check left & right neighboring boundaries */
-	if(rank_l == MPI_PROC_NULL && rank_r != MPI_PROC_NULL)  /* Right neighbor, left global boundary */
+	/* Set boundary values */
+	for(i = 1; i < imax+1; i++)
 	{
-		/* Set left boundary conditions */
-		for(j = 1; j <= jmax; j++)
-		{
-			F[0][j] = U[0][j];
-		}
-	}
-	else if(rank_l != MPI_PROC_NULL && rank_r == MPI_PROC_NULL)  /* Left neighbor, right global boundary */
-	{
-		/* Set right boundary conditions */
-		for(j = 1; j <= jmax; j++)
-		{
-			F[imax][j] = U[imax][j];
-		}
-	}
-	else if(rank_l == MPI_PROC_NULL && rank_r == MPI_PROC_NULL)  /* Both neighbors are global domain boundaries */
-	{
-		/* Set left & right boundary conditions */
-		for(j = 1; j <= jmax; j++)
-		{
-			F[0][j] = U[0][j];
-			F[imax][j] = U[imax][j];
-		}
+		G[i][0] = V[i][0];
+		G[i][jmax] = V[i][jmax];
 	}
 
-	/* Check top & bottom neighboring boundaries */
-	if(rank_t == MPI_PROC_NULL && rank_b != MPI_PROC_NULL)  /* Bottom neighbor, top global boundary */
+	for(j = 1; j < jmax+1; j++)
 	{
-		/* Set top boundary conditions */
-		for(i = 1; i <= imax; i++)
-		{
-			G[i][jmax] = V[i][jmax];
-		}
-	}
-	else if(rank_t != MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* Top neighbor, bottom global boundary */
-	{
-		/* Set bottom boundary conditions */
-		for(i = 1; i <= imax; i++)
-		{
-			G[i][0] = V[i][0];
-		}
-	}
-	else if(rank_t == MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* Both neighbors are processes */
-	{
-		/* Set top & bottom boundary conditions */
-		for(i = 1; i <= imax; i++)
-		{
-			G[i][0] = V[i][0];
-			G[i][jmax] = V[i][jmax];
-		}
+		F[0][j] = U[0][j];
+		F[imax][j] = U[imax][j];
 	}
 }
 
@@ -243,12 +171,8 @@ void calculate_dt(
 		loc_uv_max[0] = matrix_abs_max(U, imax, jmax);
 		loc_uv_max[1] = matrix_abs_max(V, imax, jmax);
 
-//		printf("loc_u=%f, loc_v=%f\n", loc_uv_max[0], loc_uv_max[1]);
-
 		/* Communicate with the other processes to find the global max values of U and V */
 		MPI_Allreduce(loc_uv_max, glob_uv_max, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-
-//		printf("glob_u=%f, glob_v=%f\n", glob_uv_max[0], glob_uv_max[1]);
 
 		*dt = tau*fmin((Re/2)*(1/((1/pow(dx, 2)) + (1/pow(dy, 2)))), fmin(dx/glob_uv_max[0], dy/glob_uv_max[1]));
 	}

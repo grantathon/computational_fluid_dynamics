@@ -1,4 +1,4 @@
-CC = mpicc#.mpich2 #gcc
+CC = mpicc.mpich2 #gcc
 CFLAGS = -Wall -Werror #-pedantic
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 
