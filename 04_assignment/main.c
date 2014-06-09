@@ -203,7 +203,8 @@ int main(int argn, char** args)
 		/* Visualize U, V, and P depending on dt_value */
 		if(((t / dt_value) >= visual_n) || (t == dt))
 		{
-			write_vtkFile(szProblem, visual_n, xlength, ylength, x_dim, y_dim, dx, dy, U, V, P);
+			/* write_vtkFile(szProblem, visual_n, xlength, ylength, x_dim, y_dim, dx, dy, U, V, P); */
+			output_uvp(U, V, P, il, ir, jb, jt, omg_i, omg_j, szProblem, visual_n);
 			visual_n++;
 		}
 
@@ -215,7 +216,9 @@ int main(int argn, char** args)
 		{
 			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
 		}
+
 		//write_vtkFile(szProblem, visual_n, xlength, ylength, x_dim, y_dim, dx, dy, U, V, P);
+//		output_uvp(U, V, P, il, ir, jb, jt, omg_i, omg_j, szProblem);
 	}
 
 	/* Deallocate heap memory */

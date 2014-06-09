@@ -61,4 +61,9 @@ void write_vtkHeader( FILE *fp, int imax, int jmax,
 void write_vtkPointCoordinates( FILE *fp, int imax, int jmax, 
                                 double dx, double dy);
 
+void output_uvp(double **U, double **V, double **P,
+                int il, int ir, int jb, int jt,
+                int omg_i, int omg_j,
+                char *outputfile, int t);
+
 #endif
