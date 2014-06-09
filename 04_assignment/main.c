@@ -185,7 +185,6 @@ int main(int argn, char** args)
 	/* Begin the time iteration process */
 	while(t < t_end)
 	{
-		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
 		boundaryvalues(x_dim, y_dim, U, V, rank_l, rank_r, rank_b, rank_t);
 		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, x_dim, y_dim, U, V, F, G, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
 		calculate_rs(dt, dx, dy, x_dim, y_dim, F, G, RS);
@@ -203,7 +202,6 @@ int main(int argn, char** args)
 		/* Visualize U, V, and P depending on dt_value */
 		if(((t / dt_value) >= visual_n) || (t == dt))
 		{
-			/* write_vtkFile(szProblem, visual_n, xlength, ylength, x_dim, y_dim, dx, dy, U, V, P); */
 			output_uvp(U, V, P, il, ir, jb, jt, omg_i, omg_j, szProblem, visual_n);
 			visual_n++;
 		}
@@ -217,8 +215,7 @@ int main(int argn, char** args)
 			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
 		}
 
-		//write_vtkFile(szProblem, visual_n, xlength, ylength, x_dim, y_dim, dx, dy, U, V, P);
-//		output_uvp(U, V, P, il, ir, jb, jt, omg_i, omg_j, szProblem);
+		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
 	}
 
 	/* Deallocate heap memory */

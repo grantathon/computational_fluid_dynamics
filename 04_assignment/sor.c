@@ -78,8 +78,8 @@ void sor(
 	}
 
 	/* SOR iteration */
-	for(i = 1; i <= (ir - il + 1); i++) {
-		for(j = 1; j <= (jt - jb + 1); j++) {
+	for(i = 1; i <= x_dim; i++) {
+		for(j = 1; j <= y_dim; j++) {
 			P[i][j] = (1.0-omg)*P[i][j]
 				  + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);
 		}
@@ -89,8 +89,8 @@ void sor(
 	pressure_comm(P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
 
 	/* compute the residual */
-	for(i = 1; i <= (ir - il + 1); i++) {
-		for(j = 1; j <= (jt - jb + 1); j++) {
+	for(i = 1; i <= x_dim; i++) {
+		for(j = 1; j <= y_dim; j++) {
 			rloc += ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j])*
 				  ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j]);
 		}
@@ -99,5 +99,4 @@ void sor(
 	/* Sum the squares of all local residuals then square root that sum for global residual */
 	MPI_Allreduce(&rloc, res, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	*res = sqrt((*res)/(imax*jmax));
-
 }
