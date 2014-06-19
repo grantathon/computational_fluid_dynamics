@@ -1,5 +1,5 @@
 #include "parallel.h"
-
+#include <mpi.h>
 
 void Program_Message(char *txt)
 /* produces a stderr text output  */

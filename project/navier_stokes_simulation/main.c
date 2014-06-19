@@ -149,8 +149,8 @@ int main(int argc, char *argv[])
 
 		/* Read parameters from DAT file, store locally, and check for potential error */
 		readParamError = read_parameters(problemDataFile, &Re, &UI, &VI, &PI, &GX, &GY,
-				&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
-				&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb, &iproc, &jproc);
+			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
+			&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb, &iproc, &jproc);
 
 		if(readParamError != 1)
 		{
@@ -189,6 +189,10 @@ int main(int argc, char *argv[])
 	MPI_Bcast(&dt_value, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&iproc, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&jproc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&wl, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&wr, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&wt, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&wb, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 	if(myrank == 0)
 	{
@@ -216,7 +220,7 @@ int main(int argc, char *argv[])
 	while(t < t_end)
 	{
 		boundaryvalues(x_dim, y_dim, U, V, wl, wr, wt, wb, flag, rank_l, rank_r, rank_b, rank_t);
-		spec_boundary_val(problem, x_dim, y_dim, U, V, UI, VI, rank_l);
+		spec_boundary_val(problem, imax, jmax, y_dim, U, V, UI, VI, omg_j, jb, jt, rank_l);
 
 		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, x_dim, y_dim, U, V, F, G, flag);
 		calculate_rs(dt, dx, dy, x_dim, y_dim, F, G, RS);

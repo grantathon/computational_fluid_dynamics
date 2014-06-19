@@ -36,10 +36,14 @@ void spec_boundary_val(
 		const char *problem,
 		int imax,
 		int jmax,
+		int y_dim,
 		double **U,
 		double **V,
 		double UI,
 		double VI,
+		int omg_j,
+		int jb,
+		int jt,
 		int rank_l
 );
 
