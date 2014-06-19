@@ -1,6 +1,8 @@
 #include "math.h"
 #include "uvp.h"
 #include "ns_definitions.h"
+#include "parallel.h"
+#include <mpi.h>
 
 double matrix_abs_max(double **A, int imax, int jmax)
 {
@@ -24,20 +26,20 @@ double matrix_abs_max(double **A, int imax, int jmax)
 }
 
 void calculate_fg(
-		double Re,
-		double GX,
-		double GY,
-		double alpha,
-		double dt,
-		double dx,
-		double dy,
-		int imax,
-		int jmax,
-		double **U,
-		double **V,
-		double **F,
-		double **G,
-		int **Flag
+			double Re,
+			double GX,
+			double GY,
+			double alpha,
+			double dt,
+			double dx,
+			double dy,
+			int imax,
+			int jmax,
+			double **U,
+			double **V,
+			double **F,
+			double **G,
+			int **Flag
 )
 {
 	int i, j;
@@ -193,25 +195,31 @@ void calculate_rs(
  *
  */
 void calculate_dt(
-		double Re,
-		double tau,
-		double *dt,
-		double dx,
-		double dy,
-		int imax,
-		int jmax,
-		double **U,
-		double **V
+  double Re,
+  double tau,
+  double *dt,
+  double dx,
+  double dy,
+  int imax,
+  int jmax,
+  double **U,
+  double **V
 )
 {
 	/* Only update dt if tau is positive */
 	if(tau > 0)
 	{
-		/* Find the max of both velocity matrices */
-		double u_max = matrix_abs_max(U, imax, jmax);
-		double v_max = matrix_abs_max(V, imax, jmax);
+		double loc_uv_max[2] = {0.0};
+		double glob_uv_max[2] = {0.0};
 
-		*dt = tau*fmin((Re/2)*(1/((1/pow(dx, 2)) + (1/pow(dy, 2)))), fmin(dx/u_max, dy/v_max));
+		/* Find the max of both velocity matrices for the local domain */
+		loc_uv_max[0] = matrix_abs_max(U, imax, jmax);
+		loc_uv_max[1] = matrix_abs_max(V, imax, jmax);
+
+		/* Communicate with the other processes to find the global max values of U and V */
+		MPI_Allreduce(loc_uv_max, glob_uv_max, 2, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+
+		*dt = tau*fmin((Re/2)*(1/((1/pow(dx, 2)) + (1/pow(dy, 2)))), fmin(dx/glob_uv_max[0], dy/glob_uv_max[1]));
 	}
 }
 
@@ -240,9 +248,21 @@ void calculate_uv(
 		double **F,
 		double **G,
 		double **P,
-		int **Flag
+		int **Flag,
+		int il,
+		int ir,
+		int jb,
+		int jt,
+		int rank_l,
+		int rank_r,
+		int rank_b,
+		int rank_t
 )
 {
+	double *bufSend = 0;
+	double *bufRecv = 0;
+	MPI_Status status;
+	int chunk = 0;
 	int i, j;
 
 	/* Iterate only over the inner cells */
@@ -270,4 +290,7 @@ void calculate_uv(
 			}	
 		}
 	}
+
+	/* Communicate between processes regarding velocities */
+	uv_comm(U, V, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
 }

@@ -6,74 +6,76 @@ void sor(
   double omg,
   double dx,
   double dy,
-  int    imax,
-  int    jmax,
   double **P,
   double **RS,
   double *res,
-  int **Flag,
-  double Pw,
-  double delta_p
-) {
-  int i,j;
-  double rloc;
+  int il,
+  int ir,
+  int jb,
+  int jt,
+  int rank_l,
+  int rank_r,
+  int rank_b,
+  int rank_t,
+  int imax,
+  int jmax,
+  int **Flag
+)
+{
+  int i, j;
+  double rloc = 0.0;
   double coeff = omg/(2.0*(1.0/(dx*dx)+1.0/(dy*dy)));
+  double *bufSend = 0;
+  double *bufRecv = 0;
+  MPI_Status status;
+  int chunk = 0;
+  int x_dim = ir - il + 1;
+  int y_dim = jt - jb + 1;
 
-  /* new variable, that is used to count the total number of fluid cells ; used for the normalization
+  /* new local variable, that is used to count the total number of fluid cells ; used for the normalization
   of the residual */
-  int fluid_cells_count = 0;
+  int local_fluid_cells_count = 0;
 
-  /* SOR iteration */
-  for(i = 1; i < imax + 1; i++)
+  /* Set left & right global domain boundaries according to Neumann boundary conditions */
+  if(rank_l == MPI_PROC_NULL && rank_r != MPI_PROC_NULL)  /* Only receive/send data from/to right */
   {
-    for(j = 1; j < jmax + 1; j++)
-    {
-      P[i][j] = (1.0-omg)*P[i][j]
-              + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);  
+    for(j = 1; j <= y_dim; j++) {
+      P[0][j] = P[1][j];
+    }
+  }
+  else if(rank_l != MPI_PROC_NULL && rank_r == MPI_PROC_NULL)  /* Only send/receive data to/from left */
+  {
+    for(j = 1; j <= y_dim; j++) {
+      P[x_dim+1][j] = P[x_dim][j];
+    }
+  }
+  else if(rank_l == MPI_PROC_NULL && rank_r == MPI_PROC_NULL)  /* No bordering processes */
+  {
+    for(j = 1; j <= y_dim; j++) {
+      P[0][j] = P[1][j];
+      P[x_dim+1][j] = P[x_dim][j];
     }
   }
 
-  /* compute the residual */
-  /* now, the computation is restricted only for the fluid cells */
-  rloc = 0;
-  for(i = 0; i <= imax; i++) 
+  /* Set top & bottom global domain boundaries according to Neumann boundary conditions */
+  if(rank_t == MPI_PROC_NULL && rank_b != MPI_PROC_NULL)  /* Only receive/send data from/to bottom */
   {
-    for(j = 0; j <= jmax; j++) 
-    {
-      if(Flag[i][j] & C_F)
-      {
-        rloc += ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j])*
-                ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j]);
-        fluid_cells_count++;
-      }
+    for(i = 1; i <= x_dim; i++) {
+      P[i][y_dim+1] = P[i][y_dim];
     }
   }
-
-  /* the residual is now normalized by the total number of fluid cells */
-  rloc = rloc/(fluid_cells_count);
-  rloc = sqrt(rloc);
-
-  /* set residual */
-  *res = rloc;
-
-  /* set boundary values */
-  /* pressure BC based on left boundary pressure value and pressure gradient */
-  for(i = 0; i <= imax + 1; i++) {
-    P[i][0] = P[i][1];
-    P[i][jmax+1] = P[i][jmax];
-  }
-  for(j = 0; j <= jmax + 1; j++)
+  else if(rank_t != MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* Only send/receive data to/from top */
   {
-	  if (Flag[0][j] & P_L)
-	  {
-		  P[0][j] = (2 * Pw) - P[1][j];
-		  P[imax+1][j] = (2 * (Pw - delta_p)) - P[imax][j];
-	  }
-	  else
-	  {
-		  P[0][j] = P[1][j];
-		  P[imax+1][j] = P[imax][j];
-	  }
+    for(i = 1; i <= x_dim; i++) {
+      P[i][0] = P[i][1];
+    }
+  }
+  else if(rank_t == MPI_PROC_NULL && rank_b == MPI_PROC_NULL)  /* No bordering processes */
+  {
+    for(i = 1; i <= x_dim; i++) {
+      P[i][0] = P[i][1];
+      P[i][y_dim+1] = P[i][y_dim];
+    }
   }
 
   /* boundary conditions for the pressure at the boundary stripe*/
@@ -81,7 +83,6 @@ void sor(
   {
       for(j = 1 ; j < jmax + 1 ; j++)
       {
-
         if(Flag[i][j] == B_O)
         {
           P[i][j] = P[i + 1][j];
@@ -115,5 +116,40 @@ void sor(
           P[i][j] = (P[i][j - 1] + P[i - 1][j])/2;    
         }
       }
-  }      
+  }
+
+  /* SOR iteration */
+  for(i = 1; i < imax + 1; i++)
+  {
+    for(j = 1; j < jmax + 1; j++)
+    {
+      P[i][j] = (1.0-omg)*P[i][j]
+              + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);  
+    }
+  }
+
+  /* Communicate between processes regarding pressure boundaries */
+  pressure_comm(P, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, bufSend, bufRecv, &status, chunk);
+
+  /* compute the residual */
+  /* now, the computation is restricted only for the fluid cells */
+  rloc = 0;
+  for(i = 0; i <= imax; i++) 
+  {
+    for(j = 0; j <= jmax; j++) 
+    {
+      if(Flag[i][j] & C_F)
+      {
+        rloc += ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j])*
+                ( (P[i+1][j]-2.0*P[i][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]-2.0*P[i][j]+P[i][j-1])/(dy*dy) - RS[i][j]);
+        local_fluid_cells_count++;
+      }
+    }
+  }
+
+  /* Sum the squares of all local residuals then square root that sum for global residual */
+  MPI_Allreduce(&rloc, res, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  /* Sum all local fluid cell counts*/
+  MPI_Allreduce(&local_fluid_cells_count, fluid_cells_count, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+  *res = sqrt((*res)/fluid_cells_count);
 }

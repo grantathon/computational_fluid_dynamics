@@ -33,20 +33,20 @@ double matrix_abs_max(double **A, int imax, int jmax);
  for the boundary obstacle cells, as well.
  */
 void calculate_fg(
-  double Re,
-  double GX,
-  double GY,
-  double alpha,
-  double dt,
-  double dx,
-  double dy,
-  int imax,
-  int jmax,
-  double **U,
-  double **V,
-  double **F,
-  double **G,
-  int **Flag
+    double Re,
+    double GX,
+    double GY,
+    double alpha,
+    double dt,
+    double dx,
+    double dy,
+    int imax,
+    int jmax,
+    double **U,
+    double **V,
+    double **F,
+    double **G,
+    int **Flag
 );
 
 
@@ -114,7 +114,15 @@ void calculate_uv(
   double **F,
   double **G,
   double **P,
-  int **Flag
+  int **Flag,
+  int il,
+  int ir,
+  int jb,
+  int jt,
+  int rank_l,
+  int rank_r,
+  int rank_b,
+  int rank_t
 );
 
 #endif

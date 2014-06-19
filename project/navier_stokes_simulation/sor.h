@@ -14,14 +14,20 @@ void sor(
   double omg,
   double dx,
   double dy,
-  int    imax,
-  int    jmax,
   double **P,
   double **RS,
   double *res,
-  int **Flag,
-  double Pw,
-  double delta_p
+  int il,
+  int ir,
+  int jb,
+  int jt,
+  int rank_l,
+  int rank_r,
+  int rank_b,
+  int rank_t,
+  int imax,
+  int jmax,
+  int **Flag
 );
 
 
