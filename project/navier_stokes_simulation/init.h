@@ -65,17 +65,9 @@ int read_parameters(
   int *wr,			/* for right, left, top and */
   int *wt,			/* bottom surfaces. */
   int *wb,
-  double *delta_p,
-  double *Pw
+  int *iproc,
+  int *jproc
 );
-
-/*
-void read_special_BC(const char * szFileName,
-		double *UI,
-		double *VI,
-		double *delta_p
-);
-*/
 
 
 /**
@@ -99,8 +91,14 @@ void init_uvp(
 */
 void init_flag(
   const char *problem,
+  int xdim,
+  int ydim,
   int imax,
   int jmax,
+  int il,
+  int ir,
+  int jb,
+  int jt,
   int ***Flag);
 
 #endif

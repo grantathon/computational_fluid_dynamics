@@ -29,8 +29,8 @@ int read_parameters(const char * szFileName,
                     int *wr,			/* for right, left, top and */
                     int *wt,			/* bottom surfaces. */
                     int *wb,
-                    double *delta_p,
-                    double *Pw
+                    int *iproc,					/* i-dim of processors */
+                    int *jproc					/* j-dim of processors */
 )
 {
 	/* Read domain boundary conditions*/
@@ -64,12 +64,8 @@ int read_parameters(const char * szFileName,
 	READ_DOUBLE( szFileName, *GY );
 	READ_DOUBLE( szFileName, *PI );
 
-	/* Read pressure difference if plane shear flow	*/
-	if (strcmp(szFileName, "plane_shear_flow.dat") == 0)
-	{
-		READ_DOUBLE( szFileName, *delta_p );
-		READ_DOUBLE( szFileName, *Pw );
-	}
+	READ_INT   ( szFileName, *iproc );
+	READ_INT   ( szFileName, *jproc );
 
 	*dx = *xlength / (double)(*imax);
 	*dy = *ylength / (double)(*jmax);
@@ -77,21 +73,6 @@ int read_parameters(const char * szFileName,
 	return 1;
 }
 
-void read_special_BC(const char * szFileName,
-		double *UI,	/* Read inlet velocity BC*/
-		double *VI,
-		double *delta_p
-)
-{
-	READ_DOUBLE( szFileName, *UI );
-	READ_DOUBLE( szFileName, *VI );
-
-	if (strcmp(szFileName, "plane_shear_flow.dat") == 0)
-	{
-		READ_DOUBLE( szFileName, *delta_p );
-	}
-
-}
 
 /*
  * Initialize the U, V, and P grids to what UI, VU, and PI
@@ -121,26 +102,14 @@ void init_uvp(
 	init_matrix(*P, 0, imax+1, 0, jmax+1, PI);
 }
 
-void init_flag(const char *problem, int imax, int jmax, int ***flag)
+void init_flag(const char *problem, int xdim, int ydim, int imax, int jmax, int il, int ir, int jb, int jt, int ***flag)
 {
 	char *problemPBMFile = 0;
 	int **obstacleFlag = 0;
 	int i, j;
 
 	/* initialize Flag as a matrix of integers */
-	*flag = imatrix(0, imax+1, 0, jmax+1);
-
-	/* Set boundary flags */
-	for(i = 0; i <= imax+1; i++)
-	{
-		(*flag)[i][0] 		= C_B;	/* Floor */
-		(*flag)[i][jmax+1] 	= C_B;	/* Ceiling */
-	}
-	for(j = 0; j <= jmax+1; j++)
-	{
-		(*flag)[0][j] 		= C_B;	/* Left wall */
-		(*flag)[imax+1][j] 	= C_B;	/* Right wall */
-	}
+	*flag = imatrix(0, xdim+1, 0, ydim+1);
 
 	/* Retrieve full file name */
 	problemPBMFile = malloc(strlen(problem) + 5);
@@ -150,10 +119,86 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 	/* Input file containing fluid/obstacle data */
 	obstacleFlag = read_pgm(problemPBMFile);
 
-	/* Set inner flags */
-	for(i = 1; i <= imax; i++)
+	/* Set boundary flags */
+	if(il == 1 && ir == imax)
 	{
-		for(j = 1; j <= jmax; j++)
+		for(j = 0; j <= ydim+1; j++)
+		{
+			(*flag)[0][j] 		= C_B;	/* Left wall */
+			(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
+		}
+	}
+	else if(il != 1 && ir == imax)
+	{
+		for(j = 0; j <= ydim+1; j++)
+		{
+			(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
+		}
+
+		for(j = 0; j <= ydim+1; j++)
+		{
+			if(obstacleFlag[il-1][jb+j-1] == 1)
+			{
+				(*flag)[0][j] 		= C_F;	/* Left wall */
+			}
+			else
+			{
+				(*flag)[0][j] 		= C_B;	/* Left wall */
+			}
+		}
+
+//		for(j = 1; j <= jmax; j++)
+		for(j = 0; j <= ydim+1; j++)
+		{
+			/* Set flags according to neighboring fluids */
+			if(obstacleFlag[il-2][jb+j-1] == 1)
+			{
+				(*flag)[0][j] |= B_W;
+			}
+			if(obstacleFlag[il][jb+j-1] == 1)
+			{
+				(*flag)[0][j] |= B_O;
+			}
+			if(obstacleFlag[il-1][jb+j] == 1)
+			{
+				(*flag)[0][j] |= B_N;
+			}
+			if(obstacleFlag[il-1][jb+j-2] == 1)
+			{
+				(*flag)[0][j] |= B_S;
+			}
+		}
+	}
+	else if(il == 1 && ir != imax)
+	{
+		for(j = 0; j <= ydim+1; j++)
+		{
+			(*flag)[0][j] 		= C_B;	/* Left wall */
+		}
+	}
+	else
+	{
+
+	}
+
+//	for(i = 0; i <= imax+1; i++)
+//	{
+//		(*flag)[i][0] 		= C_B;	/* Floor */
+//		(*flag)[i][jmax+1] 	= C_B;	/* Ceiling */
+//	}
+//	for(j = 0; j <= jmax+1; j++)
+//	{
+//		(*flag)[0][j] 		= C_B;	/* Left wall */
+//		(*flag)[imax+1][j] 	= C_B;	/* Right wall */
+//	}
+
+
+	/* Set inner flags */
+//	for(i = 1; i <= imax; i++)
+	for(i = il; i <= ir; i++)
+	{
+//		for(j = 1; j <= jmax; j++)
+		for(j = jb; j <= jt; j++)
 		{
 			/* Determine whether cell is a fluid or an obstacle */
 			if(obstacleFlag[i][j] == 1)
@@ -167,11 +212,13 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 		}
 	}
 
-	for(i = 1; i <= imax; i++)
+//	for(i = 1; i <= imax; i++)
+	for(i = il; i <= ir; i++)
 	{
-		for(j = 1; j <= jmax; j++)
+//		for(j = 1; j <= jmax; j++)
+		for(j = jb; j <= jt; j++)
 		{
-			/* Set flags according to neighbouring fluids */
+			/* Set flags according to neighboring fluids */
 			if(obstacleFlag[i-1][j] == 1)
 			{
 				(*flag)[i][j] |= B_W;
@@ -191,18 +238,7 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 		}
 	}
 
-	/* Specify the left and right boundaries where pressure BC is defined	*/
-	/* We only specify pressure value on the left boundary	*/
-	if (strcmp(problem, "plane_shear_flow") == 0)
-	{
-		for(j = 1; j <= jmax; j++)
-		{
-			(*flag)[0][j] = P_L;
-
-		}
-	}
-
-	free_imatrix(obstacleFlag, 0, imax+1, 0, jmax+1);
+	free_imatrix(obstacleFlag, 0, xdim+1, 0, ydim+1);
 	free(problemPBMFile);
 }
 
