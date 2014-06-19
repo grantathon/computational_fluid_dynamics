@@ -48,8 +48,9 @@ int main(int argc, char *argv[])
 {
 	/* Input file with user parameters */
 	const char *problem = "flow_over_a_step";
-	char *problemDataFile = malloc(strlen(problem) + 5);
-	char *problemOutput = malloc(strlen(problem) + 7);
+	char *problemDataFile = malloc(strlen(problem) + 4);
+	char *problemOutput = malloc(strlen(problem) + 10);
+	char buffer[4] = {0};
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -75,6 +76,7 @@ int main(int argc, char *argv[])
 	int n 			= 0;
 	double start_time = 0.0;
 	double end_time = 0.0;
+	double visual_n = 1.0;
 
 	/* Pressure iteration data */
 	int itermax 	= 0;
@@ -131,7 +133,13 @@ int main(int argc, char *argv[])
 
 	/* Append name for output vtk file */
 	strcpy(problemOutput, problem);
-	strcat(problemOutput, "_Output");
+	strcat(problemOutput, "_output.");
+	sprintf(buffer, "%i", myrank);
+	strcat(problemOutput, buffer);
+
+	/* Setup input file var for reading */
+	strcpy(problemDataFile, problem);
+	strcat(problemDataFile, ".dat");
 
 	/* Perform necessary initializations in the main process */
 	if(myrank == 0)
@@ -207,40 +215,39 @@ int main(int argc, char *argv[])
 	printf("Begin the main computation...\n");
 	while(t < t_end)
 	{
-		boundaryvalues(imax, jmax, U, V, wl, wr, wt, wb, flag, rank_l, rank_r, rank_b, rank_t);
-		//boundaryvalues(imax, jmax, U, V, wl, wr, wt, wb, flag);
+		boundaryvalues(x_dim, y_dim, U, V, wl, wr, wt, wb, flag, rank_l, rank_r, rank_b, rank_t);
+		spec_boundary_val(problem, x_dim, y_dim, U, V, UI, VI, rank_l);
 
-		spec_boundary_val(problem, imax, jmax, U, V, UI, VI, rank_l);
-		//spec_boundary_val(problem, imax, jmax, U, V, UI, VI);
-
-		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, flag);
-		//calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, flag);
-		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);
+		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, x_dim, y_dim, U, V, F, G, flag);
+		calculate_rs(dt, dx, dy, x_dim, y_dim, F, G, RS);
 
 		it = 0;
 		do
 		{
 			sor(omg, dx, dy, P, RS, &res, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, imax, jmax, flag);
-			//sor(omg, dx, dy, imax, jmax, P, RS, &res, flag, Pw, delta_p);
 			it++;
 		}
 		while( it < itermax && res > eps);
 
-		// Output info to user
-		printf("n=%u, res=%f, it=%u, t=%f, dt=%f\n", n, res, it, t, dt);
+		calculate_uv(dt, dx, dy, x_dim, y_dim, U, V, F, G, P, flag, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
+		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
 
-		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, flag, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
-		//calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, flag);
-		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
-		//calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
-//        write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
+		/* Visualize U, V, and P depending on dt_value */
+		if(1)//(((t / dt_value) >= visual_n) || (t == dt))
+		{
+			output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
+			visual_n++;
+		}
+
+		// output only for master rank
+		if (myrank == 0)
+		{
+			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
+		}
 
 		n++;
 		t += dt;
 	}
-
-	/* Visualize U, V, and P */
-	write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
 
 	/* TODO: Write output array to shared file */
 	output_values = malloc(4*sizeof(double));
