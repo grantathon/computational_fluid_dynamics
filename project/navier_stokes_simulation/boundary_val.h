@@ -20,9 +20,14 @@ void boundaryvalues(
 		int rank_t
 );
 
+void boundaryvalues_flag(int imax, int jmax, int il, int ir, int jb, int jt, double **flag, double **obstacle);
+
 void boundaryvalues_t(int imax, int jmax, double **U, double **V, int wt);
+
 void boundaryvalues_b(int imax, int jmax, double **U, double **V, int wb);
+
 void boundaryvalues_l(int imax, int jmax, double **U, double **V, int wl);
+
 void boundaryvalues_r(int imax, int jmax, double **U, double **V, int wr);
 
 

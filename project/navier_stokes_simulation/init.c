@@ -119,7 +119,11 @@ void init_flag(const char *problem, int xdim, int ydim, int imax, int jmax, int 
 	/* Input file containing fluid/obstacle data */
 	obstacleFlag = read_pgm(problemPBMFile);
 
-	/* Set boundary flags */
+	/* Set the boundary values for flag */
+	// TODO: Put all of the boundary initializations in boundaryvalues_flag()
+//	boundaryvalues_flag(imax, jmax, il, ir, jb, jt, flag, obstacleFlag);
+
+	/* Set left and right boundary flags */
 	if(il == 1 && ir == imax)
 	{
 		for(j = 0; j <= ydim+1; j++)
@@ -130,11 +134,97 @@ void init_flag(const char *problem, int xdim, int ydim, int imax, int jmax, int 
 	}
 	else if(il != 1 && ir == imax)
 	{
+		/* Set right boundary flags */
 		for(j = 0; j <= ydim+1; j++)
 		{
 			(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
 		}
 
+		/* Set left boundary flags */
+		for(j = 0; j <= ydim+1; j++)
+		{
+			if(obstacleFlag[il-1][jb+j-1] == 1)
+			{
+				(*flag)[0][j] 	= C_F;	/* Left wall */
+			}
+			else
+			{
+				(*flag)[0][j] 	= C_B;	/* Left wall */
+			}
+
+			/* Set flags according to neighboring fluids */
+			if(obstacleFlag[il-2][jb+j-1] == 1)
+			{
+				(*flag)[0][j] |= B_W;
+			}
+			if(obstacleFlag[il][jb+j-1] == 1)
+			{
+				(*flag)[0][j] |= B_O;
+			}
+			if((jb+j) < jmax+1)
+			{
+				if(obstacleFlag[il-1][jb+j] == 1) // WARNING: May not exist!
+				{
+					(*flag)[0][j] |= B_N;
+				}
+			}
+			if((jb+j-2) > 0)
+			{
+				if(obstacleFlag[il-1][jb+j-2] == 1) // WARNING: May not exist!
+				{
+					(*flag)[0][j] |= B_S;
+				}
+			}
+		}
+	}
+	else if(il == 1 && ir != imax)
+	{
+		/* Set left boundary flags */
+		for(j = 0; j <= ydim+1; j++)
+		{
+			(*flag)[0][j] 		= C_B;	/* Left wall */
+		}
+
+		/* Set right boundary flags */
+		for(j = 0; j <= ydim+1; j++)
+		{
+			if(obstacleFlag[ir+1][jb+j-1] == 1)
+			{
+				(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
+			}
+			else
+			{
+				(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
+			}
+
+			/* Set flags according to neighboring fluids */
+			if(obstacleFlag[ir][jb+j-1] == 1)
+			{
+				(*flag)[xdim+1][j] |= B_W;
+			}
+			if(obstacleFlag[ir+2][jb+j-1] == 1)
+			{
+				(*flag)[xdim+1][j] |= B_O;
+			}
+			if((jb+j) < jmax+1)
+			{
+				if(obstacleFlag[ir+1][jb+j] == 1) // WARNING: May not exist!
+				{
+					(*flag)[xdim+1][j] |= B_N;
+				}
+			}
+			if((jb+j-2) > 0)
+			{
+				if(obstacleFlag[ir+1][jb+j-2] == 1 && jb != 1) // WARNING: May not exist!
+				{
+					(*flag)[xdim+1][j] |= B_S;
+				}
+			}
+		}
+	}
+	else
+	{
+		/* Set left and right boundary flags */
 		for(j = 0; j <= ydim+1; j++)
 		{
 			if(obstacleFlag[il-1][jb+j-1] == 1)
@@ -145,11 +235,16 @@ void init_flag(const char *problem, int xdim, int ydim, int imax, int jmax, int 
 			{
 				(*flag)[0][j] 		= C_B;	/* Left wall */
 			}
-		}
 
-//		for(j = 1; j <= jmax; j++)
-		for(j = 0; j <= ydim+1; j++)
-		{
+			if(obstacleFlag[ir+1][jb+j-1] == 1)
+			{
+				(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
+			}
+			else
+			{
+				(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
+			}
+
 			/* Set flags according to neighboring fluids */
 			if(obstacleFlag[il-2][jb+j-1] == 1)
 			{
@@ -159,49 +254,226 @@ void init_flag(const char *problem, int xdim, int ydim, int imax, int jmax, int 
 			{
 				(*flag)[0][j] |= B_O;
 			}
-			if(obstacleFlag[il-1][jb+j] == 1)
+			if((jb+j) < jmax+1)
 			{
-				(*flag)[0][j] |= B_N;
+				if(obstacleFlag[il-1][jb+j] == 1) // WARNING: May not exist!
+				{
+					(*flag)[0][j] |= B_N;
+				}
 			}
-			if(obstacleFlag[il-1][jb+j-2] == 1)
+			if((jb+j-2) > 0)
 			{
-				(*flag)[0][j] |= B_S;
+				if(obstacleFlag[il-1][jb+j-2] == 1 && jb != 1) // WARNING: May not exist!
+				{
+					(*flag)[0][j] |= B_S;
+				}
+			}
+
+			/* Set flags according to neighboring fluids */
+			if(obstacleFlag[ir][jb+j-1] == 1)
+			{
+				(*flag)[xdim+1][j] |= B_W;
+			}
+			if(obstacleFlag[ir+2][jb+j-1] == 1)
+			{
+				(*flag)[xdim+1][j] |= B_O;
+			}
+			if((jb+j) < jmax+1)
+			{
+				if(obstacleFlag[ir+1][jb+j] == 1) // WARNING: May not exist!
+				{
+					(*flag)[xdim+1][j] |= B_N;
+				}
+			}
+			if((jb+j-2) > 0)
+			{
+				if(obstacleFlag[ir+1][jb+j-2] == 1) // WARNING: May not exist!
+				{
+					(*flag)[xdim+1][j] |= B_S;
+				}
 			}
 		}
 	}
-	else if(il == 1 && ir != imax)
+
+	/* Set bottom and top boundary flags */
+	if(jb == 1 && jt == jmax)
 	{
-		for(j = 0; j <= ydim+1; j++)
+		for(i = 0; i <= xdim+1; i++)
 		{
-			(*flag)[0][j] 		= C_B;	/* Left wall */
+			(*flag)[i][0] 		= C_B;	/* Floor */
+			(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
+		}
+	}
+	else if(jb != 1 && jt == jmax)
+	{
+		/* Set top boundary flags */
+		for(i = 0; i <= xdim+1; i++)
+		{
+			(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
+		}
+
+		/* Set bottom boundary flags */
+		for(i = 0; i <= xdim+1; i++)
+		{
+			if(obstacleFlag[il+i-1][jb-1] == 1)
+			{
+				(*flag)[i][0] 	= C_F;	/* Floor */
+			}
+			else
+			{
+				(*flag)[i][0] 	= C_B;	/* Floor */
+			}
+
+			/* Set flags according to neighboring fluids */
+			if((il+i-2) > 0)
+			{
+				if(obstacleFlag[il+i-2][jb-1] == 1) // WARNING: May not exist!
+				{
+					(*flag)[i][0] |= B_W;
+				}
+			}
+			if((il+i) < imax+1)
+			{
+				if(obstacleFlag[il+i][jb-1] == 1) // WARNING: May not exist!
+				{
+					(*flag)[i][0] |= B_O;
+				}
+			}
+			if(obstacleFlag[il+i-1][jb] == 1)
+			{
+				(*flag)[i][0] |= B_N;
+			}
+			if(obstacleFlag[il+i-1][jb-2] == 1)
+			{
+				(*flag)[i][0] |= B_S;
+			}
+		}
+	}
+	else if(jb == 1 && jt != jmax)
+	{
+		/* Set bottom boundary flags */
+		for(i = 0; i <= xdim+1; i++)
+		{
+			(*flag)[i][ydim+1] 		= C_B;	/* Floor */
+		}
+
+		/* Set top boundary flags */
+		for(i = 0; i <= xdim+1; i++)
+		{
+			if(obstacleFlag[il+i-1][jt+1] == 1)
+			{
+				(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
+			}
+			else
+			{
+				(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
+			}
+
+			/* Set flags according to neighboring fluids */
+			if((il+i-2) > 0)
+			{
+				if(obstacleFlag[il+i-2][jt+1] == 1) // WARNING: May not exist!
+				{
+					(*flag)[xdim+1][j] |= B_W;
+				}
+			}
+			if((il+i) < imax+1)
+			{
+				if(obstacleFlag[il+i][jt+1] == 1) // WARNING: May not exist!
+				{
+					(*flag)[xdim+1][j] |= B_O;
+				}
+			}
+			if(obstacleFlag[il+i-1][jt+2] == 1)
+			{
+				(*flag)[xdim+1][j] |= B_N;
+			}
+			if(obstacleFlag[il+i-1][jt] == 1)
+			{
+				(*flag)[xdim+1][j] |= B_S;
+			}
 		}
 	}
 	else
 	{
+		/* Set bottom and top boundary flags */
+		for(i = 0; i <= xdim+1; i++)
+		{
+			if(obstacleFlag[il+i-1][jb-1] == 1)
+			{
+				(*flag)[i][0] 	= C_F;	/* Floor */
+			}
+			else
+			{
+				(*flag)[i][0] 	= C_B;	/* Floor */
+			}
 
+			if(obstacleFlag[il+i-1][jt+1] == 1)
+			{
+				(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
+			}
+			else
+			{
+				(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
+			}
+
+			/* Set flags according to neighboring fluids */
+			if((il+i-2) > 0)
+			{
+				if(obstacleFlag[il+i-2][jb-1] == 1) // WARNING: May not exist!
+				{
+					(*flag)[i][0] |= B_W;
+				}
+			}
+			if((il+i) < imax+1)
+			{
+				if(obstacleFlag[il+i][jb-1] == 1) // WARNING: May not exist!
+				{
+					(*flag)[i][0] |= B_O;
+				}
+			}
+			if(obstacleFlag[il+i-1][jb] == 1)
+			{
+				(*flag)[i][0] |= B_N;
+			}
+			if(obstacleFlag[il+i-1][jb-2] == 1)
+			{
+				(*flag)[i][0] |= B_S;
+			}
+
+			/* Set flags according to neighboring fluids */
+			if((il+i-2) > 0)
+			{
+				if(obstacleFlag[il+i-2][jt+1] == 1) // WARNING: May not exist!
+				{
+					(*flag)[xdim+1][j] |= B_W;
+				}
+			}
+			if((il+i) < imax+1)
+			{
+				if(obstacleFlag[il+i][jt+1] == 1) // WARNING: May not exist!
+				{
+					(*flag)[xdim+1][j] |= B_O;
+				}
+			}
+			if(obstacleFlag[il+i-1][jt+2] == 1)
+			{
+				(*flag)[xdim+1][j] |= B_N;
+			}
+			if(obstacleFlag[il+i-1][jt] == 1)
+			{
+				(*flag)[xdim+1][j] |= B_S;
+			}
+		}
 	}
 
-//	for(i = 0; i <= imax+1; i++)
-//	{
-//		(*flag)[i][0] 		= C_B;	/* Floor */
-//		(*flag)[i][jmax+1] 	= C_B;	/* Ceiling */
-//	}
-//	for(j = 0; j <= jmax+1; j++)
-//	{
-//		(*flag)[0][j] 		= C_B;	/* Left wall */
-//		(*flag)[imax+1][j] 	= C_B;	/* Right wall */
-//	}
-
-
 	/* Set inner flags */
-//	for(i = 1; i <= imax; i++)
-	for(i = il; i <= ir; i++)
+	for(i = 1; i <= xdim; i++)
 	{
-//		for(j = 1; j <= jmax; j++)
-		for(j = jb; j <= jt; j++)
+		for(j = 1; j <= ydim; j++)
 		{
 			/* Determine whether cell is a fluid or an obstacle */
-			if(obstacleFlag[i][j] == 1)
+			if(obstacleFlag[il+i-1][jb+j-1] == 1)
 			{
 				(*flag)[i][j] = C_F;  /* Fluid */
 			}
@@ -209,29 +481,21 @@ void init_flag(const char *problem, int xdim, int ydim, int imax, int jmax, int 
 			{
 				(*flag)[i][j] = C_B;  /* Obstacle/border */
 			}
-		}
-	}
 
-//	for(i = 1; i <= imax; i++)
-	for(i = il; i <= ir; i++)
-	{
-//		for(j = 1; j <= jmax; j++)
-		for(j = jb; j <= jt; j++)
-		{
 			/* Set flags according to neighboring fluids */
-			if(obstacleFlag[i-1][j] == 1)
+			if(obstacleFlag[il+i-2][jb+j-1] == 1)
 			{
 				(*flag)[i][j] |= B_W;
 			}
-			if(obstacleFlag[i+1][j] == 1)
+			if(obstacleFlag[il+i][jb+j-1] == 1)
 			{
 				(*flag)[i][j] |= B_O;
 			}
-			if(obstacleFlag[i][j+1] == 1)
+			if(obstacleFlag[il+i-1][jb+j] == 1)
 			{
 				(*flag)[i][j] |= B_N;
 			}
-			if(obstacleFlag[i][j-1] == 1)
+			if(obstacleFlag[il+i-1][jb+j-2] == 1)
 			{
 				(*flag)[i][j] |= B_S;
 			}

@@ -98,6 +98,11 @@ void boundaryvalues(int imax, int jmax, double **U, double **V, int wl, int wr, 
 	}
 }
 
+void boundaryvalues_flag(int imax, int jmax, int il, int ir, int jb, int jt, double **flag, double **obstacle)
+{
+
+}
+
 void boundaryvalues_t(int imax, int jmax, double **U, double **V, int wt)
 {
 	int i;

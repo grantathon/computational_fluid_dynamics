@@ -91,8 +91,6 @@ int main(int argc, char *argv[])
 	double UI = 0;
 	double VI = 0;
 	double PI = 0;
-	double delta_p	= 0;	/* for pressure BC */
-	double Pw = 0;			/* pressure value at right boundary */
 
 	/* Resulting system quantities */
 	double *output_values = 0;
@@ -197,16 +195,13 @@ int main(int argc, char *argv[])
 	y_dim = jt - jb + 1;
 
 	/* Initialize matrices for velocity, pressure, rhs, etc. */
-	init_uvp(UI, VI, PI, x_dim, y_dim, imax, jmax, &U, &V, &P);
+	init_uvp(UI, VI, PI, x_dim, y_dim, &U, &V, &P);
 	F = matrix(0, x_dim+1, 0, y_dim+1);
 	G = matrix(0, x_dim+1, 0, y_dim+1);
 	RS = matrix(0, x_dim+1, 0, y_dim+1);
 
 	/* Init flags indicating cell type and neighbors cell types */
-	init_flag(problem, x_dim, y_dim, il, ir, jb, jt, &flag);
-
-	printf("Made it!\n");
-	return 0;
+	init_flag(problem, x_dim, y_dim, imax, jmax, il, ir, jb, jt, &flag);
 
 	/* Begin the time iteration process */
 	printf("Begin the main computation...\n");

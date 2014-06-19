@@ -1,6 +1,8 @@
 #include "sor.h"
 #include "ns_definitions.h"
+#include "parallel.h"
 #include <math.h>
+#include <mpi.h>
 
 void sor(double omg, double dx, double dy, double **P, double **RS, double *res, int il, int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t, int imax, int jmax, int **Flag)
 {
@@ -17,6 +19,7 @@ void sor(double omg, double dx, double dy, double **P, double **RS, double *res,
   /* new local variable, that is used to count the total number of fluid cells ; used for the normalization
   of the residual */
   int local_fluid_cells_count = 0;
+  int fluid_cells_count = 0;
 
   /* Set left & right global domain boundaries according to Neumann boundary conditions */
   if(rank_l == MPI_PROC_NULL && rank_r != MPI_PROC_NULL)  /* Only receive/send data from/to right */
@@ -132,6 +135,6 @@ void sor(double omg, double dx, double dy, double **P, double **RS, double *res,
   /* Sum the squares of all local residuals then square root that sum for global residual */
   MPI_Allreduce(&rloc, res, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   /* Sum all local fluid cell counts*/
-  MPI_Allreduce(&local_fluid_cells_count, fluid_cells_count, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&local_fluid_cells_count, &fluid_cells_count, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
   *res = sqrt((*res)/fluid_cells_count);
 }
