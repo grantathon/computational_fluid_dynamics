@@ -64,9 +64,9 @@ void sor(double omg, double dx, double dy, double **P, double **RS, double *res,
   }
 
   /* boundary conditions for the pressure at the boundary stripe*/
-  for(i = 1 ; i < imax + 1 ; i++)
+  for(i = 1 ; i < x_dim + 1 ; i++)
   {
-      for(j = 1 ; j < jmax + 1 ; j++)
+      for(j = 1 ; j < y_dim + 1 ; j++)
       {
         if(Flag[i][j] == B_O)
         {
@@ -104,9 +104,9 @@ void sor(double omg, double dx, double dy, double **P, double **RS, double *res,
   }
 
   /* SOR iteration */
-  for(i = 1; i < imax + 1; i++)
+  for(i = 1; i < x_dim + 1; i++)
   {
-    for(j = 1; j < jmax + 1; j++)
+    for(j = 1; j < y_dim + 1; j++)
     {
       P[i][j] = (1.0-omg)*P[i][j]
               + coeff*(( P[i+1][j]+P[i-1][j])/(dx*dx) + ( P[i][j+1]+P[i][j-1])/(dy*dy) - RS[i][j]);  
@@ -119,9 +119,9 @@ void sor(double omg, double dx, double dy, double **P, double **RS, double *res,
   /* compute the residual */
   /* now, the computation is restricted only for the fluid cells */
   rloc = 0;
-  for(i = 0; i <= imax; i++) 
+  for(i = 1; i <= x_dim; i++)
   {
-    for(j = 0; j <= jmax; j++) 
+    for(j = 1; j <= y_dim; j++)
     {
       if(Flag[i][j] & C_F)
       {
