@@ -1,5 +1,6 @@
 #include "helper.h"
 #include "visual.h"
+#include "ns_definitions.h"
 #include <stdio.h>
 
 
@@ -81,6 +82,18 @@ void write_vtkHeader( FILE *fp, int imax, int jmax,
 }
 
 
+void write_uvpPointCoordinates(FILE *fp, int origin_i, int origin_j, int imax, int jmax, double dx, double dy)
+{
+  int i, j;
+
+  for(j = 0; j < jmax+1; j++) {
+    for(i = 0; i < imax+1; i++) {
+      fprintf(fp, "%f %f 0\n", origin_i+(i*dx), origin_j+(j*dy) );
+    }
+  }
+}
+
+
 void write_vtkPointCoordinates( FILE *fp, int imax, int jmax, 
                       double dx, double dy) {
   double originX = 0.0;  
@@ -93,6 +106,79 @@ void write_vtkPointCoordinates( FILE *fp, int imax, int jmax,
     for(i = 0; i < imax+1; i++) {
       fprintf(fp, "%f %f 0\n", originX+(i*dx), originY+(j*dy) );
     }
+  }
+}
+
+
+void output_uvp(double **U, double **V, double **P, int **flag, int il, int ir, int jb, int jt, int omg_i, int omg_j, char *outputfile, int t)
+{
+  int i, j;
+  int dx = 1, dy = 1;
+  FILE *fp = NULL;
+
+  char file_name[80];
+
+  sprintf( file_name, "%s.%i.%i.%i.vtk", outputfile, omg_i, omg_j, t);
+
+  int xdim = ir - il + 1;
+  int ydim = jt - jb + 1;
+
+  fp = fopen( file_name, "w");
+  if( fp == NULL )
+  {
+    char szBuff[80];
+    sprintf( szBuff, "Failed to open %s", file_name );
+    ERROR( szBuff );
+    return;
+  }
+
+  /* write header + point coordinates */
+  write_vtkHeader( fp, xdim, ydim, dx, dy);
+  write_uvpPointCoordinates(fp, il, jb, xdim, ydim, dx, dy);
+
+  fprintf(fp, "POINT_DATA %i \n", (xdim+1)*(ydim+1));
+
+  fprintf(fp,"\n");
+  fprintf(fp, "VECTORS velocity float\n");
+  for(j = 0; j < ydim+1; j++)
+  {
+	for(i = 0; i < xdim+1; i++)
+	{
+		if(flag[i][j] & C_F)
+		{
+			fprintf(fp, "%f %f 0\n", (U[i][j] + U[i][j+1]) * 0.5, (V[i][j] + V[i+1][j]) * 0.5);
+		}
+		else
+		{
+			fprintf(fp, "%f %f 0\n", 0.0, 0.0);
+		}
+	}
+  }
+
+  fprintf(fp,"\n");
+  fprintf(fp,"CELL_DATA %i \n", ((xdim)*(ydim)) );
+  fprintf(fp, "SCALARS pressure float 1 \n");
+  fprintf(fp, "LOOKUP_TABLE default \n");
+  for(j = 1; j < ydim+1; j++)
+  {
+    for(i = 1; i < xdim+1; i++)
+    {
+		if(flag[i][j] & C_F)
+		{
+			fprintf(fp, "%f\n", P[i][j]);
+		}
+		else
+		{
+			fprintf(fp, "%f\n", 0.0);
+		}
+    }
+  }
+
+  if( fclose(fp) )
+  {
+    char szBuff[80];
+    sprintf( szBuff, "Failed to close %s", file_name );
+    ERROR( szBuff );
   }
 }
 
