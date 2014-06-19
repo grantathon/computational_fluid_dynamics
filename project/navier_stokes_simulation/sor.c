@@ -2,25 +2,7 @@
 #include "ns_definitions.h"
 #include <math.h>
 
-void sor(
-  double omg,
-  double dx,
-  double dy,
-  double **P,
-  double **RS,
-  double *res,
-  int il,
-  int ir,
-  int jb,
-  int jt,
-  int rank_l,
-  int rank_r,
-  int rank_b,
-  int rank_t,
-  int imax,
-  int jmax,
-  int **Flag
-)
+void sor(double omg, double dx, double dy, double **P, double **RS, double *res, int il, int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t, int imax, int jmax, int **Flag)
 {
   int i, j;
   double rloc = 0.0;

@@ -212,17 +212,21 @@ int main(int argc, char *argv[])
 	printf("Begin the main computation...\n");
 	while(t < t_end)
 	{
-		boundaryvalues(imax, jmax, U, V, wl, wr, wt, wb, flag);
+		boundaryvalues(imax, jmax, U, V, wl, wr, wt, wb, flag, rank_l, rank_r, rank_b, rank_t);
+		//boundaryvalues(imax, jmax, U, V, wl, wr, wt, wb, flag);
 
-		spec_boundary_val(problem, imax, jmax, U, V, UI, VI);
+		spec_boundary_val(problem, imax, jmax, U, V, UI, VI, rank_l);
+		//spec_boundary_val(problem, imax, jmax, U, V, UI, VI);
 
 		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, flag);
+		//calculate_fg(Re, GX, GY, alpha, dt, dx, dy, imax, jmax, U, V, F, G, flag);
 		calculate_rs(dt, dx, dy, imax, jmax, F, G, RS);
 
 		it = 0;
 		do
 		{
-			sor(omg, dx, dy, imax, jmax, P, RS, &res, flag, Pw, delta_p);
+			sor(omg, dx, dy, P, RS, &res, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, imax, jmax, flag);
+			//sor(omg, dx, dy, imax, jmax, P, RS, &res, flag, Pw, delta_p);
 			it++;
 		}
 		while( it < itermax && res > eps);
@@ -230,8 +234,10 @@ int main(int argc, char *argv[])
 		// Output info to user
 		printf("n=%u, res=%f, it=%u, t=%f, dt=%f\n", n, res, it, t, dt);
 
-		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, flag);
+		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, flag, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
+		//calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, flag);
 		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
+		//calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
 //        write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
 
 		n++;

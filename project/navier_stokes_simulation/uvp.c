@@ -25,22 +25,7 @@ double matrix_abs_max(double **A, int imax, int jmax)
 	return max_val;
 }
 
-void calculate_fg(
-			double Re,
-			double GX,
-			double GY,
-			double alpha,
-			double dt,
-			double dx,
-			double dy,
-			int imax,
-			int jmax,
-			double **U,
-			double **V,
-			double **F,
-			double **G,
-			int **Flag
-)
+void calculate_fg(double Re, double GX, double GY, double alpha, double dt, double dx, double dy, int imax, int jmax, double **U, double **V, double **F, double **G, int **Flag)
 {
 	int i, j;
 	double du_x_2, du_y_2, dv_x_2, dv_y_2, duv_x, duv_y, du2_x, dv2_y;
@@ -194,17 +179,7 @@ void calculate_rs(
  * @f$ {\delta t} := \tau \, \min\left( \frac{Re}{2}\left(\frac{1}{{\delta x}^2} + \frac{1}{{\delta y}^2}\right)^{-1}, \frac{{\delta x}}{|u_{max}|},\frac{{\delta y}}{|v_{max}|} \right) @f$
  *
  */
-void calculate_dt(
-  double Re,
-  double tau,
-  double *dt,
-  double dx,
-  double dy,
-  int imax,
-  int jmax,
-  double **U,
-  double **V
-)
+void calculate_dt(double Re, double tau, double *dt, double dx, double dy, int imax, int jmax, double **U, double **V)
 {
 	/* Only update dt if tau is positive */
 	if(tau > 0)
@@ -237,27 +212,9 @@ void calculate_dt(
  *
  * @image html calculate_uv.jpg
  */
-void calculate_uv(
-		double dt,
-		double dx,
-		double dy,
-		int imax,
-		int jmax,
-		double **U,
-		double **V,
-		double **F,
-		double **G,
-		double **P,
-		int **Flag,
-		int il,
-		int ir,
-		int jb,
-		int jt,
-		int rank_l,
-		int rank_r,
-		int rank_b,
-		int rank_t
-)
+void calculate_uv(double dt, double dx, double dy, int imax, int jmax,
+					double **U, double **V, double **F, double **G, double **P, int **Flag,
+						int il, int ir, int jb, int jt, int rank_l, int rank_r, int rank_b, int rank_t)
 {
 	double *bufSend = 0;
 	double *bufRecv = 0;
