@@ -101,5 +101,34 @@ void init_flag(
   int jt,
   int ***Flag);
 
+void broadcast_parameters(
+	int myrank,
+	double *Re,
+	double *UI,
+	double *VI,
+	double *PI,
+	double *GX,
+	double *GY,
+	double *t_end,
+	double *xlength,
+	double *ylength,
+	double *dt,
+	double *dx,
+	double *dy,
+	int  *imax,
+	int  *jmax,
+	double *alpha,
+	double *omg,
+	double *tau,
+	int  *itermax,
+	double *eps,
+	double *dt_value,
+	int *wl,
+	int *wr,
+	int *wt,
+	int *wb,
+	int *iproc,
+	int *jproc);
+
 #endif
 

@@ -20,7 +20,7 @@ void boundaryvalues(
 		int rank_t
 );
 
-void boundaryvalues_flag(int imax, int jmax, int il, int ir, int jb, int jt, double **flag, double **obstacle);
+void boundaryvalues_flag(int imax, int jmax, int il, int ir, int jb, int jt, int ***flag, int **obstacle);
 
 void boundaryvalues_t(int imax, int jmax, double **U, double **V, int wt);
 
@@ -33,7 +33,6 @@ void boundaryvalues_r(int imax, int jmax, double **U, double **V, int wr);
 
 /* Additional BCs implemented here.*/
 void spec_boundary_val(
-		const char *problem,
 		int imax,
 		int jmax,
 		int y_dim,

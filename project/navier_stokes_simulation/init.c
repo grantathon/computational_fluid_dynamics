@@ -1,7 +1,10 @@
 #include "helper.h"
 #include "init.h"
 #include "ns_definitions.h"
+#include "boundary_val.h"
+
 #include <string.h>
+#include <mpi.h>
 
 int read_parameters(const char * szFileName,
 					double *Re,                /* reynolds number   */
@@ -70,6 +73,8 @@ int read_parameters(const char * szFileName,
 	*dx = *xlength / (double)(*imax);
 	*dy = *ylength / (double)(*jmax);
 
+	printf("wl=%u, wr=%u, wt=%u, wb=%u\n", *wl, *wr, *wt, *wb);
+
 	return 1;
 }
 
@@ -120,352 +125,7 @@ void init_flag(const char *problem, int xdim, int ydim, int imax, int jmax, int 
 	obstacleFlag = read_pgm(problemPBMFile);
 
 	/* Set the boundary values for flag */
-	// TODO: Put all of the boundary initializations in boundaryvalues_flag()
-//	boundaryvalues_flag(imax, jmax, il, ir, jb, jt, flag, obstacleFlag);
-
-	/* Set left and right boundary flags */
-	if(il == 1 && ir == imax)
-	{
-		for(j = 0; j <= ydim+1; j++)
-		{
-			(*flag)[0][j] 		= C_B;	/* Left wall */
-			(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
-		}
-	}
-	else if(il != 1 && ir == imax)
-	{
-		/* Set right boundary flags */
-		for(j = 0; j <= ydim+1; j++)
-		{
-			(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
-		}
-
-		/* Set left boundary flags */
-		for(j = 0; j <= ydim+1; j++)
-		{
-			if(obstacleFlag[il-1][jb+j-1] == 1)
-			{
-				(*flag)[0][j] 	= C_F;	/* Left wall */
-			}
-			else
-			{
-				(*flag)[0][j] 	= C_B;	/* Left wall */
-			}
-
-			/* Set flags according to neighboring fluids */
-			if(obstacleFlag[il-2][jb+j-1] == 1)
-			{
-				(*flag)[0][j] |= B_W;
-			}
-			if(obstacleFlag[il][jb+j-1] == 1)
-			{
-				(*flag)[0][j] |= B_O;
-			}
-			if((jb+j) < jmax+1)
-			{
-				if(obstacleFlag[il-1][jb+j] == 1) // WARNING: May not exist!
-				{
-					(*flag)[0][j] |= B_N;
-				}
-			}
-			if((jb+j-2) > 0)
-			{
-				if(obstacleFlag[il-1][jb+j-2] == 1) // WARNING: May not exist!
-				{
-					(*flag)[0][j] |= B_S;
-				}
-			}
-		}
-	}
-	else if(il == 1 && ir != imax)
-	{
-		/* Set left boundary flags */
-		for(j = 0; j <= ydim+1; j++)
-		{
-			(*flag)[0][j] 		= C_B;	/* Left wall */
-		}
-
-		/* Set right boundary flags */
-		for(j = 0; j <= ydim+1; j++)
-		{
-			if(obstacleFlag[ir+1][jb+j-1] == 1)
-			{
-				(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
-			}
-			else
-			{
-				(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
-			}
-
-			/* Set flags according to neighboring fluids */
-			if(obstacleFlag[ir][jb+j-1] == 1)
-			{
-				(*flag)[xdim+1][j] |= B_W;
-			}
-			if(obstacleFlag[ir+2][jb+j-1] == 1)
-			{
-				(*flag)[xdim+1][j] |= B_O;
-			}
-			if((jb+j) < jmax+1)
-			{
-				if(obstacleFlag[ir+1][jb+j] == 1) // WARNING: May not exist!
-				{
-					(*flag)[xdim+1][j] |= B_N;
-				}
-			}
-			if((jb+j-2) > 0)
-			{
-				if(obstacleFlag[ir+1][jb+j-2] == 1 && jb != 1) // WARNING: May not exist!
-				{
-					(*flag)[xdim+1][j] |= B_S;
-				}
-			}
-		}
-	}
-	else
-	{
-		/* Set left and right boundary flags */
-		for(j = 0; j <= ydim+1; j++)
-		{
-			if(obstacleFlag[il-1][jb+j-1] == 1)
-			{
-				(*flag)[0][j] 		= C_F;	/* Left wall */
-			}
-			else
-			{
-				(*flag)[0][j] 		= C_B;	/* Left wall */
-			}
-
-			if(obstacleFlag[ir+1][jb+j-1] == 1)
-			{
-				(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
-			}
-			else
-			{
-				(*flag)[xdim+1][j] 	= C_B;	/* Right wall */
-			}
-
-			/* Set flags according to neighboring fluids */
-			if(obstacleFlag[il-2][jb+j-1] == 1)
-			{
-				(*flag)[0][j] |= B_W;
-			}
-			if(obstacleFlag[il][jb+j-1] == 1)
-			{
-				(*flag)[0][j] |= B_O;
-			}
-			if((jb+j) < jmax+1)
-			{
-				if(obstacleFlag[il-1][jb+j] == 1) // WARNING: May not exist!
-				{
-					(*flag)[0][j] |= B_N;
-				}
-			}
-			if((jb+j-2) > 0)
-			{
-				if(obstacleFlag[il-1][jb+j-2] == 1 && jb != 1) // WARNING: May not exist!
-				{
-					(*flag)[0][j] |= B_S;
-				}
-			}
-
-			/* Set flags according to neighboring fluids */
-			if(obstacleFlag[ir][jb+j-1] == 1)
-			{
-				(*flag)[xdim+1][j] |= B_W;
-			}
-			if(obstacleFlag[ir+2][jb+j-1] == 1)
-			{
-				(*flag)[xdim+1][j] |= B_O;
-			}
-			if((jb+j) < jmax+1)
-			{
-				if(obstacleFlag[ir+1][jb+j] == 1) // WARNING: May not exist!
-				{
-					(*flag)[xdim+1][j] |= B_N;
-				}
-			}
-			if((jb+j-2) > 0)
-			{
-				if(obstacleFlag[ir+1][jb+j-2] == 1) // WARNING: May not exist!
-				{
-					(*flag)[xdim+1][j] |= B_S;
-				}
-			}
-		}
-	}
-
-	/* Set bottom and top boundary flags */
-	if(jb == 1 && jt == jmax)
-	{
-		for(i = 0; i <= xdim+1; i++)
-		{
-			(*flag)[i][0] 		= C_B;	/* Floor */
-			(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
-		}
-	}
-	else if(jb != 1 && jt == jmax)
-	{
-		/* Set top boundary flags */
-		for(i = 0; i <= xdim+1; i++)
-		{
-			(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
-		}
-
-		/* Set bottom boundary flags */
-		for(i = 0; i <= xdim+1; i++)
-		{
-			if(obstacleFlag[il+i-1][jb-1] == 1)
-			{
-				(*flag)[i][0] 	= C_F;	/* Floor */
-			}
-			else
-			{
-				(*flag)[i][0] 	= C_B;	/* Floor */
-			}
-
-			/* Set flags according to neighboring fluids */
-			if((il+i-2) > 0)
-			{
-				if(obstacleFlag[il+i-2][jb-1] == 1) // WARNING: May not exist!
-				{
-					(*flag)[i][0] |= B_W;
-				}
-			}
-			if((il+i) < imax+1)
-			{
-				if(obstacleFlag[il+i][jb-1] == 1) // WARNING: May not exist!
-				{
-					(*flag)[i][0] |= B_O;
-				}
-			}
-			if(obstacleFlag[il+i-1][jb] == 1)
-			{
-				(*flag)[i][0] |= B_N;
-			}
-			if(obstacleFlag[il+i-1][jb-2] == 1)
-			{
-				(*flag)[i][0] |= B_S;
-			}
-		}
-	}
-	else if(jb == 1 && jt != jmax)
-	{
-		/* Set bottom boundary flags */
-		for(i = 0; i <= xdim+1; i++)
-		{
-			(*flag)[i][ydim+1] 		= C_B;	/* Floor */
-		}
-
-		/* Set top boundary flags */
-		for(i = 0; i <= xdim+1; i++)
-		{
-			if(obstacleFlag[il+i-1][jt+1] == 1)
-			{
-				(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
-			}
-			else
-			{
-				(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
-			}
-
-			/* Set flags according to neighboring fluids */
-			if((il+i-2) > 0)
-			{
-				if(obstacleFlag[il+i-2][jt+1] == 1) // WARNING: May not exist!
-				{
-					(*flag)[xdim+1][j] |= B_W;
-				}
-			}
-			if((il+i) < imax+1)
-			{
-				if(obstacleFlag[il+i][jt+1] == 1) // WARNING: May not exist!
-				{
-					(*flag)[xdim+1][j] |= B_O;
-				}
-			}
-			if(obstacleFlag[il+i-1][jt+2] == 1)
-			{
-				(*flag)[xdim+1][j] |= B_N;
-			}
-			if(obstacleFlag[il+i-1][jt] == 1)
-			{
-				(*flag)[xdim+1][j] |= B_S;
-			}
-		}
-	}
-	else
-	{
-		/* Set bottom and top boundary flags */
-		for(i = 0; i <= xdim+1; i++)
-		{
-			if(obstacleFlag[il+i-1][jb-1] == 1)
-			{
-				(*flag)[i][0] 	= C_F;	/* Floor */
-			}
-			else
-			{
-				(*flag)[i][0] 	= C_B;	/* Floor */
-			}
-
-			if(obstacleFlag[il+i-1][jt+1] == 1)
-			{
-				(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
-			}
-			else
-			{
-				(*flag)[i][ydim+1] 	= C_B;	/* Ceiling */
-			}
-
-			/* Set flags according to neighboring fluids */
-			if((il+i-2) > 0)
-			{
-				if(obstacleFlag[il+i-2][jb-1] == 1) // WARNING: May not exist!
-				{
-					(*flag)[i][0] |= B_W;
-				}
-			}
-			if((il+i) < imax+1)
-			{
-				if(obstacleFlag[il+i][jb-1] == 1) // WARNING: May not exist!
-				{
-					(*flag)[i][0] |= B_O;
-				}
-			}
-			if(obstacleFlag[il+i-1][jb] == 1)
-			{
-				(*flag)[i][0] |= B_N;
-			}
-			if(obstacleFlag[il+i-1][jb-2] == 1)
-			{
-				(*flag)[i][0] |= B_S;
-			}
-
-			/* Set flags according to neighboring fluids */
-			if((il+i-2) > 0)
-			{
-				if(obstacleFlag[il+i-2][jt+1] == 1) // WARNING: May not exist!
-				{
-					(*flag)[xdim+1][j] |= B_W;
-				}
-			}
-			if((il+i) < imax+1)
-			{
-				if(obstacleFlag[il+i][jt+1] == 1) // WARNING: May not exist!
-				{
-					(*flag)[xdim+1][j] |= B_O;
-				}
-			}
-			if(obstacleFlag[il+i-1][jt+2] == 1)
-			{
-				(*flag)[xdim+1][j] |= B_N;
-			}
-			if(obstacleFlag[il+i-1][jt] == 1)
-			{
-				(*flag)[xdim+1][j] |= B_S;
-			}
-		}
-	}
+	boundaryvalues_flag(imax, jmax, il, ir, jb, jt, flag, obstacleFlag);
 
 	/* Set inner flags */
 	for(i = 1; i <= xdim; i++)
@@ -506,4 +166,65 @@ void init_flag(const char *problem, int xdim, int ydim, int imax, int jmax, int 
 	free(problemPBMFile);
 }
 
+void broadcast_parameters(
+	int myrank,
+	double *Re,
+	double *UI,
+	double *VI,
+	double *PI,
+	double *GX,
+	double *GY,
+	double *t_end,
+	double *xlength,
+	double *ylength,
+	double *dt,
+	double *dx,
+	double *dy,
+	int  *imax,
+	int  *jmax,
+	double *alpha,
+	double *omg,
+	double *tau,
+	int  *itermax,
+	double *eps,
+	double *dt_value,
+	int *wl,
+	int *wr,
+	int *wt,
+	int *wb,
+	int *iproc,
+	int *jproc)
+{
+	/* Broadcast parameters to the remaining processes */
+	MPI_Bcast(Re, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(UI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(VI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(PI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(GX, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(GY, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(t_end, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(xlength, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(ylength, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(dt, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(dx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(dy, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(imax, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(jmax, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(alpha, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(omg, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(tau, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(itermax, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(eps, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(dt_value, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(wl, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(wr, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(wt, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(wb, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(iproc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(jproc, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
+	if(myrank == 0)
+	{
+		printf("All simulation parameters have been broadcasted!\n\n");
+	}
+}
