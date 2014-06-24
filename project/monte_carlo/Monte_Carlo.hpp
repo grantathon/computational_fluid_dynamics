@@ -59,10 +59,10 @@ public:
 	void MCSimulation_Stop(std::string txt);
 	/* domain decomposition for the second layer of parallelism */
 	void init_parallel(int nsamples, int nproc, int *myrank, int *il, int *ir, int *rank_l, int *rank_r, int *omg_i, int num_proc);
+	/* data decomposition - peasent style */
+	void data_decomposition(int rank, int* nsampels, int* nprocs, int* samples_per_proc);
 
 	~MonteCarlo();
 };
-
-
 
 #endif /* MONTECARLO_HPP_ */
