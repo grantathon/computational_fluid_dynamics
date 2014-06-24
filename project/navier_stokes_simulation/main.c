@@ -11,46 +11,14 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-/**
- * The main operation reads the configuration file, initializes the scenario and
- * contains the main loop. So here are the individual steps of the algorithm:
- *
- * - read the program configuration file using read_parameters()
- * - set up the matrices (arrays) needed using the matrix() command
- * - create the initial setup init_uvp(), init_flag(), output_uvp()
- * - perform the main loop
- * - trailer: destroy memory allocated and do some statistics
- *
- * The layout of the grid is decribed by the first figure below, the enumeration
- * of the whole grid is given by the second figure. All the unknowns corresond
- * to a two dimensional degree of freedom layout, so they are not stored in
- * arrays, but in a matrix.
- *
- * @image html grid.jpg
- *
- * @image html whole-grid.jpg
- *
- * Within the main loop the following big steps are done (for some of the 
- * operations a definition is defined already within uvp.h):
- *
- * - calculate_dt() Determine the maximal time step size.
- * - boundaryvalues() Set the boundary values for the next time step.
- * - calculate_fg() Determine the values of F and G (diffusion and confection).
- *   This is the right hand side of the pressure equation and used later on for
- *   the time step transition.
- * - calculate_rs()
- * - Iterate the pressure poisson equation until the residual becomes smaller
- *   than eps or the maximal number of iterations is performed. Within the
- *   iteration loop the operation sor() is used.
- * - calculate_uv() Calculate the velocity at the next time step.
- */
 int main(int argc, char *argv[])
 {
 	/* Input file with user parameters */
 	const char *problem = "flow_over_a_step";
 	char *problemDataFile = malloc(strlen(problem) + 4);
 	char *problemOutput = malloc(strlen(problem) + 10);
-	char buffer[4] = {0};
+	char *simOutput = malloc(strlen("sim_") + 20);
+	char buffer[10] = {0};
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -74,9 +42,9 @@ int main(int argc, char *argv[])
 	double tau 		= 0;
 	double dt_value = 0;
 	int n 			= 0;
-	double start_time = 0.0;
-	double end_time = 0.0;
-	double visual_n = 1.0;
+	double start_time = 0;
+	double end_time = 0;
+	double visual_n = 1;
 
 	/* Pressure iteration data */
 	int itermax 	= 0;
@@ -95,7 +63,6 @@ int main(int argc, char *argv[])
 	double PI = 0;
 
 	/* Resulting system quantities */
-	double *output_values = 0;
 	double **U 	= 0;
 	double **V 	= 0;
 	double **P 	= 0;
@@ -121,6 +88,7 @@ int main(int argc, char *argv[])
 	int num_proc = 0;
 	int comm_size = 0;
 	int x_dim, y_dim;
+	int mc_id = 0;
 
 	/* Initialize MPI and begin parallel processes */
 	MPI_Init(&argc, &argv);
@@ -141,6 +109,35 @@ int main(int argc, char *argv[])
 	strcpy(problemDataFile, problem);
 	strcat(problemDataFile, ".dat");
 
+	/* Read passed Reynolds number and unique Monte Carlo ID */
+	if(argc == 3)
+	{
+		Re = atof(argv[1]);
+		if(Re <= 0)
+		{
+			Programm_Stop("Reynolds number must be greater than zero.");
+			return 0;
+		}
+
+		mc_id = atoi(argv[2]);
+		if(mc_id < 0)
+		{
+			Programm_Stop("Monte Carlo ID must be positive.");
+			return 0;
+		}
+	}
+	else
+	{
+		Programm_Stop("Please pass the Reynolds number and Monte Carlo ID as arguments, respectively.");
+		return 0;
+	}
+
+	/* Setup simulation output file */
+	strcpy(simOutput, "ns_sim_");
+	sprintf(buffer, "%i", mc_id);
+	strcat(simOutput, buffer);
+	strcat(simOutput, ".mc");
+
 	/* Perform necessary initializations in the main process */
 	if(myrank == 0)
 	{
@@ -148,7 +145,7 @@ int main(int argc, char *argv[])
 		start_time = MPI_Wtime();
 
 		/* Read parameters from DAT file, store locally, and check for potential error */
-		readParamError = read_parameters(problemDataFile, &Re, &UI, &VI, &PI, &GX, &GY,
+		readParamError = read_parameters(problemDataFile, &UI, &VI, &PI, &GX, &GY,
 			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
 			&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb, &iproc, &jproc);
 
@@ -167,42 +164,15 @@ int main(int argc, char *argv[])
 	}
 
 	/* Broadcast parameters to the remaining processes */
-	MPI_Bcast(&Re, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&UI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&VI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&PI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&GX, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&GY, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&t_end, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&xlength, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&ylength, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&dt, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&dx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&dy, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&imax, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&jmax, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&alpha, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&omg, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&tau, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&itermax, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&eps, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&dt_value, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&iproc, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&jproc, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&wl, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&wr, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&wt, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&wb, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-	if(myrank == 0)
-	{
-		printf("All simulation parameters have been broadcasted!\n\n");
-	}
+	broadcast_parameters(myrank, &Re, &UI, &VI, &PI, &GX, &GY, &t_end, &xlength, &ylength, &dt,
+			&dx, &dy, &imax, &jmax, &alpha, &omg, &tau, &itermax, &eps, &dt_value, &wl, &wr,
+			&wt, &wb, &iproc, &jproc);
 
 	/* Initialize process dependent variables */
 	init_parallel(iproc, jproc, imax, jmax, &myrank, &il, &ir, &jb, &jt, &rank_l,
             &rank_r, &rank_b, &rank_t, &omg_i, &omg_j, num_proc);
 
+	/* Set dimensions of local process */
 	x_dim = ir - il + 1;
 	y_dim = jt - jb + 1;
 
@@ -220,7 +190,7 @@ int main(int argc, char *argv[])
 	while(t < t_end)
 	{
 		boundaryvalues(x_dim, y_dim, U, V, wl, wr, wt, wb, flag, rank_l, rank_r, rank_b, rank_t);
-		spec_boundary_val(problem, imax, jmax, y_dim, U, V, UI, VI, omg_j, jb, jt, rank_l);
+		spec_boundary_val(imax, jmax, y_dim, U, V, UI, VI, omg_j, jb, jt, rank_l);
 
 		calculate_fg(Re, GX, GY, alpha, dt, dx, dy, x_dim, y_dim, U, V, F, G, flag);
 		calculate_rs(dt, dx, dy, x_dim, y_dim, F, G, RS);
@@ -231,34 +201,47 @@ int main(int argc, char *argv[])
 			sor(omg, dx, dy, P, RS, &res, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t, imax, jmax, flag);
 			it++;
 		}
-		while( it < itermax && res > eps);
+		while(it < itermax && res > eps);
 
 		calculate_uv(dt, dx, dy, x_dim, y_dim, U, V, F, G, P, flag, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
-		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
 
 		/* Visualize U, V, and P depending on dt_value */
-		if(1)//(((t / dt_value) >= visual_n) || (t == dt))
+		if((t / dt_value) >= visual_n)
 		{
 			output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
 			visual_n++;
 		}
 
-		// output only for master rank
+		// output sim stats to user by master rank
 		if (myrank == 0)
 		{
 			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
 		}
 
-		n++;
+		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
+
 		t += dt;
+		n++;
 	}
 
-	/* TODO: Write output array to shared file */
-	output_values = malloc(4*sizeof(double));
-	output_values[0] = 0;  	// Re
-	output_values[1] = 0;	// U
-	output_values[2] = 0;	// V
-	output_values[3] = 0;	// P
+	/* Visualize last output of U, V, and P */
+	output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
+
+	/* Write simulation output values */
+	if(myrank == 0)
+	{
+		/* Reynolds number */
+		if(write_to_file((const char*)simOutput, Re) == 0)
+		{
+			return 0;
+		}
+
+		/* TODO: Seperation point */
+
+
+		/* TODO: Pressure at seperation point */
+
+	}
 
 	/* Deallocate heap memory */
 	free_matrix(U, 0, x_dim+1, 0, y_dim+1);

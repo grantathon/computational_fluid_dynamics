@@ -47,8 +47,8 @@ void calculate_fg(double Re, double GX, double GY, double alpha, double dt, doub
 								- ((fabs(V[i][j-1] + V[i+1][j-1])*(U[i][j-1] - U[i][j]))/4));
 
 				du2_x = (1/dx)*(pow((U[i][j] + U[i+1][j])/2, 2) - pow((U[i-1][j] + U[i][j])/2, 2))
-		+ (alpha/dx)*(((fabs(U[i][j] + U[i+1][j])*(U[i][j] - U[i+1][j]))/4)
-				- ((fabs(U[i-1][j] + U[i][j])*(U[i-1][j] - U[i][j]))/4));
+						+ (alpha/dx)*(((fabs(U[i][j] + U[i+1][j])*(U[i][j] - U[i+1][j]))/4)
+						- ((fabs(U[i-1][j] + U[i][j])*(U[i-1][j] - U[i][j]))/4));
 
 				F[i][j] = U[i][j] + dt*(((du_x_2 + du_y_2)/Re) - du2_x - duv_y + GX);
 			}
@@ -73,8 +73,8 @@ void calculate_fg(double Re, double GX, double GY, double alpha, double dt, doub
 								- ((fabs(U[i-1][j] + U[i-1][j+1])*(V[i-1][j] - V[i][j]))/4));
 
 				dv2_y = (1/dy)*(pow((V[i][j] + V[i][j+1])/2, 2) - pow((V[i][j-1] + V[i][j])/2, 2))
-		+ (alpha/dy)*(((fabs(V[i][j] + V[i][j+1])*(V[i][j] - V[i][j+1]))/4)
-				- ((fabs(V[i][j-1] + V[i][j])*(V[i][j-1] - V[i][j]))/4));
+						+ (alpha/dy)*(((fabs(V[i][j] + V[i][j+1])*(V[i][j] - V[i][j+1]))/4)
+						- ((fabs(V[i][j-1] + V[i][j])*(V[i][j-1] - V[i][j]))/4));
 
 				G[i][j] = V[i][j] + dt*(((dv_x_2 + dv_y_2)/Re) - duv_x - dv2_y + GY);
 			}
