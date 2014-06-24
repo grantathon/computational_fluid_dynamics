@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
 	shear_stress_calc(&x_loc, dx, dy, imax, U, V);
 	printf("re-attachment point: %f \t time: %f\n", x_loc, t);
 
+
 	/* Visualize U, V, and P */
 	write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
 

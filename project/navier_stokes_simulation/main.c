@@ -6,6 +6,7 @@
 #include "sor.h"
 #include "string.h"
 #include "parallel.h"
+#include "shear_stress.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
 	/* Pressure iteration data */
 	int itermax 	= 0;
 	int it 			= 0;
-	double res 		= 0;
+	double res 		= 1;
 	double eps 		= 0;
 	double omg 		= 0;
 	double alpha 	= 0;
@@ -89,6 +90,10 @@ int main(int argc, char *argv[])
 	int comm_size = 0;
 	int x_dim, y_dim;
 	int mc_id = 0;
+
+	/*	Parameters for flow reattachment*/
+	double x_local = 0;
+	double x_global = 0;
 
 	/* Initialize MPI and begin parallel processes */
 	MPI_Init(&argc, &argv);
@@ -187,7 +192,7 @@ int main(int argc, char *argv[])
 
 	/* Begin the time iteration process */
 	printf("Begin the main computation...\n");
-	while(t < t_end)
+	while(res > eps)
 	{
 		boundaryvalues(x_dim, y_dim, U, V, wl, wr, wt, wb, flag, rank_l, rank_r, rank_b, rank_t);
 		spec_boundary_val(imax, jmax, y_dim, U, V, UI, VI, omg_j, jb, jt, rank_l);
@@ -224,23 +229,39 @@ int main(int argc, char *argv[])
 		n++;
 	}
 
+	/* for all the domains touching the bottom check for the re-attachment point */
+	if (rank_b == MPI_PROC_NULL)
+	{
+		shear_stress_calc(&x_local, dx, dy, il, x_dim, U, V);
+	}
+	/* find the maximum of the attachment point from all subdomains bordering the floor*/
+	MPI_Allreduce(&x_local, &x_global, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+
 	/* Visualize last output of U, V, and P */
 	output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
 
 	/* Write simulation output values */
 	if(myrank == 0)
 	{
+		printf("global point: %f \t time: %f\n", x_global, t);
+
 		/* Reynolds number */
 		if(write_to_file((const char*)simOutput, Re) == 0)
 		{
 			return 0;
 		}
 
-		/* TODO: Seperation point */
+		/* Re-attachment point location*/
+		if(write_to_file((const char*)simOutput, x_global) == 0)
+		{
+			return 0;
+		}
 
-
-		/* TODO: Pressure at seperation point */
-
+		/* Re-attachment point time (steady state)*/
+		if(write_to_file((const char*)simOutput, t) == 0)
+		{
+			return 0;
+		}
 	}
 
 	/* Deallocate heap memory */
