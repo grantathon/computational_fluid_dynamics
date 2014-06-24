@@ -7,7 +7,6 @@
 #include <mpi.h>
 
 int read_parameters(const char * szFileName,
-					double *Re,                /* reynolds number   */
                     double *UI,                /* velocity x-direction */
                     double *VI,                /* velocity y-direction */
                     double *PI,                /* pressure */
@@ -46,7 +45,6 @@ int read_parameters(const char * szFileName,
 	READ_DOUBLE( szFileName, *xlength );
 	READ_DOUBLE( szFileName, *ylength );
 
-	READ_DOUBLE( szFileName, *Re    );
 	READ_DOUBLE( szFileName, *t_end );
 	READ_DOUBLE( szFileName, *dt    );
 
@@ -196,7 +194,7 @@ void broadcast_parameters(
 	int *jproc)
 {
 	/* Broadcast parameters to the remaining processes */
-	MPI_Bcast(Re, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+//	MPI_Bcast(Re, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(UI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(VI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(PI, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);

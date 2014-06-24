@@ -41,9 +41,9 @@ int main(int argc, char *argv[])
 	double tau 		= 0;
 	double dt_value = 0;
 	int n 			= 0;
-	double start_time = 0.0;
-	double end_time = 0.0;
-	double visual_n = 0.0;
+	double start_time = 0;
+	double end_time = 0;
+	double visual_n = 1;
 
 	/* Pressure iteration data */
 	int itermax 	= 0;
@@ -107,6 +107,17 @@ int main(int argc, char *argv[])
 	strcpy(problemDataFile, problem);
 	strcat(problemDataFile, ".dat");
 
+	/* Read passed Reynolds number */
+	if(argc > 1)
+	{
+		Re = atof(argv[1]);
+		if(Re <= 0)
+		{
+			Programm_Stop("Reynolds number must be greater than zero!");
+			return 0;
+		}
+	}
+
 	/* Perform necessary initializations in the main process */
 	if(myrank == 0)
 	{
@@ -114,7 +125,7 @@ int main(int argc, char *argv[])
 		start_time = MPI_Wtime();
 
 		/* Read parameters from DAT file, store locally, and check for potential error */
-		readParamError = read_parameters(problemDataFile, &Re, &UI, &VI, &PI, &GX, &GY,
+		readParamError = read_parameters(problemDataFile, &UI, &VI, &PI, &GX, &GY,
 			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
 			&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb, &iproc, &jproc);
 
@@ -192,6 +203,9 @@ int main(int argc, char *argv[])
 		t += dt;
 		n++;
 	}
+
+	/* Visualize last output of U, V, and P */
+	output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
 
 	/* Deallocate heap memory */
 	free_matrix(U, 0, x_dim+1, 0, y_dim+1);

@@ -41,7 +41,6 @@
 
 int read_parameters( 
 		const char *szFileName,
-  double *Re,
   double *UI,
   double *VI,
   double *PI,
