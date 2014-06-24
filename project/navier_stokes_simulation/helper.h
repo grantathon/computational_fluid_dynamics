@@ -271,6 +271,11 @@ void init_imatrix( int **m, int nrl, int nrh, int ncl, int nch, int a);
  */
 int **read_pgm(const char *filename);
 
+/**
+ * Outputs a double to a file, where multiple values in a file will be delimited by a space.
+ * If the file doesn't exist, it is created.
+ */
+int write_to_file(const char *filename, double output_val);
 
 /**
  *                         useful macros

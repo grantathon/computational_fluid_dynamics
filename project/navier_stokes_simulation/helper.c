@@ -431,7 +431,6 @@ int **read_pgm(const char *filename)
     int i1, j1;
     int **pic = NULL;
     
-
     if ((input=fopen(filename,"rb"))==0)
     {
        char szBuff[80];
@@ -503,4 +502,32 @@ int **read_pgm(const char *filename)
     fclose(input);
     
     return pic;
+}
+
+int write_to_file(const char *filename, double output_val)
+{
+	FILE *input = NULL;
+
+	/* Initialize reading/writing of output file */
+	input = fopen(filename, "a+");
+	if(input == 0)
+	{
+		char szBuff[80];
+		sprintf(szBuff, "Can not append or create file %s", filename);
+		ERROR(szBuff);
+	}
+
+	/* Check value existence in file.  If exists, start with space. Else, no space */
+	if(fgetc(input) != EOF)
+	{
+		fprintf(input, " %f", output_val);
+	}
+	else
+	{
+		fprintf(input, "%f", output_val);
+	}
+
+	fclose(input);
+
+	return 1;
 }

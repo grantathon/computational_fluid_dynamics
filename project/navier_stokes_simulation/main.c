@@ -17,7 +17,8 @@ int main(int argc, char *argv[])
 	const char *problem = "flow_over_a_step";
 	char *problemDataFile = malloc(strlen(problem) + 4);
 	char *problemOutput = malloc(strlen(problem) + 10);
-	char buffer[4] = {0};
+	char *simOutput = malloc(strlen("sim_") + 20);
+	char buffer[10] = {0};
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -87,6 +88,7 @@ int main(int argc, char *argv[])
 	int num_proc = 0;
 	int comm_size = 0;
 	int x_dim, y_dim;
+	int mc_id = 0;
 
 	/* Initialize MPI and begin parallel processes */
 	MPI_Init(&argc, &argv);
@@ -107,16 +109,34 @@ int main(int argc, char *argv[])
 	strcpy(problemDataFile, problem);
 	strcat(problemDataFile, ".dat");
 
-	/* Read passed Reynolds number */
-	if(argc > 1)
+	/* Read passed Reynolds number and unique Monte Carlo ID */
+	if(argc == 3)
 	{
 		Re = atof(argv[1]);
 		if(Re <= 0)
 		{
-			Programm_Stop("Reynolds number must be greater than zero!");
+			Programm_Stop("Reynolds number must be greater than zero.");
+			return 0;
+		}
+
+		mc_id = atoi(argv[2]);
+		if(mc_id < 0)
+		{
+			Programm_Stop("Monte Carlo ID must be positive.");
 			return 0;
 		}
 	}
+	else
+	{
+		Programm_Stop("Please pass the Reynolds number and Monte Carlo ID as arguments, respectively.");
+		return 0;
+	}
+
+	/* Setup simulation output file */
+	strcpy(simOutput, "ns_sim_");
+	sprintf(buffer, "%i", mc_id);
+	strcat(simOutput, buffer);
+	strcat(simOutput, ".mc");
 
 	/* Perform necessary initializations in the main process */
 	if(myrank == 0)
@@ -206,6 +226,22 @@ int main(int argc, char *argv[])
 
 	/* Visualize last output of U, V, and P */
 	output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
+
+	/* Write simulation output values */
+	if(myrank == 0)
+	{
+		/* Reynolds number */
+		if(write_to_file((const char*)simOutput, Re) == 0)
+		{
+			return 0;
+		}
+
+		/* TODO: Seperation point */
+
+
+		/* TODO: Pressure at seperation point */
+
+	}
 
 	/* Deallocate heap memory */
 	free_matrix(U, 0, x_dim+1, 0, y_dim+1);
