@@ -8,7 +8,8 @@ OBJ = 	helper.o\
       	uvp.o\
       	main.o\
       	visual.o\
-      	sor.o
+      	sor.o\
+      	shear_stress.o
 
 
 all:  $(OBJ)

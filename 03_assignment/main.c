@@ -4,7 +4,9 @@
 #include "uvp.h"
 #include "boundary_val.h"
 #include "sor.h"
+#include "shear_stress.h"
 #include "string.h"
+
 #include <stdio.h>
 
 /**
@@ -73,7 +75,7 @@ int main(int argc, char *argv[])
 	/* Pressure iteration data */
 	int itermax 	= 0;
 	int it 			= 0;
-	double res 		= 0;
+	double res 		= 1;
 	double eps 		= 0;
 	double omg 		= 0;
 	double alpha 	= 0;
@@ -96,6 +98,11 @@ int main(int argc, char *argv[])
 	double **F 	= 0;
 	double **G 	= 0;
 	int **Flag 	= 0;
+
+	/*	Parameters for flow reattachment*/
+	double x_loc = 0;
+
+	/*stress_tensor = matrix(1, imax, 1, 1);*/
 
 	/* User must enter correct problem strings */
 	if(strcmp(problem, "Karman_vortex") && strcmp(problem, "plane_shear_flow") && strcmp(problem, "flow_over_a_step"))
@@ -132,7 +139,7 @@ int main(int argc, char *argv[])
 
 	/* Begin the time iteration process */
 	printf("Begin the main computation...\n");
-	while(t < t_end)
+	while(res > eps)
 	{
 		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
 		boundaryvalues(imax, jmax, U, V, wl, wr, wt, wb, Flag);
@@ -156,8 +163,11 @@ int main(int argc, char *argv[])
 
 		n++;
 		t += dt;
-		printf("t=%f, dt=%f\n", t, dt);
+		/*printf("t=%f, dt=%f\n", t, dt);*/
 	}
+
+	shear_stress_calc(&x_loc, dx, dy, imax, U, V);
+	printf("re-attachment point: %f \t time: %f\n", x_loc, t);
 
 	/* Visualize U, V, and P */
 	write_vtkFile(problemOutput, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
@@ -169,6 +179,8 @@ int main(int argc, char *argv[])
 	free_matrix(RS, 0, imax+1, 0, jmax+1);
 	free_matrix(F, 0, imax+1, 0, jmax+1);
 	free_matrix(G, 0, imax+1, 0, jmax+1);
+	/*free_matrix(stress_tensor, 1, imax, 1, 1);*/
+
 	free_imatrix(Flag, 0, imax+1, 0, jmax+1);
 
 	return -1;
