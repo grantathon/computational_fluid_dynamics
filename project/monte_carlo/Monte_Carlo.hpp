@@ -11,6 +11,7 @@
 #include <boost/random.hpp>
 #include <iostream>
 #include <numeric>
+#include <cmath>
 #include <mpi.h>
 
 /* Monte Carlo method for UQ */

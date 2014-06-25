@@ -7,7 +7,7 @@ OBJ = 	Monte_Carlo.o\
 		solver.o
 
 all:  $(OBJ)
-	$(CC) $(CFLAGS) -o sim $(OBJ)  -lm
+	$(CC) $(CFLAGS) -o sim_MC $(OBJ)  -lm
 
 %.o : %.cpp
 	$(CC) -c $(CFLAGS) $*.cpp -o $*.o

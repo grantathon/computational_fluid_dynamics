@@ -41,7 +41,7 @@
  	double temp;
 
  	for (int i = 0; i < nsamples; i++) {
- 		temp = get_normal();
+ 		temp = fabs(get_normal());
  		ndsamples.push_back(temp);
  	}
 
