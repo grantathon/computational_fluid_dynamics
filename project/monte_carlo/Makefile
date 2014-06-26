@@ -3,8 +3,7 @@ CFLAGS = -Wall -Werror #-pedantic
 .cpp.o:  ; $(CC) -cpp $(CFLAGS) $<
 
 OBJ = 	Monte_Carlo.o\
-		main.o\
-		solver.o
+		main.o
 
 all:  $(OBJ)
 	$(CC) $(CFLAGS) -o sim_MC $(OBJ)  -lm
@@ -13,9 +12,8 @@ all:  $(OBJ)
 	$(CC) -c $(CFLAGS) $*.cpp -o $*.o
 
 clean:
-	rm $(OBJ)
+	rm $(OBJ) *.mc
 
 Monte_Carlo.o : Monte_Carlo.hpp
-solver.o 	  : solver.hpp
  
-main.o        : Monte_Carlo.hpp solver.hpp
+main.o        : Monte_Carlo.hpp

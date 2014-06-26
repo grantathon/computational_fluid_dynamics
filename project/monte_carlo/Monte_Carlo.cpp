@@ -61,7 +61,7 @@
  	return udsamples;
  }
 
- double MonteCarlo::compute_mean(std::vector<double> v) {
+ double MonteCarlo::compute_mean(const std::vector<double> &v) const {
  	double sum = 0.0, mean = 0.0;
 
  	sum = std::accumulate(v.begin(), v.end(), 0.0);
@@ -70,7 +70,7 @@
  	return mean;
  }
 
- double MonteCarlo::compute_variance(std::vector<double> v, double mean) {
+ double MonteCarlo::compute_variance(const std::vector<double> &v, double mean) const {
  	double square_sum = 0.0, stddev = 0.0;
 
  	std::vector<double> diff(v.size());
@@ -83,71 +83,13 @@
  	return stddev;
  }
 
- void MonteCarlo::MCSimulation_Stop(std::string txt)
-/* all processes will produce a text output, be synchronized and finished */
+
+ void MonteCarlo::data_decomposition(int* nsampels, int* nprocs, int *samples_per_proc)
  {
- 	int myrank;
+ 	int rank;
 
- 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-   MPI_Barrier(MPI_COMM_WORLD);                           /* synchronize output */
- 	std::cout << "-STOP- P:" << myrank << " " << txt << std::endl;
- 	fflush(stdout);
- 	fflush(stderr);
- 	MPI_Barrier(MPI_COMM_WORLD);
- 	MPI_Finalize();
- 	exit(1);
- }
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
- void MonteCarlo::init_parallel(int nsamples, int nproc, int *myrank, int *il, int *ir, int *rank_l, int *rank_r, int *omg_i, int num_proc)
- {
- 	int i_per_iproc, i_rem;
-
-	/* Set sub-domain coordinates */
- 	*omg_i = ((*myrank) % nproc) + 1;
-
-	/* Compute il, ir for each sub-domain*/
- 	i_per_iproc = (nsamples / nproc);
- 	i_rem = (nsamples % nproc);
-
-	/* for left and right*/
-	if ((*omg_i) == 1)   /* to rank zero assign the remainder*/
- 	{
- 		*il = (((*omg_i) -1) * i_per_iproc) + 1;
- 	}
- 	else
- 	{
- 		*il = (((*omg_i) -1) * i_per_iproc) + i_rem + 1;
- 	}
- 	*ir = ((*omg_i) * i_per_iproc) + i_rem;
-
-	/* Assign rank of neighbour to each sub-domain: rank_l, rank_r*/
-	/* Left boundary*/
- 	if ((*il) == 1)
- 	{
- 		*rank_l = MPI_PROC_NULL;
- 	}
- 	else
- 	{
- 		*rank_l = (*myrank) - 1;
- 	}
-
-	/* Right boundary*/
- 	if ((*ir) == nsamples)
- 	{
- 		*rank_r = MPI_PROC_NULL;
- 	}
- 	else
- 	{
- 		*rank_r = (*myrank) + 1;
- 	}
-
- 	std::cout <<"rank= "<< *myrank << std::endl;
- 	std::cout << "omg_i= " <<*omg_i << std::endl;
- 	std::cout << "il= " << *il << " " << "ir= " << *ir << " " << "rank_l= " <<*rank_l << " " << "rank_r= " << *rank_r << std::endl;
- }
-
- void MonteCarlo::data_decomposition(int rank, int* nsampels, int* nprocs, int *samples_per_proc)
- {
  	if (rank == 0) 
  	{
  		*samples_per_proc = *nsampels - (*nprocs - 1)*((*nsampels)/(*nprocs));
@@ -156,6 +98,63 @@
  	{
  		*samples_per_proc = (*nsampels)/(*nprocs);
  	}
+ }
+
+ void MonteCarlo::get_NS_solution(int* samples_per_proc, const std::vector<double> &Re)
+ {
+ 	int rank;
+ 	char buffer[10];
+
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+ 	for(int i = 0 ; i < *samples_per_proc ; i++)
+	{
+		char call_NS_solver[30] = "mpirun -np 4 ./sim ";
+		snprintf(buffer, sizeof(buffer), "%g %d", Re[i], rank*(*samples_per_proc) + i + 1);	
+		strcat(call_NS_solver, buffer);
+
+		system(call_NS_solver);
+
+		//MPI_Barrier( MPI_COMM_WORLD);
+	}
+ }
+
+ void MonteCarlo::get_QoI(int* samples_per_proc, std::vector<double> &qoi)
+ {
+ 	int rank;
+ 	char buffer[10];
+
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+ 	for(int i = 0 ; i < *samples_per_proc ; i++)
+	{
+		double Re, x_global, t_reattach;
+		char datafile_name[30] = "ns_sim_";
+
+		snprintf(buffer, sizeof(buffer), "%d%s", rank*(*samples_per_proc) + i + 1, ".mc");	
+		strcat(datafile_name, buffer);
+
+		std::ifstream MC_data(datafile_name);
+		MC_data >> Re >> x_global >> t_reattach;
+
+		qoi.push_back(t_reattach);
+
+		//MPI_Barrier( MPI_COMM_WORLD);
+	}
+ }
+
+ void MonteCarlo::MCSimulation_Stop(const std::string &txt)
+ {
+ 	int myrank;
+
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+    MPI_Barrier(MPI_COMM_WORLD);                           /* synchronize output */
+ 	std::cout << "-STOP- P:" << myrank << " " << txt << std::endl;
+ 	fflush(stdout);
+ 	fflush(stderr);
+ 	MPI_Barrier(MPI_COMM_WORLD);
+ 	MPI_Finalize();
+ 	exit(1);
  }
 
  MonteCarlo::~MonteCarlo() {
