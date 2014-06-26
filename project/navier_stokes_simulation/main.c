@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 		MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 		if(comm_size != (iproc*jproc))
 		{
-			printf("The number of processes entered via 'mpirun -np %u' does not equal the size specified by the input file (iproc * jproc = %u)\n", comm_size, iproc*jproc);
+			/*printf("The number of processes entered via 'mpirun -np %u' does not equal the size specified by the input file (iproc * jproc = %u)\n", comm_size, iproc*jproc);*/
 			return 0;
 		}
 	}
@@ -213,14 +213,14 @@ int main(int argc, char *argv[])
 		/* Visualize U, V, and P depending on dt_value */
 		if((t / dt_value) >= visual_n)
 		{
-			output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
+			/*output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);*/
 			visual_n++;
 		}
 
 		// output sim stats to user by master rank
 		if (myrank == 0)
 		{
-			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
+			/*printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);*/
 		}
 
 		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 	MPI_Allreduce(&x_local, &x_global, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
 	/* Visualize last output of U, V, and P */
-	output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
+	/*output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);*/
 
 	/* Write simulation output values */
 	if(myrank == 0)
@@ -277,7 +277,8 @@ int main(int argc, char *argv[])
 	{
 		/* End timer */
 		end_time = MPI_Wtime();
-		printf("Program time: %f\n", (end_time - start_time));
+		printf("Elapsed time for NS solver using %d processors is: %f seconds\n", num_proc, end_time - start_time);
+
 	}
 
 	/* Finalize MPI */

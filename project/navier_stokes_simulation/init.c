@@ -71,7 +71,7 @@ int read_parameters(const char * szFileName,
 	*dx = *xlength / (double)(*imax);
 	*dy = *ylength / (double)(*jmax);
 
-	printf("wl=%u, wr=%u, wt=%u, wb=%u\n", *wl, *wr, *wt, *wb);
+	/*printf("wl=%u, wr=%u, wt=%u, wb=%u\n", *wl, *wr, *wt, *wb);*/
 
 	return 1;
 }

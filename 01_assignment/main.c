@@ -43,7 +43,7 @@ int main(int argn, char** args)
 {
 	/* Input file with user parameters */
 	const char *szFileName = "cavity100.dat";
-	const char *szProblem = "SciCompCFD_Assignment_01";
+	/*const char *szProblem = "SciCompCFD_Assignment_01";*/
 	int readParamError = 0;
 
 	/* Geometry data */
@@ -123,12 +123,14 @@ int main(int argn, char** args)
 		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P);
 
 		/* Visualize U, V, and P */
-		write_vtkFile(szProblem, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
+		/*write_vtkFile(szProblem, n, xlength, ylength, imax, jmax, dx, dy, U, V, P);*/
 
 		n++;
 		t += dt;
-		printf("t=%f, dt=%f\n", t, dt);
+		/*rintf("t=%f, dt=%f\n", t, dt);*/
 	}
+
+	printf("End of simulation...hooray! \n");
 
 	/* Deallocate heap memory */
 	free_matrix(U, 0, imax+1, 0, jmax+1);

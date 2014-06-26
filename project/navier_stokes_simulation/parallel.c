@@ -138,8 +138,8 @@ void init_parallel(int iproc,
 	  *rank_t = (*myrank) + iproc;
 	}
 
-	printf("rank: %u, omg_i: %u, omg_j: %u, il: %u\t, ir: %u, jb: %u, jt: %u\t, rank_l: %u, rank_r: %u\t, rank_b: %u, rank_t: %u\n",
-			*myrank, *omg_i, *omg_j, *il, *ir, *jb, *jt, *rank_l, *rank_r, *rank_b, *rank_t);
+	/*printf("rank: %u, omg_i: %u, omg_j: %u, il: %u\t, ir: %u, jb: %u, jt: %u\t, rank_l: %u, rank_r: %u\t, rank_b: %u, rank_t: %u\n",
+			*myrank, *omg_i, *omg_j, *il, *ir, *jb, *jt, *rank_l, *rank_r, *rank_b, *rank_t);*/
 }
 
 void pressure_comm(double **P,
