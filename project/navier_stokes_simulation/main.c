@@ -92,8 +92,10 @@ int main(int argc, char *argv[])
 	int mc_id = 0;
 
 	/*	Parameters for flow reattachment*/
-	double x_local = 0;
-	double x_global = 0;
+	double x_local_stress = 0;
+	double x_global_stress = 0;
+	double x_local_U = 0;
+	double x_global_U = 0;
 
 	/* Initialize MPI and begin parallel processes */
 	MPI_Init(&argc, &argv);
@@ -220,7 +222,7 @@ int main(int argc, char *argv[])
 		// output sim stats to user by master rank
 		if (myrank == 0)
 		{
-			/*printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);*/
+			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
 		}
 
 		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
@@ -229,21 +231,24 @@ int main(int argc, char *argv[])
 		n++;
 	}
 
-	/* for all the domains touching the bottom check for the re-attachment point */
+	/* for all the domains touching the bottom surface check for the re-attachment point */
 	if (rank_b == MPI_PROC_NULL)
 	{
-		shear_stress_calc(&x_local, dx, dy, il, x_dim, U, V);
+		/*separation_point_shear_stress(&x_local_stress, dx, dy, il, x_dim, U, V);*/
+		separation_point_U(&x_local_U, dx, dy, il, x_dim, U, V);
 	}
 	/* find the maximum of the attachment point from all subdomains bordering the floor*/
-	MPI_Allreduce(&x_local, &x_global, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+	MPI_Allreduce(&x_local_stress, &x_global_stress, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+	MPI_Allreduce(&x_local_U, &x_global_U, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
 	/* Visualize last output of U, V, and P */
-	/*output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);*/
+	output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
 
 	/* Write simulation output values */
 	if(myrank == 0)
 	{
-		printf("global point: %f \t time: %f\n", x_global, t);
+		/*printf("global point (stress): %f \t time: %f\n", x_global_stress, t);*/
+		printf("global point (U-comp): %f \t time: %f\n", x_global_U, t);
 
 		/* Reynolds number */
 		if(write_to_file((const char*)simOutput, Re) == 0)
@@ -252,7 +257,7 @@ int main(int argc, char *argv[])
 		}
 
 		/* Re-attachment point location*/
-		if(write_to_file((const char*)simOutput, x_global) == 0)
+		if(write_to_file((const char*)simOutput, x_global_stress) == 0)
 		{
 			return 0;
 		}

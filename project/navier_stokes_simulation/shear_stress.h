@@ -1,7 +1,7 @@
 #ifndef __SHEAR_STRESS_H_
 #define __SHEAR_STRESS_H_
 
-void shear_stress_calc(
+void separation_point_shear_stress(
   double *x_loc,
   double dx,
   double dy,
@@ -11,5 +11,14 @@ void shear_stress_calc(
   double **V
 );
 
+void separation_point_U(
+  double *x_loc,
+  double dx,
+  double dy,
+  int il,
+  int    imax,
+  double **U,
+  double **V
+);
 
 #endif
