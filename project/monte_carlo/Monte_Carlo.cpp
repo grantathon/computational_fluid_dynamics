@@ -1,10 +1,3 @@
-/*
- * Monte_Carlo.cpp
- *
- *  Created on: Jun 19, 2014
- *      Author: ionut
- */
-
 #include "Monte_Carlo.hpp"
 
  MonteCarlo::MonteCarlo(double mean, double stddev)

@@ -1,10 +1,3 @@
-/*
- * MonteCarlo.hpp
- *
- *  Created on: Jun 19, 2014
- *      Author: ionut
- */
-
 #ifndef MONTECARLO_HPP_
 #define MONTECARLO_HPP_
 

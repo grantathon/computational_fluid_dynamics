@@ -1,9 +1,10 @@
 CC = mpic++#.mpich2 #gcc
-CFLAGS = -Wall -Werror #-pedantic
+CFLAGS = -Wall -Werror
 .cpp.o:  ; $(CC) -cpp $(CFLAGS) $<
 
-OBJ = 	Monte_Carlo.o\
-		main.o
+OBJ = 	main.o\
+		Monte_Carlo.o\
+		PBM_File.o
 
 all:  $(OBJ)
 	$(CC) $(CFLAGS) -o sim_MC $(OBJ)  -lm
@@ -15,5 +16,6 @@ clean:
 	rm $(OBJ) *.mc
 
 Monte_Carlo.o : Monte_Carlo.hpp
+PBM_File.o : 	PBM_File.hpp
  
-main.o        : Monte_Carlo.hpp
+main.o        : Monte_Carlo.hpp PBM_File.hpp

@@ -1,12 +1,7 @@
-//============================================================================
-// Name        : Monte.cpp
-// Author      : Ionut
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
-//============================================================================
-
 #include "Monte_Carlo.hpp"
+#include "PBM_File.hpp"
+#include <fstream>
+#include <iostream>
 
 int main(int argc, char *argv[]) 
 {
@@ -25,17 +20,26 @@ int main(int argc, char *argv[])
 	double mean_nd = 0.0;
 	double var_nd = 0.0;
 
-	std::string MC_eos = "End of simulation";
+	/* grid size */
+	int imax = atoi(argv[1]);
+	int jmax = atoi(argv[2]);
 
+	/* misc. */
+	std::string MC_eos = "End of simulation";
 	double start_time = 0.0, end_time = 0.0;
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-	if(myrank == 0)	
+	if(myrank == 0)
 	{
 		start_time = MPI_Wtime();
+
+		// Construct PBM file based on user input
+		PBMFile *pbm = new PBMFile(imax, jmax, 0, 1, "flow_over_a_step.pbm");
+		pbm->OutputStep(0.5, 0.1);
+		delete pbm;
 	}
 
 	MonteCarlo *m = new MonteCarlo(mean, stddev);
@@ -51,7 +55,7 @@ int main(int argc, char *argv[])
 	m->get_QoI(&samples_per_proc, nd_qoi);
 
 	if(myrank == 0)
-	{	
+	{
 		mean_nd = m->compute_mean(nd_qoi);
 		var_nd = m->compute_variance(nd_qoi, mean_nd);
 
@@ -62,7 +66,7 @@ int main(int argc, char *argv[])
 	if (myrank == 0)
 	{
 		end_time = MPI_Wtime();
-		printf("Elapsed time for MC simulation(%d samples) using %d processors is: %f seconds\n", nsamples, num_proc, end_time - start_time);
+		printf("Elapsed time for MC simulation (%d samples) using %d processors is: %f seconds\n", nsamples, num_proc, end_time - start_time);
 	}
 
 	m->MCSimulation_Stop(MC_eos);
