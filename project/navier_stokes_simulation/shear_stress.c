@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void shear_stress_calc(
+void separation_point_shear_stress(
   double *x_loc,
   double dx,
   double dy,
@@ -36,6 +36,32 @@ void shear_stress_calc(
     }
 
     stress_ahead = stress;
+
+    /*printf("rank: %i \t %f \t %f \t %f \t %f \n ", rank, (il + i) * dx,  stress, du_dy, dv_dx);*/
+  }
+}
+
+void separation_point_U(
+  double *x_loc,
+  double dx,
+  double dy,
+  int il,
+  int    imax,
+  double **U,
+  double **V
+)
+{
+  int i;
+
+  /* loop through all x-cells for the first layer from right to left*/
+  for(i = imax-1; i > 1; i--)
+  {
+    /* check if stress changes sign from +ve to -ve then exit with x location*/
+    if (U[i][1] < 0)
+    {
+      *x_loc = (il + i) * dx;
+      break;
+    }
 
     /*printf("rank: %i \t %f \t %f \t %f \t %f \n ", rank, (il + i) * dx,  stress, du_dy, dv_dx);*/
   }
