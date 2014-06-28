@@ -2,6 +2,7 @@
 #include "init.h"
 #include "ns_definitions.h"
 #include "boundary_val.h"
+#include "parallel.h"
 
 #include <string.h>
 #include <mpi.h>
@@ -48,8 +49,8 @@ int read_parameters(const char * szFileName,
 	READ_DOUBLE( szFileName, *t_end );
 	READ_DOUBLE( szFileName, *dt    );
 
-	READ_INT   ( szFileName, *imax );
-	READ_INT   ( szFileName, *jmax );
+//	READ_INT   ( szFileName, *imax );
+//	READ_INT   ( szFileName, *jmax );
 
 	READ_DOUBLE( szFileName, *omg   );
 	READ_DOUBLE( szFileName, *eps   );
@@ -70,8 +71,6 @@ int read_parameters(const char * szFileName,
 
 	*dx = *xlength / (double)(*imax);
 	*dy = *ylength / (double)(*jmax);
-
-	/*printf("wl=%u, wr=%u, wt=%u, wb=%u\n", *wl, *wr, *wt, *wb);*/
 
 	return 1;
 }
@@ -225,4 +224,45 @@ void broadcast_parameters(
 	{
 		printf("All simulation parameters have been broadcasted!\n\n");
 	}
+}
+
+int read_args(int argc, char** argv, double* Re, int* mc_id, int* imax, int* jmax)
+{
+	if(argc == 5)
+	{
+		*Re = atof(argv[1]);
+		if(*Re <= 0)
+		{
+			Programm_Stop("Reynolds number must be greater than zero.");
+			return 0;
+		}
+
+		*mc_id = atoi(argv[2]);
+		if(*mc_id < 0)
+		{
+			Programm_Stop("Monte Carlo ID must be positive.");
+			return 0;
+		}
+
+		*imax = atoi(argv[3]);
+		if(*imax < 0)
+		{
+			Programm_Stop("imax must be a positive integer.");
+			return 0;
+		}
+
+		*jmax = atoi(argv[4]);
+		if(*jmax < 0)
+		{
+			Programm_Stop("jmax must be a positive integer.");
+			return 0;
+		}
+	}
+	else
+	{
+		Programm_Stop("Please pass the correct number and type of arguments (Re, MC_ID, imax, jmax).");
+		return 0;
+	}
+
+	return 1;
 }

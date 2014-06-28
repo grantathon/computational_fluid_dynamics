@@ -1,4 +1,4 @@
-CC = mpicc#.mpich2 #gcc
+CC = mpicc.mpich2 #gcc
 CFLAGS = -Wall -Werror #-pedantic
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 
@@ -20,7 +20,7 @@ all:  $(OBJ)
 	$(CC) -c $(CFLAGS) $*.c -o $*.o
 
 clean:
-	rm $(OBJ)
+	rm $(OBJ) *.mc
 
 helper.o      : helper.h 
 init.o        : helper.h init.h 

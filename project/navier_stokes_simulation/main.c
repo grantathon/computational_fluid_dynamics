@@ -102,6 +102,12 @@ int main(int argc, char *argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
+	/* Read passed input parameters */
+	if(read_args(argc, argv, &Re, &mc_id, &imax, &jmax) == 0)
+	{
+		return 0;
+	}
+
 	/* Setup retrieval of data configuration file */
 	strcpy(problemDataFile, problem);
 	strcat(problemDataFile, ".dat");
@@ -115,29 +121,6 @@ int main(int argc, char *argv[])
 	/* Setup input file var for reading */
 	strcpy(problemDataFile, problem);
 	strcat(problemDataFile, ".dat");
-
-	/* Read passed Reynolds number and unique Monte Carlo ID */
-	if(argc == 3)
-	{
-		Re = atof(argv[1]);
-		if(Re <= 0)
-		{
-			Programm_Stop("Reynolds number must be greater than zero.");
-			return 0;
-		}
-
-		mc_id = atoi(argv[2]);
-		if(mc_id < 0)
-		{
-			Programm_Stop("Monte Carlo ID must be positive.");
-			return 0;
-		}
-	}
-	else
-	{
-		Programm_Stop("Please pass the Reynolds number and Monte Carlo ID as arguments, respectively.");
-		return 0;
-	}
 
 	/* Setup simulation output file */
 	strcpy(simOutput, "ns_sim_");
@@ -153,8 +136,8 @@ int main(int argc, char *argv[])
 
 		/* Read parameters from DAT file, store locally, and check for potential error */
 		readParamError = read_parameters(problemDataFile, &UI, &VI, &PI, &GX, &GY,
-			&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
-			&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb, &iproc, &jproc);
+					&t_end, &xlength, &ylength, &dt, &dx, &dy, &imax, &jmax, &alpha, &omg, &tau,
+					&itermax, &eps, &dt_value, &wl, &wr, &wt, &wb, &iproc, &jproc);
 
 		if(readParamError != 1)
 		{
@@ -165,7 +148,7 @@ int main(int argc, char *argv[])
 		MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 		if(comm_size != (iproc*jproc))
 		{
-			/*printf("The number of processes entered via 'mpirun -np %u' does not equal the size specified by the input file (iproc * jproc = %u)\n", comm_size, iproc*jproc);*/
+			Programm_Stop("The number of processes entered via 'mpirun -np [int]' does not equal the size specified by the input file\n");
 			return 0;
 		}
 	}
@@ -213,11 +196,11 @@ int main(int argc, char *argv[])
 		calculate_uv(dt, dx, dy, x_dim, y_dim, U, V, F, G, P, flag, il, ir, jb, jt, rank_l, rank_r, rank_b, rank_t);
 
 		/* Visualize U, V, and P depending on dt_value */
-		if((t / dt_value) >= visual_n)
-		{
-			/*output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);*/
-			visual_n++;
-		}
+//		if((t / dt_value) >= visual_n)
+//		{
+//			output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
+//			visual_n++;
+//		}
 
 		// output sim stats to user by master rank
 		if (myrank == 0)
@@ -257,7 +240,7 @@ int main(int argc, char *argv[])
 		}
 
 		/* Re-attachment point location*/
-		if(write_to_file((const char*)simOutput, x_global_stress) == 0)
+		if(write_to_file((const char*)simOutput, x_global_U) == 0)
 		{
 			return 0;
 		}
@@ -283,7 +266,6 @@ int main(int argc, char *argv[])
 		/* End timer */
 		end_time = MPI_Wtime();
 		printf("Elapsed time for NS solver using %d processors is: %f seconds\n", num_proc, end_time - start_time);
-
 	}
 
 	/* Finalize MPI */

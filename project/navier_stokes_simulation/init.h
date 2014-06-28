@@ -129,5 +129,7 @@ void broadcast_parameters(
 	int *iproc,
 	int *jproc);
 
+int read_args(int argc, char** argv, double* Re, int* mc_id, int* imax, int* jmax);
+
 #endif
 
