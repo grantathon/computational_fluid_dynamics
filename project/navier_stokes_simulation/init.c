@@ -226,32 +226,52 @@ void broadcast_parameters(
 	}
 }
 
-int read_args(int argc, char** argv, double* Re, int* mc_id, int* imax, int* jmax)
+int read_args(int argc, char** argv, int *flag_Re, double* Re, double *viscosity, int* mc_id, int* imax, int* jmax, double *rho)
 {
-	if(argc == 5)
+	if(argc == 6)
 	{
-		*Re = atof(argv[1]);
-		if(*Re <= 0)
+		/*	flag_Re={1, or something else}, if 1 then argv[1] is reynold's number otherwise it is Viscosity*/
+		*flag_Re = atoi(argv[1]);
+
+		if (*flag_Re == 1)
 		{
-			Programm_Stop("Reynolds number must be greater than zero.");
-			return 0;
+			*Re = atof(argv[2]);
+			if(*Re <= 0)
+			{
+				Programm_Stop("Reynolds number must be greater than zero.");
+				return 0;
+			}
+		}
+		else
+		{	
+			*viscosity = atof(argv[2]);
+			if(*viscosity <= 0)
+			{
+				Programm_Stop("Viscosity number must be greater than zero.");
+				return 0;
+			}
+			/*	Re is calculated based on the channel width (height of step can also be cansidered?),
+			 *	density(rho) specified in the data file and the initial flow velocity.
+			 *	Re=100 corresponds to 0.0245 kg/(m·s)
+			 */
+			*Re = (2 * (*rho) * 1)/(*viscosity);
 		}
 
-		*mc_id = atoi(argv[2]);
+		*mc_id = atoi(argv[3]);
 		if(*mc_id < 0)
 		{
 			Programm_Stop("Monte Carlo ID must be positive.");
 			return 0;
 		}
 
-		*imax = atoi(argv[3]);
+		*imax = atoi(argv[4]);
 		if(*imax < 0)
 		{
 			Programm_Stop("imax must be a positive integer.");
 			return 0;
 		}
 
-		*jmax = atoi(argv[4]);
+		*jmax = atoi(argv[5]);
 		if(*jmax < 0)
 		{
 			Programm_Stop("jmax must be a positive integer.");

@@ -56,6 +56,8 @@ int main(int argc, char *argv[])
 	double alpha 	= 0;
 
 	/* Problem dependent quantities */
+	double viscosity = 0;
+	double rho = 1.225; /* standard air density in units of kg/m^3*/
 	double Re = 0;
 	double GX = 0;
 	double GY = 0;
@@ -71,6 +73,7 @@ int main(int argc, char *argv[])
 	double **F 	= 0;
 	double **G 	= 0;
 	int **flag 	= 0;
+	int flag_Re = 1;	/*	flag for Re or viscosity input, default value (1) is set for Re input*/
 
 	/* MPI variables */
 	int iproc = 0;
@@ -103,7 +106,7 @@ int main(int argc, char *argv[])
 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
 	/* Read passed input parameters */
-	if(read_args(argc, argv, &Re, &mc_id, &imax, &jmax) == 0)
+	if(read_args(argc, argv, &flag_Re, &Re, &viscosity, &mc_id, &imax, &jmax, &rho) == 0)
 	{
 		return 0;
 	}
@@ -231,7 +234,7 @@ int main(int argc, char *argv[])
 	if(myrank == 0)
 	{
 		/*printf("global point (stress): %f \t time: %f\n", x_global_stress, t);*/
-		printf("global point (U-comp): %f \t time: %f\n", x_global_U, t);
+		printf("Re: %f \t global point (U-comp): %f \t time: %f\n", Re, x_global_U, t);
 
 		/* Reynolds number */
 		if(write_to_file((const char*)simOutput, Re) == 0)
