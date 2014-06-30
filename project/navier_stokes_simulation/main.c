@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	int n 			= 0;
 	double start_time = 0;
 	double end_time = 0;
-	double visual_n = 1;
+//	double visual_n = 1;
 
 	/* Pressure iteration data */
 	int itermax 	= 0;
@@ -120,10 +120,6 @@ int main(int argc, char *argv[])
 	strcat(problemOutput, "_output.");
 	sprintf(buffer, "%i", myrank);
 	strcat(problemOutput, buffer);
-
-	/* Setup input file var for reading */
-	strcpy(problemDataFile, problem);
-	strcat(problemDataFile, ".dat");
 
 	/* Setup simulation output file */
 	strcpy(simOutput, "ns_sim_");
@@ -223,12 +219,13 @@ int main(int argc, char *argv[])
 		/*separation_point_shear_stress(&x_local_stress, dx, dy, il, x_dim, U, V);*/
 		separation_point_U(&x_local_U, dx, dy, il, x_dim, U, V);
 	}
+
 	/* find the maximum of the attachment point from all subdomains bordering the floor*/
 	MPI_Allreduce(&x_local_stress, &x_global_stress, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 	MPI_Allreduce(&x_local_U, &x_global_U, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
 	/* Visualize last output of U, V, and P */
-	output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
+//	output_uvp(U, V, P, flag, il, ir, jb, jt, omg_i, omg_j, problemOutput, visual_n);
 
 	/* Write simulation output values */
 	if(myrank == 0)
