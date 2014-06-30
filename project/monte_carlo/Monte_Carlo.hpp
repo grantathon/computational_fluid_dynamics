@@ -10,14 +10,13 @@
 #include <mpi.h>
 
 /* Monte Carlo method for UQ */
-class MonteCarlo
-{
-private:
-
-	/* mean and standard deviation for the Gaussian random variable */
-	double mean, stddev;
-	/* min and max values for the uniform distribute random variable */
-	int x_min, x_max;
+ class MonteCarlo
+ {
+ private:
+	/* the Raynolds number will be of the form mean + stddev*sigma, where
+	sigma is ~N(0,1) or ~U(0,1) */
+	double u_gauss, s_gauss; // u_gauss = 0, s_gauss = 1;
+	int u_uniform , s_uniform; // u_uniform = 0; s_uniform = 1;
 
 	/* mersenne twister random number generator */
 	boost::mt19937 rng;
@@ -27,23 +26,23 @@ private:
 	boost::uniform_int<> uniform_distr;
 
 	boost::variate_generator<boost::mt19937&,
-		                           boost::normal_distribution<> >* var_normal;
+	boost::normal_distribution<> >* var_normal;
 
 	boost::variate_generator<boost::mt19937&,
-			                           boost::uniform_int<> >* var_uniform;
+	boost::uniform_int<> >* var_uniform;
 
 public:
 
 	/* constructors */
-	MonteCarlo(double mean, double stddev);
-	MonteCarlo(int x_min, int x_max);
+	MonteCarlo(double u_gauss, double s_gauss);
+	MonteCarlo(int u_uniform, int s_uniform);
 
 	/** Uncertainty (i.e. Random variables) related methods **/
 
 	/* generate nsamples samples of normal distributed random variables */
-	std::vector<double> generate_nd_samples(double mean, double stddev, int nsamples);
+	std::vector<double> generate_nd_samples(double mean_nd, double sttdev_nd, int nsamples);
 	/* generate nsamples samples of uniformly distributed random variables */
-	std::vector<double> generate_ud_samples(int x_min, int x_max, int nsamples);
+	std::vector<double> generate_ud_samples(double mean_ud, double sttdev_ud, int nsamples);
 
 	/* compute the first two statistical moments */
 	double compute_mean(const std::vector<double> &v) const;
@@ -61,13 +60,10 @@ public:
 	void data_decomposition(int* nsampels, int* nprocs, int* samples_per_proc);
 
 	/* call the NS solver for each generated sample */
-	void get_NS_solution(int* samples_per_proc, const std::vector<double> &Re);
+	void get_NS_solution(int* samples_per_proc, const std::vector<double> &Re, int rv_flag, int imax, int jmax);
 
 	/* get the QoI (Quantities of interest - the desired output parameters, from a UQ point of view) */
 	void get_QoI(int* samples_per_proc, std::vector<double> &qoi);
-
-	/* helper function for ending the mpi parallelization */
-	void MCSimulation_Stop(const std::string &txt);
 
 	/***********************************************************/
 

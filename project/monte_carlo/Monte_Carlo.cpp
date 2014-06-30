@@ -1,20 +1,20 @@
 #include "Monte_Carlo.hpp"
 
- MonteCarlo::MonteCarlo(double mean, double stddev)
+ MonteCarlo::MonteCarlo(double u_gauss, double s_gauss)
  {
  	rng = boost::mt19937();
 
- 	normal_distr = boost::normal_distribution<>(mean, stddev);
+ 	normal_distr = boost::normal_distribution<>(u_gauss, s_gauss);
 
  	var_normal = new boost::variate_generator<boost::mt19937&,
  	boost::normal_distribution<> >(rng, normal_distr);
  }
 
- MonteCarlo::MonteCarlo(int x_min, int x_max)
+ MonteCarlo::MonteCarlo(int u_uniform, int s_uniform)
  {
  	rng = boost::mt19937();
 
- 	uniform_distr = boost::uniform_int<>(x_min, x_max);
+ 	uniform_distr = boost::uniform_int<>(u_uniform, s_uniform);
 
  	var_uniform = new boost::variate_generator<boost::mt19937&,
  	boost::uniform_int<> >(rng, uniform_distr);
@@ -28,26 +28,26 @@
  	return (*var_uniform)();
  }
 
- std::vector<double> MonteCarlo::generate_nd_samples(double mean,
- 	double stddev, int nsamples) {
+ std::vector<double> MonteCarlo::generate_nd_samples(double mean_nd,
+ 	double stddev_nd, int nsamples) {
  	std::vector<double> ndsamples;
  	double temp;
 
  	for (int i = 0; i < nsamples; i++) {
- 		temp = fabs(get_normal());
+ 		temp = mean_nd + stddev_nd*get_normal();
  		ndsamples.push_back(temp);
  	}
 
  	return ndsamples;
  }
 
- std::vector<double> MonteCarlo::generate_ud_samples(int x_min, int x_max,
+ std::vector<double> MonteCarlo::generate_ud_samples(double mean_ud, double stddev_ud,
  	int nsamples) {
  	std::vector<double> udsamples;
  	double temp;
 
  	for (int i = 0; i < nsamples; i++) {
- 		temp = get_uniform();
+ 		temp = mean_ud + stddev_ud*get_uniform();
  		udsamples.push_back(temp);
  	}
 
@@ -93,61 +93,47 @@
  	}
  }
 
- void MonteCarlo::get_NS_solution(int* samples_per_proc, const std::vector<double> &Re)
+ void MonteCarlo::get_NS_solution(int* samples_per_proc, const std::vector<double> &Re, int rv_flag, int imax, int jmax)
  {
  	int rank;
- 	char buffer[10];
+ 	char buffer[20];
 
  	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
  	for(int i = 0 ; i < *samples_per_proc ; i++)
-	{
-		char call_NS_solver[30] = "mpirun -np 4 ./sim ";
-		snprintf(buffer, sizeof(buffer), "%g %d", Re[i], rank*(*samples_per_proc) + i + 1);	
-		strcat(call_NS_solver, buffer);
+ 	{
+ 		char call_NS_solver[30] = "mpirun -np 4 ./sim ";
+ 		snprintf(buffer, sizeof(buffer), "%d %g %d %d %d", rv_flag, Re[i], rank*(*samples_per_proc) + i + 1, imax, jmax);	
+ 		strcat(call_NS_solver, buffer);
 
-		system(call_NS_solver);
+ 		system(call_NS_solver);
+ 	}
 
-		//MPI_Barrier( MPI_COMM_WORLD);
-	}
+ 	MPI_Barrier(MPI_COMM_WORLD);
  }
 
  void MonteCarlo::get_QoI(int* samples_per_proc, std::vector<double> &qoi)
  {
  	int rank;
- 	char buffer[10];
+ 	char buffer[15];
 
  	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
  	for(int i = 0 ; i < *samples_per_proc ; i++)
-	{
-		double Re, x_global, t_reattach;
-		char datafile_name[30] = "ns_sim_";
+ 	{
+ 		double Re, x_global, t_reattach;
+ 		char datafile_name[30] = "ns_sim_";
 
-		snprintf(buffer, sizeof(buffer), "%d%s", rank*(*samples_per_proc) + i + 1, ".mc");	
-		strcat(datafile_name, buffer);
+ 		snprintf(buffer, sizeof(buffer), "%d%s", rank*(*samples_per_proc) + i + 1, ".mc");	
+ 		strcat(datafile_name, buffer);
 
-		std::ifstream MC_data(datafile_name);
-		MC_data >> Re >> x_global >> t_reattach;
+ 		std::ifstream MC_data(datafile_name);
+ 		MC_data >> Re >> x_global >> t_reattach;
 
-		qoi.push_back(t_reattach);
+ 		qoi.push_back(t_reattach);
+ 	}
 
-		//MPI_Barrier( MPI_COMM_WORLD);
-	}
- }
-
- void MonteCarlo::MCSimulation_Stop(const std::string &txt)
- {
- 	int myrank;
-
- 	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-    MPI_Barrier(MPI_COMM_WORLD);                           /* synchronize output */
- 	std::cout << "-STOP- P:" << myrank << " " << txt << std::endl;
- 	fflush(stdout);
- 	fflush(stderr);
  	MPI_Barrier(MPI_COMM_WORLD);
- 	MPI_Finalize();
- 	exit(1);
  }
 
  MonteCarlo::~MonteCarlo() {
