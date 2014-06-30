@@ -222,7 +222,7 @@ void broadcast_parameters(
 
 	if(myrank == 0)
 	{
-		printf("All simulation parameters have been broadcasted!\n\n");
+		/*printf("All simulation parameters have been broadcasted!\n\n");*/
 	}
 }
 

@@ -73,6 +73,31 @@ int main(int argc, char *argv[])
     m->get_NS_solution(&samples_per_proc, nd_samples, rv_flag, imax, jmax);
     m->get_QoI(&samples_per_proc, nd_qoi);
 
+
+    /*StochasticCollocations *sc = new StochasticCollocations(u_gauss, s_gauss);
+
+    std::vector<double> nodes, temp_nodes, weights, coeff;
+    sc->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
+    sc->gauss_hermite_quad(8, nodes, weights);
+
+    double temp;
+
+    std:: cout << "Before get NS sol" << std::endl;
+    for(int i = 0 ; i < 8 ; i++)
+    {
+        temp = fabs(sqrt(2)*nodes[i]*stddev_nd + mean_nd);
+        temp_nodes.push_back(temp);
+    }
+    sc->get_NS_solution(&samples_per_proc, temp_nodes, rv_flag, imax, jmax);
+
+    coeff = sc->get_coefficiants(8, nsamples, mean_nd, stddev_nd, nodes, weights);
+
+    for (int i = 0; i < nsamples; ++i)
+    {
+        std::cout << coeff[i] << std::endl;
+    }*/
+
+
     if(myrank == 0)
     {   
         expectation_mc = m->compute_mean(nd_qoi);
@@ -91,6 +116,7 @@ int main(int argc, char *argv[])
     Simulation_Stop(eos);
 
     delete m;
+    //delete sc;
 
     return 0;
 }

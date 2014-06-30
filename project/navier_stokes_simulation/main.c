@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 	init_flag(problem, x_dim, y_dim, imax, jmax, il, ir, jb, jt, &flag);
 
 	/* Begin the time iteration process */
-	printf("Begin the main computation...\n");
+	/*printf("Begin the main computation...\n");*/
 	while(res > eps)
 	{
 		boundaryvalues(x_dim, y_dim, U, V, wl, wr, wt, wb, flag, rank_l, rank_r, rank_b, rank_t);
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
 		// output sim stats to user by master rank
 		if (myrank == 0)
 		{
-			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
+			/*printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);*/
 		}
 
 		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
 	if(myrank == 0)
 	{
 		/*printf("global point (stress): %f \t time: %f\n", x_global_stress, t);*/
-		printf("Re: %f \t global point (U-comp): %f \t time: %f\n", Re, x_global_U, t);
+		/*printf("Re: %f \t global point (U-comp): %f \t time: %f\n", Re, x_global_U, t);*/
 
 		/* Reynolds number */
 		if(write_to_file((const char*)simOutput, Re) == 0)

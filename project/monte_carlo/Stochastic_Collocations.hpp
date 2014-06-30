@@ -59,24 +59,20 @@ public:
 
     double hermite_poly(int degree, double &var);
     void gauss_hermite_quad(int quad_degree, std::vector<double> &nodes, std::vector<double> &weights);
-    std::vector<double> &get_coefficiants(int quad_degree, int no_coeff, std::vector<double> &nodes, 
-        std::vector<double> &weights, int rv_choice, int &imax, int &jmax);
+    std::vector<double> get_coefficiants(int quad_degree, int no_coeff, double mean, double stddev, std::vector<double> &nodes, std::vector<double> &weights);
 
     /***********************************************************/
 
     /** Parallelization related methods **/
 
     /* data decomposition among processes*/
-    void data_decomposition(int* nsampels, int* nprocs, int* samples_per_proc);
+    void data_decomposition(int* ncoeff, int* nprocs, int* coeff_per_proc);
 
     /* call the NS solver for each generated sample */
-    void get_NS_solution(int* samples_per_proc, const std::vector<double> &Re);
+    void get_NS_solution(int* coeff_per_proc, const std::vector<double> &nodes, int rv_flag, int imax, int jmax);
 
     /* get the QoI (Quantities of interest - the desired output parameters, from a UQ point of view) */
-    void get_QoI(int* samples_per_proc, std::vector<double> &qoi);
-
-    /* helper function for ending the mpi parallelization */
-    void SCSimulation_Stop(const std::string &txt);
+    void get_QoI(int* coeff_per_proc, std::vector<double> &coeff);
 
     /***********************************************************/
 

@@ -108,8 +108,6 @@
 
  		system(call_NS_solver);
  	}
-
- 	MPI_Barrier(MPI_COMM_WORLD);
  }
 
  void MonteCarlo::get_QoI(int* samples_per_proc, std::vector<double> &qoi)
@@ -132,8 +130,6 @@
 
  		qoi.push_back(t_reattach);
  	}
-
- 	MPI_Barrier(MPI_COMM_WORLD);
  }
 
  MonteCarlo::~MonteCarlo() {

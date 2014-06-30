@@ -227,6 +227,73 @@
 
  		default:
  		std::cout << "Please input a degree less or equal to 10" << std::endl;
-
- 	}	
+ 	}
  }
+ std::vector<double> StochasticCollocations::get_coefficiants(int quad_degree, int no_coeff, double mean, double stddev, std::vector<double> &nodes, std::vector<double> &weights)
+ {
+ 	std::vector<double> coeff;
+ 	double temp = 0.0;
+ 	double var = 0.0;
+
+ 	char buffer[15];
+
+ 	for(int j = 0 ; j < no_coeff ; j++)
+ 	{
+ 		double nodes_quad, x_global, t_reattach;
+ 		char datafile_name[30] = "ns_sim_";
+
+ 		snprintf(buffer, sizeof(buffer), "%d%s", j + 1, ".mc");	
+ 		strcat(datafile_name, buffer);
+
+ 		std::ifstream MC_data(datafile_name);
+ 		MC_data >> nodes_quad >> x_global >> t_reattach;
+
+ 		for(int i = 0 ; i < quad_degree ; i++)
+ 		{
+ 			var = sqrt(2)*stddev*nodes[i] + mean;
+ 			temp = temp + t_reattach * hermite_poly(j, var) * weights[i];
+ 		}
+ 		temp = temp/M_PI;
+ 		coeff.push_back(temp);
+ 	}
+ 	return coeff;
+ }
+
+ void StochasticCollocations::data_decomposition(int* ncoeff, int* nprocs, int* coeff_per_proc)
+ {
+ 	int rank;
+
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+ 	if (rank == 0) 
+ 	{
+ 		*coeff_per_proc = *ncoeff - (*nprocs - 1)*((*ncoeff)/(*nprocs));
+ 	} 
+ 	else 
+ 	{
+ 		*coeff_per_proc = (*ncoeff)/(*nprocs);
+ 	}
+ }
+
+void StochasticCollocations::get_NS_solution(int* coeff_per_proc, const std::vector<double> &nodes, int rv_flag, int imax, int jmax)
+ {
+ 	int rank;
+ 	char buffer[20];
+
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+ 	for(int i = 0 ; i < *coeff_per_proc ; i++)
+ 	{
+ 		char call_NS_solver[30] = "mpirun -np 4 ./sim ";
+ 		snprintf(buffer, sizeof(buffer), "%d %g %d %d %d", rv_flag, nodes[i], rank*(*coeff_per_proc) + i + 1, imax, jmax);	
+ 		strcat(call_NS_solver, buffer);
+
+ 		system(call_NS_solver);
+ 	}
+ }
+
+  StochasticCollocations::~StochasticCollocations() {
+ 	delete var_normal;
+ 	delete var_uniform;
+ }	
+ 
