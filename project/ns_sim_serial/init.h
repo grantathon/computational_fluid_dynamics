@@ -41,13 +41,11 @@
 
 int read_parameters( 
 		const char *szFileName,
-  double *Re,
   double *UI,
   double *VI,
   double *PI,
   double *GX,
   double *GY,
-  double *t_end,
   double *xlength,
   double *ylength,
   double *dt,
@@ -64,9 +62,7 @@ int read_parameters(
   int *wl,			/* domain boundary conditions */
   int *wr,			/* for right, left, top and */
   int *wt,			/* bottom surfaces. */
-  int *wb,
-  double *delta_p,
-  double *Pw
+  int *wb
 );
 
 /*
@@ -102,6 +98,9 @@ void init_flag(
   int imax,
   int jmax,
   int ***Flag);
+
+int read_args(int argc, char** argv, int *flag_Re, double* Re, double *viscosity, int* mc_id, int* imax, int* jmax, double *rho);
+
 
 #endif
 

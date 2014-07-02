@@ -19,9 +19,7 @@ void sor(
   double **P,
   double **RS,
   double *res,
-  int **Flag,
-  double Pw,
-  double delta_p
+  int **Flag
 );
 
 

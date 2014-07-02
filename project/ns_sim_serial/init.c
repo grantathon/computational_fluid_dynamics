@@ -4,13 +4,11 @@
 #include <string.h>
 
 int read_parameters(const char * szFileName,
-					double *Re,                /* reynolds number   */
                     double *UI,                /* velocity x-direction */
                     double *VI,                /* velocity y-direction */
                     double *PI,                /* pressure */
                     double *GX,                /* gravitation x-direction */
                     double *GY,                /* gravitation y-direction */
-                    double *t_end,             /* end time */
                     double *xlength,           /* length of the domain x-dir.*/
                     double *ylength,           /* length of the domain y-dir.*/
                     double *dt,                /* time step */
@@ -28,9 +26,7 @@ int read_parameters(const char * szFileName,
                     int *wl,			/* domain boundary conditions */
                     int *wr,			/* for right, left, top and */
                     int *wt,			/* bottom surfaces. */
-                    int *wb,
-                    double *delta_p,
-                    double *Pw
+                    int *wb
 )
 {
 	/* Read domain boundary conditions*/
@@ -43,12 +39,7 @@ int read_parameters(const char * szFileName,
 	READ_DOUBLE( szFileName, *xlength );
 	READ_DOUBLE( szFileName, *ylength );
 
-	READ_DOUBLE( szFileName, *Re    );
-	READ_DOUBLE( szFileName, *t_end );
 	READ_DOUBLE( szFileName, *dt    );
-
-	READ_INT   ( szFileName, *imax );
-	READ_INT   ( szFileName, *jmax );
 
 	READ_DOUBLE( szFileName, *omg   );
 	READ_DOUBLE( szFileName, *eps   );
@@ -63,13 +54,6 @@ int read_parameters(const char * szFileName,
 	READ_DOUBLE( szFileName, *GX );
 	READ_DOUBLE( szFileName, *GY );
 	READ_DOUBLE( szFileName, *PI );
-
-	/* Read pressure difference if plane shear flow	*/
-	if (strcmp(szFileName, "plane_shear_flow.dat") == 0)
-	{
-		READ_DOUBLE( szFileName, *delta_p );
-		READ_DOUBLE( szFileName, *Pw );
-	}
 
 	*dx = *xlength / (double)(*imax);
 	*dy = *ylength / (double)(*jmax);
@@ -206,4 +190,65 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 	free(problemPBMFile);
 }
 
+
+int read_args(int argc, char** argv, int *flag_Re, double* Re, double *viscosity, int* mc_id, int* imax, int* jmax, double *rho)
+{
+	if(argc == 6)
+	{
+		/*	flag_Re={1, or something else}, if 1 then argv[1] is reynold's number otherwise it is Viscosity*/
+		*flag_Re = atoi(argv[1]);
+
+		if (*flag_Re == 1)
+		{
+			*Re = atof(argv[2]);
+			if(*Re <= 0)
+			{
+				printf("Reynolds number must be greater than zero.");
+				return 0;
+			}
+		}
+		else
+		{
+			*viscosity = atof(argv[2]);
+			if(*viscosity <= 0)
+			{
+				printf("Viscosity number must be greater than zero.");
+				return 0;
+			}
+			/*	Re is calculated based on the channel width (height of step can also be cansidered?),
+			 *	density(rho) specified in the data file and the initial flow velocity.
+			 *	Re=100 corresponds to 0.0245 kg/(m·s)
+			 */
+			*Re = (2 * (*rho) * 1)/(*viscosity);
+		}
+
+		*mc_id = atoi(argv[3]);
+		if(*mc_id < 0)
+		{
+			printf("Monte Carlo ID must be positive.");
+			return 0;
+		}
+
+		*imax = atoi(argv[4]);
+		if(*imax < 0)
+		{
+			printf("imax must be a positive integer.");
+			return 0;
+		}
+
+		*jmax = atoi(argv[5]);
+		if(*jmax < 0)
+		{
+			printf("jmax must be a positive integer.");
+			return 0;
+		}
+	}
+	else
+	{
+		printf("Please pass the correct number and type of arguments (Re, MC_ID, imax, jmax).");
+		return 0;
+	}
+
+	return 1;
+}
 

@@ -18,7 +18,6 @@ void boundaryvalues(
 
 /* Additional BCs implemented here.*/
 void spec_boundary_val(
-		const char *problem,
 		int imax,
 		int jmax,
 		double **U,

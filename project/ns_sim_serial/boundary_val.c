@@ -152,35 +152,20 @@ void boundaryvalues(int imax, int jmax, double **U, double **V,  int wl, int wr,
 }
 
 
-void spec_boundary_val(const char *problem, int imax, int jmax, double **U, double **V, double UI, double VI)
+void spec_boundary_val(int imax, int jmax, double **U, double **V, double UI, double VI)
 {
 	int j;
 
-	if (strcmp(problem, "Karman_vortex") == 0)
+	/*	Inlet velocity BC for upper half of inlet only; lower half cells not used by any other function etc and can be removed LATER.*/
+	for(j = 1; j <= jmax/2; j++)
 	{
-		/*
-		for the Karman vortex street, we consider u = 1 and v = 0 at the left wall
-		 */
-		for(j = 1; j < jmax+1; j++)
-		{
-			U[0][j] = UI;
-			V[0][j] = 2 * VI - V[1][j];
-		}
+		U[0][j] = 0.0;
+		V[0][j] = - V[1][j];
 	}
-	else if(strcmp(problem, "flow_over_a_step") == 0)
+
+	for(j = jmax/2 + 1; j < jmax + 1; j++)
 	{
-		/*	Inlet velocity BC for upper half of inlet only; lower half cells not used by any other function etc and can be removed LATER.*/
-		for(j = 1; j <= jmax/2; j++)
-		{
-			U[0][j] = 0.0;
-			V[0][j] = - V[1][j];
-		}
-
-		for(j = jmax/2 + 1; j < jmax + 1; j++)
-		{
-			U[0][j] = UI;
-			V[0][j] = 2 * VI - V[1][j];
-		}
-
+		U[0][j] = UI;
+		V[0][j] = 2 * VI - V[1][j];
 	}
 }

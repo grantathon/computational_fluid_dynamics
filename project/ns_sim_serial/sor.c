@@ -11,9 +11,7 @@ void sor(
   double **P,
   double **RS,
   double *res,
-  int **Flag,
-  double Pw,
-  double delta_p
+  int **Flag
 ) {
   int i,j;
   double rloc;
@@ -64,16 +62,8 @@ void sor(
   }
   for(j = 0; j <= jmax + 1; j++)
   {
-	  if (Flag[0][j] & P_L)
-	  {
-		  P[0][j] = (2 * Pw) - P[1][j];
-		  P[imax+1][j] = (2 * (Pw - delta_p)) - P[imax][j];
-	  }
-	  else
-	  {
-		  P[0][j] = P[1][j];
-		  P[imax+1][j] = P[imax][j];
-	  }
+	  P[0][j] = P[1][j];
+	  P[imax+1][j] = P[imax][j];
   }
 
   /* boundary conditions for the pressure at the boundary stripe*/
