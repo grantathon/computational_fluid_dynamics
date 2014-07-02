@@ -31,7 +31,8 @@ void write_vtkFile(const char *szProblem,
 		  double dy,
                   double **U,
                   double **V,
-                  double **P);
+                  double **P,
+                  int **flag);
 
 /**
  * Method for writing header information in vtk format. 

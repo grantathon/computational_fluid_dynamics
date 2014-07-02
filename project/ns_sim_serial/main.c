@@ -13,8 +13,6 @@ int main(int argc, char *argv[])
 {
 	/* Input file with user parameters */
 	const char *problem = "flow_over_a_step";
-//	char *problemDataFile = malloc(strlen(problem) + 5);
-//	char *problemOutput = malloc(strlen(problem) + 7);
 	char *problemDataFile = malloc(strlen(problem) + 4);
 	char *problemOutput = malloc(strlen(problem) + 10);
 	char *simOutput = malloc(strlen("sim_") + 20);
@@ -41,7 +39,7 @@ int main(int argc, char *argv[])
 	double tau 		= 0;
 	double dt_value = 0;
 	int n 			= 0;
-	double visual_n = 1;
+//	double visual_n = 1;
 
 	/* Pressure iteration data */
 	int itermax 	= 0;
@@ -72,7 +70,6 @@ int main(int argc, char *argv[])
 	int flag_Re = 1;	/*	flag for Re or viscosity input, default value (1) is set for Re input*/
 
 	/*	Parameters for flow reattachment and output */
-//	double x_local_U = 0;
 	double x_loc = 0;
 	int mc_id = 0;
 
@@ -81,7 +78,6 @@ int main(int argc, char *argv[])
 	{
 		return 0;
 	}
-
 
 	/* Setup retrieval of data configuration file */
 	strcpy(problemDataFile, problem);
@@ -117,7 +113,7 @@ int main(int argc, char *argv[])
 	init_flag(problem, imax, jmax, &Flag);
 
 	/* Begin the time iteration process */
-	printf("Begin the main computation...\n");
+//	printf("Begin the main computation...\n");
 	while(res > eps)
 	{
 		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
@@ -135,25 +131,44 @@ int main(int argc, char *argv[])
 			it++;
 		}
 		while(it < itermax && res > eps);
-		printf("n=%u, res=%f, it=%u, t=%f, dt=%f\n", n, res, it, t, dt);
+//		printf("n=%u, res=%f, it=%u, t=%f, dt=%f\n", n, res, it, t, dt);
 
 		calculate_uv(dt, dx, dy, imax, jmax, U, V, F, G, P, Flag);
-		if((t / dt_value) >= visual_n)
-		{
-			write_vtkFile(problemOutput, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
-			visual_n++;
-		}
+//		if((t / dt_value) >= visual_n)
+//		{
+//			write_vtkFile(problemOutput, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P, Flag);
+//			visual_n++;
+//		}
 
 		n++;
 		t += dt;
 	}
 
-	shear_stress_calc(&x_loc, dx, dy, imax, U, V);
-	printf("re-attachment point: %f \t time: %f\n", x_loc, t);
-
-
 	/* Visualize U, V, and P */
-	write_vtkFile(problemOutput, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P);
+//	write_vtkFile(problemOutput, visual_n, xlength, ylength, imax, jmax, dx, dy, U, V, P, Flag);
+
+	separation_point_U(&x_loc, dx, dy, imax, U, V);
+//	printf("re-attachment point: %f \t time: %f\n", x_loc, t);
+
+	/* Write simulation output values */
+
+	/* Reynolds number */
+	if(write_to_file((const char*)simOutput, Re) == 0)
+	{
+		return 0;
+	}
+
+	/* Re-attachment point location*/
+	if(write_to_file((const char*)simOutput, x_loc) == 0)
+	{
+		return 0;
+	}
+
+	/* Re-attachment point time (steady state)*/
+	if(write_to_file((const char*)simOutput, t) == 0)
+	{
+		return 0;
+	}
 
 	/* Deallocate heap memory */
 	free_matrix(U, 0, imax+1, 0, jmax+1);
@@ -164,5 +179,5 @@ int main(int argc, char *argv[])
 	free_matrix(G, 0, imax+1, 0, jmax+1);
 	free_imatrix(Flag, 0, imax+1, 0, jmax+1);
 
-	return -1;
+	return 1;
 }

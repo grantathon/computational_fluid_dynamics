@@ -1,5 +1,6 @@
 #include "helper.h"
 #include "visual.h"
+#include "ns_definitions.h"
 #include <stdio.h>
 
 
@@ -13,7 +14,8 @@ void write_vtkFile(const char *szProblem,
 		 double dy,
                  double **U,
                  double **V,
-                 double **P) {
+                 double **P,
+                 int **flag) {
   
   int i,j;
   char szFileName[80];
@@ -37,7 +39,16 @@ void write_vtkFile(const char *szProblem,
   fprintf(fp, "VECTORS velocity float\n");
   for(j = 0; j < jmax+1; j++) {
     for(i = 0; i < imax+1; i++) {
-      fprintf(fp, "%f %f 0\n", (U[i][j] + U[i][j+1]) * 0.5, (V[i][j] + V[i+1][j]) * 0.5 );
+		if(flag[i][j] & C_F)
+		{
+			fprintf(fp, "%f %f 0\n", (U[i][j] + U[i][j+1]) * 0.5, (V[i][j] + V[i+1][j]) * 0.5);
+		}
+		else
+		{
+			fprintf(fp, "%f %f 0\n", 0.0, 0.0);
+		}
+
+//      fprintf(fp, "%f %f 0\n", (U[i][j] + U[i][j+1]) * 0.5, (V[i][j] + V[i+1][j]) * 0.5 );
     }
   }
 
@@ -47,7 +58,16 @@ void write_vtkFile(const char *szProblem,
   fprintf(fp, "LOOKUP_TABLE default \n");
   for(j = 1; j < jmax+1; j++) {
     for(i = 1; i < imax+1; i++) {
-      fprintf(fp, "%f\n", P[i][j] );
+		if(flag[i][j] & C_F)
+		{
+			fprintf(fp, "%f\n", P[i][j]);
+		}
+		else
+		{
+			fprintf(fp, "%f\n", 0.0);
+		}
+
+//      fprintf(fp, "%f\n", P[i][j] );
     }
   }
 

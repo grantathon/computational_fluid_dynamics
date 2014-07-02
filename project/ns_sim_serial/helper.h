@@ -603,5 +603,7 @@ int **read_pgm(const char *filename);
 	   ++nCount; \
         }
 
+int write_to_file(const char *filename, double output_val);
+
 #endif     
 
