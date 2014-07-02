@@ -102,7 +102,7 @@
 
  	for(int i = 0 ; i < *samples_per_proc ; i++)
  	{
- 		char call_NS_solver[30] = "mpirun -np 4 ./sim ";
+ 		char call_NS_solver[30] = "./sim ";
  		snprintf(buffer, sizeof(buffer), "%d %g %d %d %d", rv_flag, Re[i], rank*(*samples_per_proc) + i + 1, imax, jmax);	
  		strcat(call_NS_solver, buffer);
 

@@ -9,48 +9,45 @@ int main(int argc, char *argv[])
     int num_proc = 0;
     int myrank = 0;
 
-    double start_time = 0.0, end_time = 0.0;
+    /* Runtime measurement */
+    double start_time = 0.0;
+    double end_time = 0.0;
 
+    /* Command line arguments */
+    int flag_uq = 0;
+    int flag_distr = 0;
+    int flag_rv = 0;
+    int nsamples = 0;
+    double mean = 0.0;
+    double stddev = 0.0; 
+    int imax = 0;
+    int jmax = 0;
+
+    /* Data decomposition */
     int samples_per_proc = 0;
 
-    int nsamples = 0;
-    double mean_nd = 0.0, stddev_nd = 0.0;
-    int uq_method = 0 , distribution = 0;
-    int imax = 0, jmax = 0;
-    int rv_flag = 1;
-
-    /* for Gaussian distribution - consider only ~N(0,1)*/
+    /* for Gaussian distribution*/
     const double u_gauss = 0.0;
     const double s_gauss = 1.0;
 
-    /* statistcs */
+    /* for Uniform distribution */
+    const int x_uniform = 0.0;
+    const int y_uniform = 1.0;
+
+    /* statistcs for GRV*/
     double expectation_mc = 0.0;
     double var_mc = 0.0;
 
-    std::string eos = "End of simulation";
+    const std::string eos = "End of simulation";
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
     
-    if(argc != 7)
+    if(read_parameters(argc, argv, &flag_uq, &flag_distr, &flag_rv, &nsamples, &mean, &stddev, &imax, &jmax) == 0)
     {
-        uq_method = atoi(argv[1]);
-        distribution = atoi(argv[2]);
-        nsamples = atoi(argv[3]);
-        mean_nd = atof(argv[4]);
-        stddev_nd = atof(argv[5]);
-        imax = atoi(argv[6]);
-        jmax = atoi(argv[7]);
-    }
-    else
-    {
-        Simulation_Stop("Run the program as mpirun -np x ./sim_UQ arg1 arg2 arg3 arg4 arg5, where arg1 = mc or sc, arg 2 = g or u arg3 is the number of samples(mc) or coeff(sc) and arg4 and arg5 are the mean and stddev of Re ");
         return 0;
-    }
-    
-
-    std::cout << uq_method << distribution << std::endl;
+    } 
 
     if(myrank == 0) 
     {
@@ -62,46 +59,56 @@ int main(int argc, char *argv[])
         delete pbm;
     }
 
-    MonteCarlo *m = new MonteCarlo(u_gauss, s_gauss);
+    MonteCarlo *m;
 
-    std::vector<double> nd_samples;
-    std::vector<double> nd_qoi;
+    std::vector<double> samples;
+    std::vector<double> qoi;
 
-    nd_samples = m->generate_nd_samples(mean_nd, stddev_nd, nsamples);
-    m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
-    std:: cout << samples_per_proc << std::endl;
-    m->get_NS_solution(&samples_per_proc, nd_samples, rv_flag, imax, jmax);
-    m->get_QoI(&samples_per_proc, nd_qoi);
-
-
-    /*StochasticCollocations *sc = new StochasticCollocations(u_gauss, s_gauss);
-
-    std::vector<double> nodes, temp_nodes, weights, coeff;
-    sc->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
-    sc->gauss_hermite_quad(8, nodes, weights);
-
-    double temp;
-
-    std:: cout << "Before get NS sol" << std::endl;
-    for(int i = 0 ; i < 8 ; i++)
+    /* MC + Gaussian distribution + Re */
+    if(flag_uq == 1 && flag_distr == 1 && flag_rv == 1)
     {
-        temp = fabs(sqrt(2)*nodes[i]*stddev_nd + mean_nd);
-        temp_nodes.push_back(temp);
+        m = new MonteCarlo(u_gauss, s_gauss);
+        samples = m->generate_nd_samples(mean, stddev, nsamples);
+        m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
+        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax);
+        m->get_QoI(&samples_per_proc, qoi);    
     }
-    sc->get_NS_solution(&samples_per_proc, temp_nodes, rv_flag, imax, jmax);
 
-    coeff = sc->get_coefficiants(8, nsamples, mean_nd, stddev_nd, nodes, weights);
-
-    for (int i = 0; i < nsamples; ++i)
+    /* MC + Gaussian distribution + viscosity */
+    if(flag_uq == 1 && flag_distr == 1 && flag_rv != 1)
     {
-        std::cout << coeff[i] << std::endl;
-    }*/
+        m = new MonteCarlo(u_gauss, s_gauss);
+        samples = m->generate_nd_samples(mean, stddev, nsamples);
+        m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
+        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax);
+        m->get_QoI(&samples_per_proc, qoi);    
+    }
+
+    /* MC + Uniform distribution + Re */
+    else if(flag_uq == 1 && flag_distr != 1 && flag_rv == 1)
+    {
+        m = new MonteCarlo(x_uniform, y_uniform);
+        samples = m->generate_ud_samples(mean, stddev, nsamples);
+        m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
+        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax);
+        m->get_QoI(&samples_per_proc, qoi);    
+    }
+
+    /* MC + Uniform distribution + viscosity */
+    if(flag_uq == 1 && flag_distr != 1 && flag_rv != 1)
+    {
+        m = new MonteCarlo(x_uniform, y_uniform);
+        samples = m->generate_ud_samples(mean, stddev, nsamples);
+        m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
+        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax);
+        m->get_QoI(&samples_per_proc, qoi);    
+    }
 
 
     if(myrank == 0)
     {   
-        expectation_mc = m->compute_mean(nd_qoi);
-        var_mc = m->compute_variance(nd_qoi, expectation_mc);
+        expectation_mc = m->compute_mean(qoi);
+        var_mc = m->compute_variance(qoi, expectation_mc);
 
         std::cout << "The mean of the re-attachement point is: " << expectation_mc << std::endl;
         std::cout << "The variance of the re-attachement point is:  " << var_mc << std::endl;
@@ -116,7 +123,5 @@ int main(int argc, char *argv[])
     Simulation_Stop(eos);
 
     delete m;
-    //delete sc;
-
     return 0;
 }
