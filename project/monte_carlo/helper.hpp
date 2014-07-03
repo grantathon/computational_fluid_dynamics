@@ -10,7 +10,10 @@
 
 #include <iostream>
 #include <mpi.h>
- #include <cstdlib>
+#include <cstdlib>
+#include <fstream>
+
+void write_to_file(std::ofstream &outputFile, double reaatach_loc, double reaatch_time);
 
 int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* flag_RV, int *npoints, double* mean, double* stddev, int* imax, int *jmax);
 

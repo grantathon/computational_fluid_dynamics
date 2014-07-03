@@ -1,32 +1,36 @@
 /*
- * helper.cpp
- *
- *  Created on: Jun 29, 2014
- *      Author: ionut
- */
+* helper.cpp
+*
+*  Created on: Jun 29, 2014
+*      Author: ionut
+*/
 
 #include "helper.hpp"
 
+void write_to_file(std::ofstream &outputFile, double reaatach_loc, double reaatch_time)
+{
+    outputFile << reaatach_loc << ", " << reaatch_time << std::endl;
+}
 
- int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* flag_RV, int *npoints, double* mean, double* stddev, int* imax, int *jmax)
- {
+int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* flag_RV, int *npoints, double* mean, double* stddev, int* imax, int *jmax)
+{
    if(argc == 9)
    {
-      /* flag_UQ = 1 for MC, everything else (>=0) for SC*/
+   /* flag_UQ = 1 for MC, everything else (>=0) for SC*/
       *flag_UQ = atoi(argv[1]);
-      /* flag_distr = 1 for Gaussian distribution, everything else (>=0) for normal distribution */
+   /* flag_distr = 1 for Gaussian distribution, everything else (>=0) for normal distribution */
       *flag_distr = atoi(argv[2]);
-      /* flag_RV = 1 for Reynolds number, everything else (>=0) for viscosity */
+   /* flag_RV = 1 for Reynolds number, everything else (>=0) for viscosity */
       *flag_RV = atoi(argv[3]);
-      /* number of samples (if MC) or no of coefficiants (SC) */
+   /* number of samples (if MC) or no of coefficiants (SC) */
       *npoints = atoi(argv[4]);
-      /* mean for the RV ; both are of the form mean + zeta*stddev, where zeta is ~N(0,1) or ~U(0,1) */
+   /* mean for the RV ; both are of the form mean + zeta*stddev, where zeta is ~N(0,1) or ~U(0,1) */
       *mean = atof(argv[5]);
-      /* sttdev for RV */
+   /* sttdev for RV */
       *stddev = atof(argv[6]);
-      /* imax for the pbm file */
+   /* imax for the pbm file */
       *imax = atoi(argv[7]);
-      /* jmax for the pbm file */
+   /* jmax for the pbm file */
       *jmax = atoi(argv[8]);
 
       if(*flag_UQ < 0)
@@ -66,10 +70,10 @@
    else
    {
       Simulation_Stop("Please pass the correct number and type of arguments (flag_UQ flag_distr flag_RV npoints mean stddev imax jmax");
-      return 0;
+         return 0;
+      }
+      return 1;
    }
-   return 1;
-}
 
    void Simulation_Message(const std::string &txt)
 /* produces a stderr text output  */
@@ -91,7 +95,7 @@
       int myrank;
 
       MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-   MPI_Barrier(MPI_COMM_WORLD);                             /* synchronize output */  
+MPI_Barrier(MPI_COMM_WORLD);                             /* synchronize output */  
       std::cout << "-MESSAGE- P:" << myrank << " " << txt << std::endl;
       fflush(stdout);
       fflush(stderr);
@@ -104,7 +108,7 @@
     int myrank;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-    MPI_Barrier(MPI_COMM_WORLD); /* synchronize output */
+ MPI_Barrier(MPI_COMM_WORLD); /* synchronize output */
     std::cout << "-STOP- P:" << myrank << " " << txt << std::endl;
     fflush(stdout);
     fflush(stderr);

@@ -9,6 +9,8 @@
 #include <fstream>
 #include <mpi.h>
 
+#include "helper.hpp"
+
 /* Monte Carlo method for UQ */
  class MonteCarlo
  {
@@ -40,9 +42,9 @@ public:
 	/** Uncertainty (i.e. Random variables) related methods **/
 
 	/* generate nsamples samples of normal distributed random variables */
-	std::vector<double> generate_nd_samples(double mean_nd, double sttdev_nd, int nsamples);
+	std::vector<double> generate_nd_samples(double mean_nd, double sttdev_nd, int* nsamples);
 	/* generate nsamples samples of uniformly distributed random variables */
-	std::vector<double> generate_ud_samples(double mean_ud, double sttdev_ud, int nsamples);
+	std::vector<double> generate_ud_samples(double mean_ud, double sttdev_ud, int* nsamples);
 
 	/* compute the first two statistical moments */
 	double compute_mean(const std::vector<double> &v) const;
@@ -60,10 +62,10 @@ public:
 	void data_decomposition(int* nsampels, int* nprocs, int* samples_per_proc);
 
 	/* call the NS solver for each generated sample */
-	void get_NS_solution(int* samples_per_proc, const std::vector<double> &Re, int rv_flag, int imax, int jmax);
+	void get_NS_solution(int* samples_per_proc, std::vector<double> &Re, std::ofstream &outputFile, std::vector<double> &qoi, int rv_flag, int imax, int jmax);
 
 	/* get the QoI (Quantities of interest - the desired output parameters, from a UQ point of view) */
-	void get_QoI(int* samples_per_proc, std::vector<double> &qoi);
+	void get_QoI(int* samples_per_proc, std::vector<double> &qoi, std::ofstream &outputFile);
 
 	/***********************************************************/
 

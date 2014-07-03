@@ -31,18 +31,27 @@ int main(int argc, char *argv[])
     const double s_gauss = 1.0;
 
     /* for Uniform distribution */
-    const int x_uniform = 0.0;
-    const int y_uniform = 1.0;
+    /*const int x_uniform = 0.0;
+    const int y_uniform = 1.0;*/
 
     /* statistcs for GRV*/
     double expectation_mc = 0.0;
     double var_mc = 0.0;
 
+    const char* file_name = "UQ_simulation.dat";
     const std::string eos = "End of simulation";
+
+    /* write data for ploting purposes */
+    std::ofstream output_file;
+    output_file.open(file_name);
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+    
+    output_file << "x_reattach" << " " << "t_reattach" << std::endl;
+    
     
     if(read_parameters(argc, argv, &flag_uq, &flag_distr, &flag_rv, &nsamples, &mean, &stddev, &imax, &jmax) == 0)
     {
@@ -68,60 +77,69 @@ int main(int argc, char *argv[])
     if(flag_uq == 1 && flag_distr == 1 && flag_rv == 1)
     {
         m = new MonteCarlo(u_gauss, s_gauss);
-        samples = m->generate_nd_samples(mean, stddev, nsamples);
         m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
-        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax);
-        m->get_QoI(&samples_per_proc, qoi);    
+        samples = m->generate_nd_samples(mean, stddev, &nsamples);
+        m->get_NS_solution(&samples_per_proc, samples, output_file, qoi, flag_rv, imax, jmax);
+
+        if(myrank == 0)
+        {
+            for(int i = 0 ; i < nsamples ; i++)
+            {
+                std::cout << "qoi[" << i << "]=" << qoi[i] << std::endl;
+            }
+        }
+        
+        //m->get_QoI(&samples_per_proc, qoi, output_file);
     }
 
-    /* MC + Gaussian distribution + viscosity */
-    if(flag_uq == 1 && flag_distr == 1 && flag_rv != 1)
+    
+    /*if(flag_uq == 1 && flag_distr == 1 && flag_rv != 1)
     {
         m = new MonteCarlo(u_gauss, s_gauss);
-        samples = m->generate_nd_samples(mean, stddev, nsamples);
+        samples = m->generate_nd_samples(mean, stddev, &nsamples);
         m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
-        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax);
-        m->get_QoI(&samples_per_proc, qoi);    
+        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax, output_file);
+        m->get_QoI(&samples_per_proc, qoi, output_file);     
     }
 
-    /* MC + Uniform distribution + Re */
+
     else if(flag_uq == 1 && flag_distr != 1 && flag_rv == 1)
     {
         m = new MonteCarlo(x_uniform, y_uniform);
-        samples = m->generate_ud_samples(mean, stddev, nsamples);
         m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
-        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax);
-        m->get_QoI(&samples_per_proc, qoi);    
+        samples = m->generate_ud_samples(mean, stddev, &nsamples);
+        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax, output_file);
+        m->get_QoI(&samples_per_proc, qoi, output_file); 
     }
 
-    /* MC + Uniform distribution + viscosity */
+    
     if(flag_uq == 1 && flag_distr != 1 && flag_rv != 1)
     {
         m = new MonteCarlo(x_uniform, y_uniform);
-        samples = m->generate_ud_samples(mean, stddev, nsamples);
         m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
-        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax);
-        m->get_QoI(&samples_per_proc, qoi);    
+        samples = m->generate_ud_samples(mean, stddev, &nsamples);
+        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax, output_file);
+        m->get_QoI(&samples_per_proc, qoi, output_file);    
+        }*/
+
+
+        if(myrank == 0)
+        { 
+            expectation_mc = m->compute_mean(qoi);
+            var_mc = m->compute_variance(qoi, expectation_mc);
+            std::cout << "The mean of the re-attachement point is: " << expectation_mc << std::endl;
+            std::cout << "The variance of the re-attachement point is:  " << var_mc << std::endl;
+        }
+
+        if (myrank == 0)
+        {
+            end_time = MPI_Wtime();
+            printf("Elapsed time for MC simulation (%d samples) using %d processors is: %f seconds\n", nsamples, num_proc, end_time - start_time);
+        }
+
+        Simulation_Stop(eos);
+        output_file.close();
+
+        delete m;
+        return 0;
     }
-
-
-    if(myrank == 0)
-    {   
-        expectation_mc = m->compute_mean(qoi);
-        var_mc = m->compute_variance(qoi, expectation_mc);
-
-        std::cout << "The mean of the re-attachement point is: " << expectation_mc << std::endl;
-        std::cout << "The variance of the re-attachement point is:  " << var_mc << std::endl;
-    }
-
-    if (myrank == 0)
-    {
-        end_time = MPI_Wtime();
-        printf("Elapsed time for MC simulation (%d samples) using %d processors is: %f seconds\n", nsamples, num_proc, end_time - start_time);
-    }
-
-    Simulation_Stop(eos);
-
-    delete m;
-    return 0;
-}
