@@ -8,6 +8,8 @@ int main(int argc, char *argv[])
     /* MPI variables */
     int num_proc = 0;
     int myrank = 0;
+    int il = 0;
+    int ir = 0;
 
     /* Runtime measurement */
     double start_time = 0.0;
@@ -31,8 +33,8 @@ int main(int argc, char *argv[])
     const double s_gauss = 1.0;
 
     /* for Uniform distribution */
-    /*const int x_uniform = 0.0;
-    const int y_uniform = 1.0;*/
+    const int x_uniform = 0.0;
+    const int y_uniform = 1.0;
 
     /* statistcs for GRV*/
     double expectation_mc = 0.0;
@@ -58,6 +60,12 @@ int main(int argc, char *argv[])
         return 0;
     } 
 
+    /* samples per processor*/
+    samples_per_proc = (nsamples / num_proc);
+
+    /*flag_UQ flag_distr flag_RV npoints mean stddev imax jmax*/
+    printf("UQ: %i \t dist: %i \t RV: %i \t N: %i \t mean: %f \t var: %f \t imax: %i \t jmax: %i \n", flag_uq, flag_distr, flag_rv, nsamples, mean, stddev, imax, jmax);
+
     if(myrank == 0) 
     {
         start_time = MPI_Wtime();
@@ -77,69 +85,92 @@ int main(int argc, char *argv[])
     if(flag_uq == 1 && flag_distr == 1 && flag_rv == 1)
     {
         m = new MonteCarlo(u_gauss, s_gauss);
-        m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
+        m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
+        printf("rank: %i \t il: %i \t ir: %i \n", myrank, il, ir);
+
         samples = m->generate_nd_samples(mean, stddev, &nsamples);
-        m->get_NS_solution(&samples_per_proc, samples, output_file, qoi, flag_rv, imax, jmax);
 
         if(myrank == 0)
         {
             for(int i = 0 ; i < nsamples ; i++)
             {
-                std::cout << "qoi[" << i << "]=" << qoi[i] << std::endl;
+               // std::cout << "Re[" << i << "]: " << samples[i] << std::endl;
             }
         }
+
+        m->get_NS_solution(&myrank, &samples_per_proc, samples, &il, &ir, output_file, qoi, flag_rv, imax, jmax);
+
+        /*if(myrank == 0)
+        {
+            for(int i = 0 ; i < nsamples ; i++)
+            {
+                std::cout << "qoi[" << i << "]=" << qoi[i] << std::endl;
+            }
+        }*/
         
-        //m->get_QoI(&samples_per_proc, qoi, output_file);
+        m->get_QoI(&myrank, &samples_per_proc, &il, &ir, qoi, output_file);
     }
 
     
-    /*if(flag_uq == 1 && flag_distr == 1 && flag_rv != 1)
+    if(flag_uq == 1 && flag_distr == 1 && flag_rv != 1)
     {
         m = new MonteCarlo(u_gauss, s_gauss);
+        m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
+        printf("rank: %i \t il: %i \t ir: %i \n", myrank, il, ir);
+
         samples = m->generate_nd_samples(mean, stddev, &nsamples);
-        m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
-        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax, output_file);
-        m->get_QoI(&samples_per_proc, qoi, output_file);     
+
+        m->get_NS_solution(&myrank, &samples_per_proc, samples, &il, &ir, output_file, qoi, flag_rv, imax, jmax);
+
+        m->get_QoI(&myrank, &samples_per_proc, &il, &ir, qoi, output_file);     
     }
 
 
     else if(flag_uq == 1 && flag_distr != 1 && flag_rv == 1)
     {
         m = new MonteCarlo(x_uniform, y_uniform);
-        m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
+        m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
+        printf("rank: %i \t il: %i \t ir: %i \n", myrank, il, ir);
+
         samples = m->generate_ud_samples(mean, stddev, &nsamples);
-        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax, output_file);
-        m->get_QoI(&samples_per_proc, qoi, output_file); 
+
+        m->get_NS_solution(&myrank, &samples_per_proc, samples, &il, &ir, output_file, qoi, flag_rv, imax, jmax);
+
+        m->get_QoI(&myrank, &samples_per_proc, &il, &ir, qoi, output_file); 
     }
 
     
     if(flag_uq == 1 && flag_distr != 1 && flag_rv != 1)
     {
         m = new MonteCarlo(x_uniform, y_uniform);
-        m->data_decomposition(&nsamples, &num_proc, &samples_per_proc);
+        m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
+        printf("rank: %i \t il: %i \t ir: %i \n", myrank, il, ir);
+
         samples = m->generate_ud_samples(mean, stddev, &nsamples);
-        m->get_NS_solution(&samples_per_proc, samples, flag_rv, imax, jmax, output_file);
-        m->get_QoI(&samples_per_proc, qoi, output_file);    
-        }*/
 
+        m->get_NS_solution(&myrank, &samples_per_proc, samples, &il, &ir, output_file, qoi, flag_rv, imax, jmax);
 
-        if(myrank == 0)
-        { 
-            expectation_mc = m->compute_mean(qoi);
-            var_mc = m->compute_variance(qoi, expectation_mc);
-            std::cout << "The mean of the re-attachement point is: " << expectation_mc << std::endl;
-            std::cout << "The variance of the re-attachement point is:  " << var_mc << std::endl;
-        }
-
-        if (myrank == 0)
-        {
-            end_time = MPI_Wtime();
-            printf("Elapsed time for MC simulation (%d samples) using %d processors is: %f seconds\n", nsamples, num_proc, end_time - start_time);
-        }
-
-        Simulation_Stop(eos);
-        output_file.close();
-
-        delete m;
-        return 0;
+        m->get_QoI(&myrank, &samples_per_proc, &il, &ir, qoi, output_file);    
     }
+
+
+    if(myrank == 0)
+    { 
+        expectation_mc = m->compute_mean(qoi);
+        var_mc = m->compute_variance(qoi, expectation_mc);
+        std::cout << "The mean of the re-attachement point is: " << expectation_mc << std::endl;
+        std::cout << "The variance of the re-attachement point is:  " << var_mc << std::endl;
+    }
+
+    if (myrank == 0)
+    {
+        end_time = MPI_Wtime();
+        printf("Elapsed time for MC simulation (%d samples) using %d processors is: %f seconds\n", nsamples, num_proc, end_time - start_time);
+    }
+
+    Simulation_Stop(eos);
+    output_file.close();
+
+    delete m;
+    return 0;
+}

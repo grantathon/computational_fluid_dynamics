@@ -59,13 +59,14 @@ public:
 	/** Parallelization related methods **/
 
 	/* data decomposition among processes*/
-	void data_decomposition(int* nsampels, int* nprocs, int* samples_per_proc);
+	void data_decomposition(int samples_per_proc, int* nsampels, int* nprocs, int *myrank, int *il, int *ir);
 
 	/* call the NS solver for each generated sample */
-	void get_NS_solution(int* samples_per_proc, std::vector<double> &Re, std::ofstream &outputFile, std::vector<double> &qoi, int rv_flag, int imax, int jmax);
+	void get_NS_solution(int *myrank, int* samples_per_proc, std::vector<double> &Re,
+							int *il, int *ir, std::ofstream &outputFile, std::vector<double> &qoi, int rv_flag, int imax, int jmax);
 
 	/* get the QoI (Quantities of interest - the desired output parameters, from a UQ point of view) */
-	void get_QoI(int* samples_per_proc, std::vector<double> &qoi, std::ofstream &outputFile);
+	void get_QoI(int *myrank, int* samples_per_proc, int *il, int *ir, std::vector<double> &qoi, std::ofstream &outputFile);
 
 	/***********************************************************/
 

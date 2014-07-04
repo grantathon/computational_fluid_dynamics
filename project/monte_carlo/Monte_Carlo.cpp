@@ -1,4 +1,5 @@
 #include "Monte_Carlo.hpp"
+#include <stdio.h>
 
 MonteCarlo::MonteCarlo(double u_gauss, double s_gauss)
 {
@@ -29,7 +30,8 @@ double MonteCarlo::get_uniform() const {
 }
 
 std::vector<double> MonteCarlo::generate_nd_samples(double mean_nd,
-	double stddev_nd, int* nsamples) {
+	double stddev_nd, int* nsamples)
+{
 	std::vector<double> ndsamples;
 	double temp;
 
@@ -37,10 +39,12 @@ std::vector<double> MonteCarlo::generate_nd_samples(double mean_nd,
 	{
 		temp = fabs(mean_nd + stddev_nd*get_normal());
 		ndsamples.push_back(temp);
+		/*printf("rank: %i \t sample: %f \n", rank, temp);*/
 	}
 
 	return ndsamples;
 }
+
 
 std::vector<double> MonteCarlo::generate_ud_samples(double mean_ud, double stddev_ud,
 	int *nsamples) {
@@ -78,31 +82,67 @@ double MonteCarlo::compute_variance(const std::vector<double> &v, double mean) c
 }
 
 
-void MonteCarlo::data_decomposition(int* nsampels, int* nprocs, int *samples_per_proc)
+void MonteCarlo::data_decomposition(int samples_per_proc, int* nsampels, int* nprocs, int *myrank, int *il, int *ir)
 {
-	int rank;
+	int i_rem;
 
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	/* Compute il, ir for each sub-domain*/
+	i_rem = (*nsampels) % (*nprocs);
 
-	if (rank == 0) 
+	*il = ((*myrank) * samples_per_proc);
+	if ( *myrank == ((*nprocs) - 1))   /* make last rank the monḱey and put a banana in its mouth*/
 	{
-		*samples_per_proc = *nsampels - (*nprocs - 1)*((*nsampels)/(*nprocs));
-	} 
-	else 
-	{
-		*samples_per_proc = (*nsampels)/(*nprocs);
+		*ir = ((*myrank + 1) * samples_per_proc) + i_rem - 1;
 	}
+	else
+	{
+		*ir = ((*myrank + 1) * samples_per_proc) - 1;
+	}
+	/*printf("rank: %i \t il: %i \t ir: %i \n", *myrank, *il, *ir);*/
 }
 
-void MonteCarlo::get_NS_solution(int* samples_per_proc, std::vector<double> &Re, std::ofstream &outputFile, std::vector<double> &qoi, int rv_flag, int imax, int jmax)
+
+void MonteCarlo::get_NS_solution(int *myrank, int* samples_per_proc, std::vector<double> &Re, int *il, int *ir,
+									std::ofstream &outputFile, std::vector<double> &qoi, int rv_flag, int imax, int jmax)
 {
-	int rank;
+	int sample_size, global_id;
 	char buffer_solver[20];
 	char buffer_datafile[20];
 
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	sample_size = (*ir) - (*il) + 1;
 
-	for(int i = rank*(*samples_per_proc) ; i < (rank + 1)*(*samples_per_proc) ; i++)
+	for(int i = 0; i < sample_size ; i++)
+	{
+		global_id = i + (*myrank) * (*samples_per_proc);
+		
+		char call_NS_solver[30] = "./sim ";
+		/*char call_NS_solver[30] = "./t_rex_balls ";*/
+		
+		printf("rank: %i \t NS_inputs: \t %d %g %d %d %d \n", *myrank, rv_flag, Re[global_id], global_id + 1, imax, jmax);
+
+		snprintf(buffer_solver, sizeof(buffer_solver), "%d %g %d %d %d", rv_flag, Re[global_id], global_id + 1, imax, jmax);	
+		strcat(call_NS_solver, buffer_solver);
+
+		system(call_NS_solver);
+
+		double Re, x_global, t_reattach;
+		char datafile_name[30] = "ns_sim_";
+
+		snprintf(buffer_datafile, sizeof(buffer_datafile), "%d%s", global_id + 1, ".mc");	
+		strcat(datafile_name, buffer_datafile);
+
+		std::ifstream MC_data(datafile_name);
+		MC_data >> Re >> x_global >> t_reattach;
+
+		/*printf("rank: %i \t %s \t \n", rank, buffer_datafile);*/
+
+		write_to_file(outputFile, x_global, t_reattach);
+		qoi.push_back(t_reattach);
+		
+	}
+
+
+/*	for(int i = rank*(*samples_per_proc) ; i < (rank + 1)*(*samples_per_proc) ; i++)
 	{
 
 		char call_NS_solver[30] = "./sim ";
@@ -123,21 +163,26 @@ void MonteCarlo::get_NS_solution(int* samples_per_proc, std::vector<double> &Re,
 		write_to_file(outputFile, x_global, t_reattach);
 		qoi.push_back(t_reattach);
 	}
+*/
 }
 
-void MonteCarlo::get_QoI(int* samples_per_proc, std::vector<double> &qoi, std::ofstream &outputFile)
+void MonteCarlo::get_QoI(int *myrank, int *samples_per_proc, int *il, int *ir, std::vector<double> &qoi, std::ofstream &outputFile)
 {
-	int rank;
+	int sample_size, global_id;
+
+	sample_size = (*ir) - (*il) + 1;
+
 	char buffer[15];
-
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	for(int i = rank*(*samples_per_proc) ; i < (rank + 1)*(*samples_per_proc) ; i++)
+	
+/*	for(int i = rank*(*samples_per_proc) ; i < (rank + 1)*(*samples_per_proc) ; i++) */
+	for(int i = 0; i < sample_size ; i++)
 	{
+		global_id = i + (*myrank) * (*samples_per_proc);
+
 		double Re, x_global, t_reattach;
 		char datafile_name[30] = "ns_sim_";
 
-		snprintf(buffer, sizeof(buffer), "%d%s", i + 1, ".mc");	
+		snprintf(buffer, sizeof(buffer), "%d%s", global_id + 1, ".mc");	
 		strcat(datafile_name, buffer);
 
 		std::ifstream MC_data(datafile_name);

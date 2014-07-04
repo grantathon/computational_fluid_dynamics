@@ -16,6 +16,8 @@ int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* f
 {
    if(argc == 9)
    {
+      /*flag_UQ flag_distr flag_RV npoints mean stddev imax jmax*/
+      /* 1 1 1 5 0 1 10 2*/
    /* flag_UQ = 1 for MC, everything else (>=0) for SC*/
       *flag_UQ = atoi(argv[1]);
    /* flag_distr = 1 for Gaussian distribution, everything else (>=0) for normal distribution */
