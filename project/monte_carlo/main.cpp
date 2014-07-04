@@ -63,8 +63,7 @@ int main(int argc, char *argv[])
     /* samples per processor*/
     samples_per_proc = (nsamples / num_proc);
 
-    /*flag_UQ flag_distr flag_RV npoints mean stddev imax jmax*/
-    printf("UQ: %i \t dist: %i \t RV: %i \t N: %i \t mean: %f \t var: %f \t imax: %i \t jmax: %i \n", flag_uq, flag_distr, flag_rv, nsamples, mean, stddev, imax, jmax);
+    /*printf("UQ: %i \t dist: %i \t RV: %i \t N: %i \t mean: %f \t var: %f \t imax: %i \t jmax: %i \n", flag_uq, flag_distr, flag_rv, nsamples, mean, stddev, imax, jmax);*/
 
     if(myrank == 0) 
     {
@@ -89,14 +88,6 @@ int main(int argc, char *argv[])
         printf("rank: %i \t il: %i \t ir: %i \n", myrank, il, ir);
 
         samples = m->generate_nd_samples(mean, stddev, &nsamples);
-
-        if(myrank == 0)
-        {
-            for(int i = 0 ; i < nsamples ; i++)
-            {
-               // std::cout << "Re[" << i << "]: " << samples[i] << std::endl;
-            }
-        }
 
         m->get_NS_solution(&myrank, &samples_per_proc, samples, &il, &ir, output_file, qoi, flag_rv, imax, jmax);
 

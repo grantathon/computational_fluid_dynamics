@@ -140,30 +140,6 @@ void MonteCarlo::get_NS_solution(int *myrank, int* samples_per_proc, std::vector
 		qoi.push_back(t_reattach);
 		
 	}
-
-
-/*	for(int i = rank*(*samples_per_proc) ; i < (rank + 1)*(*samples_per_proc) ; i++)
-	{
-
-		char call_NS_solver[30] = "./sim ";
-		snprintf(buffer_solver, sizeof(buffer_solver), "%d %g %d %d %d", rv_flag, Re[i], i + 1, imax, jmax);	
-		strcat(call_NS_solver, buffer_solver);
-
-		system(call_NS_solver);
-
-		double Re, x_global, t_reattach;
-		char datafile_name[30] = "ns_sim_";
-
-		snprintf(buffer_datafile, sizeof(buffer_datafile), "%d%s", i + 1, ".mc");	
-		strcat(datafile_name, buffer_datafile);
-
-		std::ifstream MC_data(datafile_name);
-		MC_data >> Re >> x_global >> t_reattach;
-
-		write_to_file(outputFile, x_global, t_reattach);
-		qoi.push_back(t_reattach);
-	}
-*/
 }
 
 void MonteCarlo::get_QoI(int *myrank, int *samples_per_proc, int *il, int *ir, std::vector<double> &qoi, std::ofstream &outputFile)
