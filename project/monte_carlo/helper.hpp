@@ -8,8 +8,8 @@
 #ifndef HELPER_HPP_
 #define HELPER_HPP_
 
-#include <iostream>
 #include <mpi.h>
+#include <iostream>
 #include <cstdlib>
 #include <fstream>
 

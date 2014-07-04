@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 	init_flag(problem, imax, jmax, &Flag);
 
 	/* Begin the time iteration process */
-//	printf("Begin the main computation...\n");
+	printf("Begin the simulation for id = %u\n", mc_id);
 	while(res > eps)
 	{
 		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);

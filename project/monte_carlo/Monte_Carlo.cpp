@@ -120,7 +120,7 @@ void MonteCarlo::get_NS_solution(int *myrank, int* samples_per_proc, std::vector
 		
 		printf("rank: %i \t NS_inputs: \t %d %g %d %d %d \n", *myrank, rv_flag, Re[global_id], global_id + 1, imax, jmax);
 
-		snprintf(buffer_solver, sizeof(buffer_solver), "%d %g %d %d %d", rv_flag, Re[global_id], global_id + 1, imax, jmax);	
+		snprintf(buffer_solver, sizeof(buffer_solver), "%u %g %u %u %u", rv_flag, Re[global_id], global_id + 1, imax, jmax);
 		strcat(call_NS_solver, buffer_solver);
 
 		system(call_NS_solver);

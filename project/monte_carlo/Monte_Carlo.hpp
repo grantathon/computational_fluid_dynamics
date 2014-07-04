@@ -1,13 +1,13 @@
 #ifndef MONTECARLO_HPP_
 #define MONTECARLO_HPP_
 
+#include <mpi.h>
 #include <boost/random.hpp>
 #include <iostream>
 #include <numeric>
 #include <cmath>
 #include <cstring>
 #include <fstream>
-#include <mpi.h>
 
 #include "helper.hpp"
 
