@@ -8,12 +8,13 @@
 #ifndef HELPER_HPP_
 #define HELPER_HPP_
 
-#include <mpi.h>
 #include <iostream>
+#include <mpi.h>
 #include <cstdlib>
 #include <fstream>
+#include <cstring>
 
-void write_to_file(std::ofstream &outputFile, double reaatach_loc, double reaatch_time);
+void write_data_file(const char* file_name, int* nsampels);
 
 int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* flag_RV, int *npoints, double* mean, double* stddev, int* imax, int *jmax);
 

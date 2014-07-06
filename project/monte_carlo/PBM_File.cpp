@@ -7,7 +7,7 @@ PBMFile::PBMFile() :
 	fluid(1),
 	fileName("")
 {
-	std::cout << "Default constructor of PBMFile" << std::endl;
+	//std::cout << "Default constructor of PBMFile" << std::endl;
 }
 
 PBMFile::PBMFile(int imax, int jmax, bool obstacle, bool fluid, const std::string &filename) :
@@ -17,19 +17,19 @@ PBMFile::PBMFile(int imax, int jmax, bool obstacle, bool fluid, const std::strin
 	fluid(fluid),
 	fileName(filename)
 {
-	std::cout << "Main constructor of PBMFile" << std::endl;
+	//std::cout << "Main constructor of PBMFile" << std::endl;
 }
 
 PBMFile::~PBMFile()
 {
-	std::cout << "Destructor of PBMFile" << std::endl;
+	//std::cout << "Destructor of PBMFile" << std::endl;
 }
 
 void PBMFile::OutputStep(double height_perc, double width_perc) const
 {
 	if(fileName.empty())
 	{
-		std::cout << "Set the file name (it's empty...)" << std::endl;
+		//std::cout << "Set the file name (it's empty...)" << std::endl;
 		return;
 	}
 

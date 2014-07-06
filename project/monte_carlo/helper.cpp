@@ -7,9 +7,30 @@
 
 #include "helper.hpp"
 
-void write_to_file(std::ofstream &outputFile, double reaatach_loc, double reaatch_time)
+void write_data_file(const char* file_name, int* nsampels)
 {
-    outputFile << reaatach_loc << ", " << reaatch_time << std::endl;
+   char buffer_datafile[15];
+   double Re, x_global, t_reattach;
+
+   std::ofstream data_file;
+
+   data_file.open(file_name);
+
+   data_file << "x_reattach" << " " << "t_reattach" << std::endl;
+
+   for(int i = 0 ; i < *nsampels ; i++)
+   {
+      char datafile_name[30] = "ns_sim_";
+      snprintf(buffer_datafile, sizeof(buffer_datafile), "%d%s", i + 1, ".mc");   
+      strcat(datafile_name, buffer_datafile);
+
+      std::ifstream MC_data(datafile_name);
+      MC_data >> Re >> x_global >> t_reattach;
+
+      data_file << x_global << ", " << t_reattach << std::endl;
+   }
+
+   data_file.close();
 }
 
 int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* flag_RV, int *npoints, double* mean, double* stddev, int* imax, int *jmax)
