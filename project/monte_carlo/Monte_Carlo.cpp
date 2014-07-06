@@ -87,7 +87,7 @@ void MonteCarlo::monte_carlo_simulation(int *myrank, int* nsamples, int* samples
 	, std::vector<double> &rv, int rv_flag, int imax, int jmax, double *mean, double* variance)
 {
 	int sample_size, global_id;
-	char buffer_solver[20];
+	char buffer_solver[30];
 	char buffer_datafile[20];
 
 	sample_size = (*ir) - (*il) + 1;
