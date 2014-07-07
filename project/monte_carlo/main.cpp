@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
     int flag_uq = 0;
     int flag_distr = 0;
     int flag_rv = 0;
+    int flag_prog = 0;
     int nsamples = 0;
     double mean = 0.0;
     double stddev = 0.0; 
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
     /* read the command line arguments */
-    if(read_parameters(argc, argv, &flag_uq, &flag_distr, &flag_rv, &nsamples, &mean, &stddev, &imax, &jmax) == 0)
+    if(read_parameters(argc, argv, &flag_uq, &flag_distr, &flag_rv, &flag_prog, &nsamples, &mean, &stddev, &imax, &jmax) == 0)
     {
         return 0;
     } 
@@ -65,8 +66,6 @@ int main(int argc, char *argv[])
         PBMFile *pbm = new PBMFile(imax, jmax, 0, 1, "flow_over_a_step.pbm");
         pbm->OutputStep(0.5, 0.1);
         delete pbm;
-
-        std::cout << "Simulations are now running (stars below indicate completed simulations)" << std::endl;
     }
 
     /* Declare a MC object */
@@ -98,8 +97,18 @@ int main(int argc, char *argv[])
          m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
          samples = m->generate_ud_samples(mean, stddev, &nsamples);
     }
+    else
+    {
+    	std::cout << "Fatal error: bad input parameters" << std::endl;
+    	return 0;
+    }
 
-    m->monte_carlo_simulation(&myrank, &nsamples, &samples_per_proc, &il, &ir, samples, flag_rv, imax, jmax, &expectation_mc, &var_mc);
+	if(myrank == 0)
+	{
+		std::cout << std::endl << "Simulations are now running (stars below indicate completed simulations)" << std::endl;
+	}
+
+    m->monte_carlo_simulation(&myrank, &nsamples, &samples_per_proc, &il, &ir, samples, flag_rv, imax, jmax, &expectation_mc, &var_mc, &flag_prog);
 
     if (myrank == 0)
     {
@@ -132,5 +141,5 @@ int main(int argc, char *argv[])
     Simulation_Stop(eos);
     delete m;
 
-    return 0;
+    return 1;
 }

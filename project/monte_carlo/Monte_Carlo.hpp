@@ -57,7 +57,7 @@ public:
 
 	/* call the NS solver for each generated sample */
 	void monte_carlo_simulation(int *myrank, int* nsamples, int* samples_per_proc, int *il, int *ir
-		, std::vector<double> &rv, int rv_flag, int imax, int jmax, double *mean, double* variance);
+		, std::vector<double> &rv, int rv_flag, int imax, int jmax, double *mean, double* variance, int* flag_prog);
 
 
 	/***********************************************************/

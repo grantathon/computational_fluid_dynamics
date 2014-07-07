@@ -1,4 +1,4 @@
-CC = mpicc.mpich2
+CC = mpicc#.mpich2
 CFLAGS = --fast-math -Wall -Werror
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 

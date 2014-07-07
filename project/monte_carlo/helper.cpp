@@ -26,9 +26,9 @@ void write_data_file(const char* file_name, int* nsampels)
    data_file.close();
 }
 
-int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* flag_RV, int *npoints, double* mean, double* stddev, int* imax, int *jmax)
+int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* flag_RV, int* flag_prog, int *npoints, double* mean, double* stddev, int* imax, int *jmax)
 {
-   if(argc == 9)
+   if(argc == 10)
    {
       /*flag_UQ flag_distr flag_RV npoints mean stddev imax jmax*/
       /* 1 1 1 5 0 1 10 2*/
@@ -38,16 +38,18 @@ int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* f
       *flag_distr = atoi(argv[2]);
    /* flag_RV = 1 for Reynolds number, everything else (>=0) for viscosity */
       *flag_RV = atoi(argv[3]);
+   /* flag_prog = 1 for serial, everything else for parallel */
+      *flag_prog = atoi(argv[4]);
    /* number of samples (if MC) or no of coefficiants (SC) */
-      *npoints = atoi(argv[4]);
+      *npoints = atoi(argv[5]);
    /* mean for the RV ; both are of the form mean + zeta*stddev, where zeta is ~N(0,1) or ~U(0,1) */
-      *mean = atof(argv[5]);
+      *mean = atof(argv[6]);
    /* sttdev for RV */
-      *stddev = atof(argv[6]);
+      *stddev = atof(argv[7]);
    /* imax for the pbm file */
-      *imax = atoi(argv[7]);
+      *imax = atoi(argv[8]);
    /* jmax for the pbm file */
-      *jmax = atoi(argv[8]);
+      *jmax = atoi(argv[9]);
 
       if(*flag_UQ < 0)
       {
@@ -64,6 +66,12 @@ int read_parameters(int argc, char** argv, int *flag_UQ, int* flag_distr, int* f
       if(*flag_RV < 0)
       {
          Simulation_Stop("Flag for RV must be positive.");
+         return 0;
+      }
+
+      if(*flag_prog < 0)
+      {
+         Simulation_Stop("Flag for program must be positive.");
          return 0;
       }
 

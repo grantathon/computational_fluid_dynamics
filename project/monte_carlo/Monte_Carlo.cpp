@@ -84,7 +84,7 @@ void MonteCarlo::data_decomposition(int samples_per_proc, int* nsampels, int* np
 
 
 void MonteCarlo::monte_carlo_simulation(int *myrank, int* nsamples, int* samples_per_proc, int *il, int *ir
-	, std::vector<double> &rv, int rv_flag, int imax, int jmax, double *mean, double* variance)
+	, std::vector<double> &rv, int rv_flag, int imax, int jmax, double *mean, double* variance, int* flag_prog)
 {
 	int sample_size, global_id;
 	char buffer_solver[30];
@@ -104,8 +104,17 @@ void MonteCarlo::monte_carlo_simulation(int *myrank, int* nsamples, int* samples
 		/*********************************************/
 		/* call the NS solver */
 		global_id = i + (*myrank) * (*samples_per_proc);
+		char call_NS_solver[40] = "";
 		
-		char call_NS_solver[30] = "./sim ";
+		if(*flag_prog == 1)
+		{
+			strcat(call_NS_solver, "./sim ");
+		}
+		else
+		{
+			strcat(call_NS_solver, "mpirun -np 4 ./sim ");
+		}
+
 		snprintf(buffer_solver, sizeof(buffer_solver), "%u %g %u %u %u", rv_flag, rv[global_id], global_id + 1, imax, jmax);
 		strcat(call_NS_solver, buffer_solver);
 
