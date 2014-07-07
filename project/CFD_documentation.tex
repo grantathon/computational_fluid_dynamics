@@ -84,7 +84,9 @@ $\left\{
 \item {the \textbf{y-dimension} for the .pbm file};
 \end{enumerate}
 Thus, the \textbf{second task} is to \textbf{compile} the \textbf{UQ code} so that to generate the executable (i.e. \emph{sim \_UQ})  that will be used to run the entire simulation.
-The UQ part was implemented using the C++ programming language plus MPI.
+The UQ part was implemented using the C++ programming language plus MPI. \\
+
+\par To plot the distribution of the separation point the MATLAB script \texttt{combine\_data.m} (in the folder \emph{final\_samples/}) should be run. The \emph{\*.mc} files must be placed inside a separate folder within \emph{final\_samples/}).
 
 It is important to mention that for the random number generating, we use the \emph{boost} library, which is included in the submitted file. Moreover, the application code is available at \url{https://github.com/grantathon/computational_fluid_dynamics/tree/master/project}.
 \end{document}
