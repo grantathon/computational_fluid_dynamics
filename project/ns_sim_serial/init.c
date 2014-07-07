@@ -1,7 +1,9 @@
+#include <omp.h>
+#include <string.h>
+
 #include "helper.h"
 #include "init.h"
 #include "ns_definitions.h"
-#include <string.h>
 
 int read_parameters(const char * szFileName,
                     double *UI,                /* velocity x-direction */
@@ -120,6 +122,7 @@ void init_flag(const char *problem, int imax, int jmax, int ***flag)
 		(*flag)[i][0] 		= C_B;	/* Floor */
 		(*flag)[i][jmax+1] 	= C_B;	/* Ceiling */
 	}
+
 	for(j = 0; j <= jmax+1; j++)
 	{
 		(*flag)[0][j] 		= C_B;	/* Left wall */

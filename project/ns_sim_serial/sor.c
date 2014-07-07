@@ -1,5 +1,7 @@
 #include "sor.h"
 #include "ns_definitions.h"
+
+#include <omp.h>
 #include <math.h>
 
 void sor(

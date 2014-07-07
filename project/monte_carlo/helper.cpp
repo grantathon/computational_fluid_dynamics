@@ -1,10 +1,3 @@
-/*
-* helper.cpp
-*
-*  Created on: Jun 29, 2014
-*      Author: ionut
-*/
-
 #include "helper.hpp"
 
 void write_data_file(const char* file_name, int* nsampels)

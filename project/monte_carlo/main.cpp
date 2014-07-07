@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     /* for finalizing MPI */
     const std::string eos = "End of simulation";
     /* used for printing purposes */
-    /*const char* data_file = "UQ_simulation.cvs";*/
+    /*const char* data_file = "UQ_simulation.csv";*/
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &num_proc);
@@ -65,6 +65,8 @@ int main(int argc, char *argv[])
         PBMFile *pbm = new PBMFile(imax, jmax, 0, 1, "flow_over_a_step.pbm");
         pbm->OutputStep(0.5, 0.1);
         delete pbm;
+
+        std::cout << "Simulations are now running (stars below indicate completed simulations)" << std::endl;
     }
 
     /* Declare a MC object */
@@ -77,63 +79,51 @@ int main(int argc, char *argv[])
         m = new MonteCarlo(u_gauss, s_gauss, flag_distr);
         m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
         samples = m->generate_nd_samples(mean, stddev, &nsamples);
-        m->monte_carlo_simulation(&myrank, &nsamples, &samples_per_proc, &il, &ir, samples, flag_rv, imax, jmax, &expectation_mc, &var_mc);
-
-        if(myrank == 0)
-        {
-            std::cout << "The mean of the re-attachement(when Re is normal distributed) point is: " << expectation_mc << std::endl;
-            std::cout << "The variance of the re-attachement(when Re is normal distributed) point is:  " << var_mc << std::endl;
-        }
     }
-
-    /* MC + Gaussian distribution + viscosity */
-    if(flag_uq == 1 && flag_distr == 1 && flag_rv != 1)
+    else if(flag_uq == 1 && flag_distr == 1 && flag_rv != 1)  /* MC + Gaussian distribution + viscosity */
     {
         m = new MonteCarlo(u_gauss, s_gauss, flag_distr);
         m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
         samples = m->generate_nd_samples(mean, stddev, &nsamples);
-        m->monte_carlo_simulation(&myrank, &nsamples, &samples_per_proc, &il, &ir, samples, flag_rv, imax, jmax, &expectation_mc, &var_mc);
-
-        if(myrank == 0)
-        {
-            std::cout << "The mean of the re-attachement(when viscosity is normal distributed) point is: " << expectation_mc << std::endl;
-            std::cout << "The variance of the re-attachement point(when viscosity is normal distributed) is:  " << var_mc << std::endl;
-        }     
     }
-
-    /* MC + Uniform distribution + Re */
-    else if(flag_uq == 1 && flag_distr != 1 && flag_rv == 1)
+    else if(flag_uq == 1 && flag_distr != 1 && flag_rv == 1)  /* MC + Uniform distribution + Re */
     {
         m = new MonteCarlo(x_uniform, y_uniform, flag_distr);
         m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
         samples = m->generate_ud_samples(mean, stddev, &nsamples);
-        m->monte_carlo_simulation(&myrank, &nsamples, &samples_per_proc, &il, &ir, samples, flag_rv, imax, jmax, &expectation_mc, &var_mc);
-
-        if(myrank == 0)
-        {
-            std::cout << "The mean of the re-attachement(when Re is uniform distributed) point is: " << expectation_mc << std::endl;
-            std::cout << "The variance of the re-attachement point(when Re is uniform distributed) is:  " << var_mc << std::endl;
-        }      
     }
-
-    /* MC + Uniform distribution + viscosity */
-    else if(flag_uq == 1 && flag_distr != 1 && flag_rv != 1)
+    else if(flag_uq == 1 && flag_distr != 1 && flag_rv != 1)  /* MC + Uniform distribution + viscosity */
     {
          m = new MonteCarlo(x_uniform, y_uniform, flag_distr);
          m->data_decomposition(samples_per_proc, &nsamples, &num_proc, &myrank, &il, &ir);
          samples = m->generate_ud_samples(mean, stddev, &nsamples);
-         m->monte_carlo_simulation(&myrank, &nsamples, &samples_per_proc, &il, &ir, samples, flag_rv, imax, jmax, &expectation_mc, &var_mc);
-
-         if(myrank == 0)
-         {
-            std::cout << "The mean of the re-attachement(when viscosity is uniform distributed) point is: " << expectation_mc << std::endl;
-            std::cout << "The variance of the re-attachement point(when viscosity is uniform distributed) is:  " << var_mc << std::endl;
-          }        
     }
 
+    m->monte_carlo_simulation(&myrank, &nsamples, &samples_per_proc, &il, &ir, samples, flag_rv, imax, jmax, &expectation_mc, &var_mc);
 
     if (myrank == 0)
     {
+    	if(flag_distr != 1 && flag_rv != 1)
+    	{
+			std::cout << "\nThe mean of the re-attachement (when viscosity is uniform distributed) point is: " << expectation_mc << std::endl;
+			std::cout << "The variance of the re-attachement point (when viscosity is uniform distributed) is:  " << var_mc << std::endl;
+    	}
+    	else if(flag_distr == 1 && flag_rv != 1)
+    	{
+			std::cout << "\nThe mean of the re-attachement (when viscosity is normal distributed) point is: " << expectation_mc << std::endl;
+			std::cout << "The variance of the re-attachement point (when viscosity is normal distributed) is:  " << var_mc << std::endl;
+    	}
+    	else if(flag_distr == 1 && flag_rv == 1)
+    	{
+			std::cout << "\nThe mean of the re-attachement (when Re is normal distributed) point is: " << expectation_mc << std::endl;
+			std::cout << "The variance of the re-attachement (when Re is normal distributed) point is:  " << var_mc << std::endl;
+    	}
+    	else if(flag_distr != 1 && flag_rv == 1)
+    	{
+			std::cout << "\nThe mean of the re-attachement (when Re is uniform distributed) point is: " << expectation_mc << std::endl;
+			std::cout << "The variance of the re-attachement point (when Re is uniform distributed) is:  " << var_mc << std::endl;
+    	}
+
         /*write_data_file(data_file, &nsamples);*/
         end_time = MPI_Wtime();
         printf("Elapsed time for MC simulation (%d samples) using %d processors is: %f seconds\n", nsamples, num_proc, end_time - start_time);

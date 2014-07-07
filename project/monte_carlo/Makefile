@@ -1,6 +1,8 @@
-CC = mpic++#.mpich2 #gcc
+CC = mpicxx
 CFLAGS = -Wall -Werror
 .cpp.o:  ; $(CC) -cpp $(CFLAGS) $<
+
+INCFLAGS=/home/hpc/t1221/t1221ag/project
 
 OBJ = 	Monte_Carlo.o\
 		Stochastic_Collocations.o\
@@ -9,10 +11,10 @@ OBJ = 	Monte_Carlo.o\
 		main.o
 
 all:  $(OBJ)
-	$(CC) $(CFLAGS) -o sim_UQ $(OBJ)  -lm
+	$(CC) $(CFLAGS) -I$(INCFLAGS) -o sim_UQ $(OBJ)  -lm
 
 %.o : %.cpp
-	$(CC) -c $(CFLAGS) $*.cpp -o $*.o
+	$(CC) -c $(CFLAGS) -I$(INCFLAGS) $*.cpp -o $*.o
 
 clean:
 	rm $(OBJ) *.mc

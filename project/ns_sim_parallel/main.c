@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
 	double tau 		= 0;
 	double dt_value = 0;
 	int n 			= 0;
-	double start_time = 0;
-	double end_time = 0;
+//	double start_time = 0;
+//	double end_time = 0;
 //	double visual_n = 1;
 
 	/* Pressure iteration data */
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 	if(myrank == 0)
 	{
 		/* Start timer */
-		start_time = MPI_Wtime();
+//		start_time = MPI_Wtime();
 
 		/* Read parameters from DAT file, store locally, and check for potential error */
 		readParamError = read_parameters(problemDataFile, &UI, &VI, &PI, &GX, &GY,
@@ -202,10 +202,10 @@ int main(int argc, char *argv[])
 //		}
 
 		// output sim stats to user by master rank
-		if (myrank == 0)
-		{
-			/*printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);*/
-		}
+//		if (myrank == 0)
+//		{
+//			printf("res=%f, it=%u, t=%f, dt=%f\n", res, it, t, dt);
+//		}
 
 		calculate_dt(Re, tau, &dt, dx, dy, x_dim, y_dim, U, V);
 
@@ -261,15 +261,15 @@ int main(int argc, char *argv[])
 	free_matrix(RS, 0, x_dim+1, 0, y_dim+1);
 	free_imatrix(flag, 0, x_dim+1, 0, y_dim+1);
 
-	if(myrank == 0)
-	{
-		/* End timer */
-		end_time = MPI_Wtime();
-		printf("Elapsed time for NS solver using %d processors is: %f seconds\n", num_proc, end_time - start_time);
-	}
+//	if(myrank == 0)
+//	{
+//		/* End timer */
+//		end_time = MPI_Wtime();
+//		printf("Elapsed time for NS solver using %d processors is: %f seconds\n", num_proc, end_time - start_time);
+//	}
 
 	/* Finalize MPI */
-	Programm_Stop("End of simulation.");
+	Programm_Stop("");
 
 	return 1;
 }

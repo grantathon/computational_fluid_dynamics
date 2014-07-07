@@ -7,10 +7,14 @@
 #include "shear_stress.h"
 #include "string.h"
 
+#include <time.h>
 #include <stdio.h>
 
 int main(int argc, char *argv[])
 {
+//	clock_t start, end;
+//	start = clock();
+
 	/* Input file with user parameters */
 	const char *problem = "flow_over_a_step";
 	char *problemDataFile = malloc(strlen(problem) + 4);
@@ -113,7 +117,7 @@ int main(int argc, char *argv[])
 	init_flag(problem, imax, jmax, &Flag);
 
 	/* Begin the time iteration process */
-	printf("Begin the simulation for id = %u\n", mc_id);
+//	printf("Beginning of simulation for id = %u.\n", mc_id);
 	while(res > eps)
 	{
 		calculate_dt(Re, tau, &dt, dx, dy, imax, jmax, U, V);
@@ -178,6 +182,9 @@ int main(int argc, char *argv[])
 	free_matrix(F, 0, imax+1, 0, jmax+1);
 	free_matrix(G, 0, imax+1, 0, jmax+1);
 	free_imatrix(Flag, 0, imax+1, 0, jmax+1);
+
+//	end = clock();
+//	printf("End of simulation for id = %u. Elapsed time = %g seconds.\n", mc_id, (end-start)/1000000.0);
 
 	return 1;
 }

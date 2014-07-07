@@ -37,9 +37,9 @@ void Programm_Stop(char *txt)
 
    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
    MPI_Barrier(MPI_COMM_WORLD);                           /* synchronize output */
-   fprintf(stderr,"-STOP- P:%2d : %s\n",myrank,txt);
+//   fprintf(stderr,"-STOP- P:%2d : %s\n",myrank,txt);
    fflush(stdout);
-   fflush(stderr);
+//   fflush(stderr);
    MPI_Barrier(MPI_COMM_WORLD);
    MPI_Finalize();
    exit(1);
