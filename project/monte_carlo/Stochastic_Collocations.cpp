@@ -1,12 +1,4 @@
-/*
- * Stochastic_Collocations.cpp
- *
- *  Created on: Jun 27, 2014
- *      Author: ionut
- */
-
 #include "Stochastic_Collocations.hpp"
-
 
  StochasticCollocations::StochasticCollocations(double u_gauss, double s_gauss)
  {

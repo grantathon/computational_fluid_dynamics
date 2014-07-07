@@ -454,7 +454,7 @@ int **read_pgm(const char *filename)
     /* read the width and height */
     sscanf(line,"%d %d\n",&xsize,&ysize);
 
-    printf("Image size: %d x %d\n", xsize,ysize);
+//    printf("Image size: %d x %d\n", xsize,ysize);
 
     /* read # of gray levels */
     fgets(line,sizeof line,input);
@@ -463,7 +463,7 @@ int **read_pgm(const char *filename)
     /* allocate memory for image */
     /*pic = imatrix(0,xsize+2,0,ysize+2);*/
     pic = imatrix(0,xsize+1,0,ysize+1);
-    printf("Image initialised...\n");
+//    printf("Image initialised...\n");
 
     /* read pixel row by row */
     for(j1=1; j1 < ysize+1; j1++)

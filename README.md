@@ -14,4 +14,4 @@ Assignments
 Project
 ============================
 
-The goal of this project is to use a Monte Carlo method and the Navier-Stokes equations to quantify the uncertainty of the effect of the Reynolds number on the separation point following a step within a 2D grid.  To approach maximum parallelization, the Monte Carlo method will launch multiple programs over multiple nodes using MPI while the individual programs being launched will decompose the grid space using MPI.
+The goal of this project is to use a Monte Carlo method and the Navier-Stokes equations to quantify the uncertainty of the effect of the Reynolds number or viscosity on the separation point following a step within a 2D grid.  To approach maximum parallelization, the Monte Carlo method will launch multiple programs over multiple nodes using MPI while the individual programs being launched will decompose the grid space using MPI.

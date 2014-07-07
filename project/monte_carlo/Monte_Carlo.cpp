@@ -79,7 +79,7 @@ void MonteCarlo::data_decomposition(int samples_per_proc, int* nsampels, int* np
 		*ir = (*il) + samples_per_proc - 1;
 	}
 
-	printf("rank: %i \t il: %i \t ir: %i \n", *myrank, *il, *ir);
+	std::cout << "Process " << *myrank << " will evaluate samples " << *il << " - " << *ir << std::endl;
 }
 
 
@@ -106,7 +106,7 @@ void MonteCarlo::monte_carlo_simulation(int *myrank, int* nsamples, int* samples
 		global_id = i + (*myrank) * (*samples_per_proc);
 		
 		char call_NS_solver[30] = "./sim ";
-		snprintf(buffer_solver, sizeof(buffer_solver), "%d %g %d %d %d", rv_flag, rv[global_id], global_id + 1, imax, jmax);	
+		snprintf(buffer_solver, sizeof(buffer_solver), "%u %g %u %u %u", rv_flag, rv[global_id], global_id + 1, imax, jmax);
 		strcat(call_NS_solver, buffer_solver);
 
 		system(call_NS_solver);
@@ -131,6 +131,8 @@ void MonteCarlo::monte_carlo_simulation(int *myrank, int* nsamples, int* samples
 		/* compute the partial sum squared for each process - used to compute the variance */
 		partial_sum2 += t_reattach*t_reattach;
 		/*********************************************/
+
+		std::cout << "* ";
 	}
 
 	/* compute global mean */
@@ -143,6 +145,9 @@ void MonteCarlo::monte_carlo_simulation(int *myrank, int* nsamples, int* samples
 }
 
 MonteCarlo::~MonteCarlo() {
-	delete var_normal;
-	delete var_uniform;
+	if(var_normal != 0)
+		delete var_normal;
+	
+	if(var_uniform != 0)
+		delete var_uniform;
 }
