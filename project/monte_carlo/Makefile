@@ -2,7 +2,7 @@ CC = mpicxx
 CFLAGS = -Wall -Werror
 .cpp.o:  ; $(CC) -cpp $(CFLAGS) $<
 
-INCFLAGS=/home/hpc/t1221/t1221ag/project
+INCFLAGS=../
 
 OBJ = 	Monte_Carlo.o\
 		Stochastic_Collocations.o\
