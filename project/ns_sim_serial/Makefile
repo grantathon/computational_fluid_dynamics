@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Werror
+CFLAGS = --fast-math -Wall -Werror
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 
 OBJ = 	helper.o\
@@ -13,7 +13,7 @@ OBJ = 	helper.o\
 
 
 all:  $(OBJ)
-	$(CC) $(CFLAGS) -o sim $(OBJ)  -lm
+	$(CC) $(CFLAGS) -o sim $(OBJ) -lm
 
 %.o : %.c
 	$(CC) -c $(CFLAGS) $*.c -o $*.o
