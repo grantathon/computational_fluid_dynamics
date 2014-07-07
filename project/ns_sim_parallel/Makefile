@@ -1,5 +1,5 @@
-CC = mpicc.mpich2 #gcc
-CFLAGS = -Wall -Werror #-pedantic
+CC = mpicc.mpich2
+CFLAGS = --fast-math -Wall -Werror
 .c.o:  ; $(CC) -c $(CFLAGS) $<
 
 OBJ = 	helper.o\

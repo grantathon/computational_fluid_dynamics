@@ -49,9 +49,6 @@ int read_parameters(const char * szFileName,
 	READ_DOUBLE( szFileName, *t_end );
 	READ_DOUBLE( szFileName, *dt    );
 
-//	READ_INT   ( szFileName, *imax );
-//	READ_INT   ( szFileName, *jmax );
-
 	READ_DOUBLE( szFileName, *omg   );
 	READ_DOUBLE( szFileName, *eps   );
 	READ_DOUBLE( szFileName, *tau   );
