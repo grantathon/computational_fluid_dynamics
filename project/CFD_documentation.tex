@@ -43,7 +43,7 @@ $\left\{
 Thus, the \textbf{first task} is to \textbf{compile} the \textbf{solver code} so that to generate the executable (i.e., \emph{sim}) that is used in the UQ part.
 \newline
 
-After the executable for the solver is compiled we generate the UQ program. The UQ program calls the solver. In the UQ part, we implemented the \textbf{Monte Carlo} sampling (MCS) method that is used as an uncertainty propagation method in the case when the \emph{Reynolds number} or the \emph{viscosity} contains uncertainties. This is modelled as a \textbf{continuous random variable}, where the user can choose between the textbf{normal} or \textbf{uniform} 
+After the executable for the solver is compiled we generate the UQ program. The UQ program calls the solver. In the UQ part, we implemented the \textbf{Monte Carlo} sampling (MCS) method that is used as an uncertainty propagation method in the case when the \emph{Reynolds number} or the \emph{viscosity} contains uncertainties. This is modelled as a \textbf{continuous random variable}, where the user can choose between the \textbf{normal} or \textbf{uniform} 
 \footnote{the random variables are taken of the form m + s*$\zeta$, where m is the \textit{mean}, s the \textit{standard deviation} and $\zeta \sim N(0,1) \ or \sim U(0,1)$;} 
 probability distribution functions (PDF) as options to generate the random variables. The \emph{Mersenne twister} pseudorandom number generator (PRNG) was chosen to actually generate these variables, based on the selected PDF. For each generated sample, the Navier-Stokes solver will be called via a \textbf{system call} using the above mentioned input parameters and after the solutions are obtained, the statistics (i.e., the \textbf{mean} and \textbf{variance} ) are computed.
 
