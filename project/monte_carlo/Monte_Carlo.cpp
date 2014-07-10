@@ -133,12 +133,12 @@ void MonteCarlo::monte_carlo_simulation(int *myrank, int* nsamples, int* samples
 
 		/*********************************************/
 		/* compute the partial sum for each process - used to compute the mean */
-		partial_sum += t_reattach;
+		partial_sum += x_global; //t_reattach;
 		/*********************************************/
 
 		/*********************************************/
 		/* compute the partial sum squared for each process - used to compute the variance */
-		partial_sum2 += t_reattach*t_reattach;
+		partial_sum2 += x_global*x_global; //t_reattach*t_reattach;
 		/*********************************************/
 
 		std::cout << "* ";
